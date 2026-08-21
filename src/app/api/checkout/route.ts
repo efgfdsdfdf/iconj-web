@@ -56,14 +56,14 @@ export async function POST(request: Request) {
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
-        Authorization: \Bearer \\,
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
         email: email,
         amount: amountInKobo,
         reference: orderData.id,
-        callback_url: \\/api/callback\,
+        callback_url: `${origin}/api/callback`,
         metadata: {
           custom_fields: [
             { display_name: "Customer Name", variable_name: "customer_name", value: name },

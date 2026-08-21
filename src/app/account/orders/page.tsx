@@ -74,11 +74,11 @@ export default async function CustomerOrdersPage() {
                   </div>
                   
                   <div className="flex items-center justify-between w-full md:w-auto gap-4">
-                    <span className={\px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 \\}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 ${statusConfig.color}`}>
                       <StatusIcon className="w-3.5 h-3.5" />
                       {statusConfig.label}
                     </span>
-                    <Link href={\/track\}>
+                    <Link href={`/track`}>
                       <Button className="bg-slate-900 hover:bg-slate-800">Track</Button>
                     </Link>
                   </div>

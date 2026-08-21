@@ -25,8 +25,8 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
 
   return (
     <Link 
-      href={/shop/ + product.id} 
-      className={group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100  + (hideOnLg ? 'hidden lg:flex' : '')}
+      href={`/shop/${product.id}`} 
+      className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''}`}
     >
       <div className="aspect-square bg-slate-100 rounded mb-3 relative overflow-hidden">
         <img 

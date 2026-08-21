@@ -20,7 +20,7 @@ export default function CategoriesPage() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {categories.map((cat, i) => (
-          <Link href={/shop?category= + cat.title} key={i} className="group block">
+          <Link href={`/shop?category=${cat.title}`} key={i} className="group block">
             <Card className="overflow-hidden border-slate-200 transition-all hover:shadow-xl hover:-translate-y-1">
               <div className="aspect-[4/3] bg-slate-100 relative overflow-hidden">
                 <img src={cat.img} alt={cat.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />

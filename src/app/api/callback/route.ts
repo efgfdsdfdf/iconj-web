@@ -11,10 +11,10 @@ export async function GET(request: Request) {
     }
 
     // Verify transaction with Paystack
-    const verifyResponse = await fetch(\https://api.paystack.co/transaction/verify/\\, {
+    const verifyResponse = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       method: 'GET',
       headers: {
-        Authorization: \Bearer \\
+        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`
       }
     });
 
