@@ -44,7 +44,11 @@ export async function POST(request: Request) {
       estimated_profit: estimatedProfit,
       payment_status: "pending",
       order_status: "pending_payment",
-      delivery_address: body.address || {},
+      delivery_address: {
+        ...body.address,
+        name: body.name,
+        phone: body.phone
+      },
     }]).select().single();
 
     if (orderError) throw new Error("Failed to create order: " + orderError.message);

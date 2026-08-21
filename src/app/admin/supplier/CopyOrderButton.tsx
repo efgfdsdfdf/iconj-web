@@ -9,7 +9,7 @@ export default function CopyOrderButton({ order }: { order: any }) {
 
   const handleCopy = () => {
     let text = `*NEW DROPSHIP ORDER*\n\n`;
-    text += `*Order ID:* ${order.id.split('-')[0].toUpperCase()}\n`;
+    text += `*Order Ref:* ICONJ-${order.id.split('-')[0].toUpperCase()}\n`;
     text += `*Date:* ${new Date(order.created_at).toLocaleDateString()}\n\n`;
     
     text += `*ITEMS:*\n`;

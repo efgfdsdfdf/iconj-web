@@ -28,24 +28,24 @@ export function ExportCsvButton({ orders }: { orders: any[] }) {
 
     // Format data rows
     orders.forEach(order => {
-      const orderId = order.id.split('-')[0].toUpperCase();
+      const orderId = `ICONJ-${order.id.split('-')[0].toUpperCase()}`;
       const date = new Date(order.created_at).toLocaleDateString();
-      const name = \"\"\;
-      const phone = \"\"\;
-      const street = \"\"\;
-      const city = \"\"\;
-      const state = \"\"\;
+      const name = `"${order.delivery_address?.name || order.profiles?.name || 'Customer'}"`;
+      const phone = `"${order.delivery_address?.phone || ''}"`;
+      const street = `"${order.delivery_address?.street || ''}"`;
+      const city = `"${order.delivery_address?.city || ''}"`;
+      const state = `"${order.delivery_address?.state || ''}"`;
 
       if (order.order_items && order.order_items.length > 0) {
         order.order_items.forEach((item: any) => {
-          const itemName = \"\"\;
-          const sku = \"\"\;
+          const itemName = `"${item.products?.name || ''}"`;
+          const sku = `"${item.products?.supplier_sku || ''}"`;
           const qty = item.quantity;
           
-          csvContent += \\,\,\,\,\,\,\,\,\,\\n\;
+          csvContent += `${orderId},${date},${name},${phone},${street},${city},${state},${itemName},${sku},${qty}\n`;
         });
       } else {
-         csvContent += \\,\,\,\,\,\,\,"","",""\n\;
+         csvContent += `${orderId},${date},${name},${phone},${street},${city},${state},"","",""\n`;
       }
     });
 
@@ -54,7 +54,7 @@ export function ExportCsvButton({ orders }: { orders: any[] }) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    link.setAttribute("download", \dropship_orders_\.csv\);
+    link.setAttribute("download", `dropship_orders_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
