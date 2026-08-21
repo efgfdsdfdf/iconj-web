@@ -28,7 +28,7 @@ export async function GET(request: Request) {
         .from('orders')
         .update({
           payment_status: 'paid',
-          order_status: 'processing'
+          order_status: 'in_production'
         })
         .eq('id', reference); // Our checkout uses order id as reference
 

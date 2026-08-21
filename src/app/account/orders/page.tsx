@@ -24,7 +24,7 @@ export default async function CustomerOrdersPage() {
   const getStatusConfig = (status: string) => {
     switch(status) {
       case 'pending_payment': return { color: "text-amber-600 bg-amber-50", icon: Clock, label: "Pending Payment" };
-      case 'processing': return { color: "text-blue-600 bg-blue-50", icon: Package, label: "Processing" };
+      case 'in_production': return { color: "text-blue-600 bg-blue-50", icon: Package, label: "Processing" };
       case 'shipped': return { color: "text-purple-600 bg-purple-50", icon: Truck, label: "Shipped" };
       case 'delivered': return { color: "text-emerald-600 bg-emerald-50", icon: CheckCircle2, label: "Delivered" };
       default: return { color: "text-slate-600 bg-slate-50", icon: Package, label: status };

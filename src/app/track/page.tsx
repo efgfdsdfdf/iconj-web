@@ -52,7 +52,7 @@ export default function TrackOrderPage() {
 
   const statusList = [
     { id: "pending_payment", label: "Awaiting Payment" },
-    { id: "processing", label: "Processing Order" },
+    { id: "in_production", label: "Processing Order" },
     { id: "shipped", label: "In Transit" },
     { id: "delivered", label: "Delivered" }
   ];
