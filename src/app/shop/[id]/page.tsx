@@ -132,7 +132,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         {/* Reviews Section */}
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <Reviews />
+            <Reviews productId={product.id} initialReviews={product.variants?.__reviews || []} />
           </div>
         </div>
 

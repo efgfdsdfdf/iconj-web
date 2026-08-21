@@ -112,16 +112,15 @@ export default async function HomePage() {
       </section>
 
       {/* TOP SELLING PRODUCTS */}
-      <section className="container mx-auto px-4 mb-8">
-        <Card className="border-none shadow-sm rounded-lg overflow-hidden bg-white">
-          <div className="bg-orange-500 px-4 py-3 flex justify-between items-center">
+      <section className="mb-8 w-full">
+        <Card className="border-none shadow-sm rounded-none overflow-hidden bg-white">
+          <div className="bg-orange-500 px-4 md:px-8 py-3 flex justify-between items-center">
             <h2 className="text-white font-bold text-lg">Top Selling Items</h2>
             <Link href="/shop" className="text-white text-sm font-medium hover:underline flex items-center">See All <ChevronRight className="w-4 h-4"/></Link>
           </div>
-          <CardContent className="p-4">
+          <CardContent className="p-4 md:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
               {products?.map((product: any, idx: number) => {
-                // Attach fallback image if missing
                 const p = { ...product, images: product.images || [getProductImage(product.category)] };
                 return <ProductCard key={product.id} product={p} hideOnLg={idx === 4} />;
               })}

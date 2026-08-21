@@ -65,3 +65,32 @@ export async function uploadProductImage(formData: FormData) {
   }
 }
 
+export async function addReview(productId: string, review: { name: string, comment: string, rating: number }) {
+  try {
+    const { data: product, error: fetchErr } = await supabaseAdmin.from('products').select('variants').eq('id', productId).single();
+    if (fetchErr) throw fetchErr;
+
+    const currentVariants = product.variants || {};
+    const existingReviews = currentVariants.__reviews || [];
+    
+    const newReview = {
+      ...review,
+      date: new Date().toISOString(),
+      verified: false
+    };
+
+    const updatedVariants = {
+      ...currentVariants,
+      __reviews: [newReview, ...existingReviews]
+    };
+
+    const { error: updateErr } = await supabaseAdmin.from('products').update({ variants: updatedVariants }).eq('id', productId);
+    if (updateErr) throw updateErr;
+
+    revalidatePath(`/shop/${productId}`);
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || 'Failed to add review' };
+  }
+}
+
