@@ -82,7 +82,7 @@ export default async function CustomerOrdersPage() {
                       <StatusIcon className="w-3.5 h-3.5" />
                       {statusConfig.label}
                     </span>
-                    <Link href={`/track`}>
+                    <Link href={`/track?id=${order.id}`}>
                       <Button className="bg-slate-900 hover:bg-slate-800">Track</Button>
                     </Link>
                   </div>

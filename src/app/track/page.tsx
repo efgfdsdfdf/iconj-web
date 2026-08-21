@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PackageSearch, Truck, Package, CheckCircle2, ChevronRight, Search } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export default function TrackOrderPage() {
@@ -17,6 +17,23 @@ export default function TrackOrderPage() {
   const [order, setOrder] = useState<any>(null);
 
   const supabase = createClient();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if (id) {
+      setOrderId(id);
+      setLoading(true);
+      supabase.from("orders").select("*").eq("id", id).single().then(({ data, error }) => {
+        if (error || !data) {
+          setError("We couldn't find an order with that ID. Please check and try again.");
+        } else {
+          setOrder(data);
+        }
+        setLoading(false);
+      });
+    }
+  }, [supabase]);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
