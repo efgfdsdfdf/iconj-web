@@ -51,8 +51,7 @@ export async function POST(request: Request) {
       order_id: orderData.id,
       product_id: item.id,
       quantity: item.quantity,
-      unit_price: item.price,
-      configuration: item
+      unit_price: item.price
     }));
     const { error: itemsError } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsError) {
