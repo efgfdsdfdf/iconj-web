@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { MessageCircle, FileText, Factory, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import CopyOrderButton from "./CopyOrderButton";
+import { ExportCsvButton } from "./ExportCsvButton";
 
 export const revalidate = 0;
 
@@ -29,6 +30,7 @@ export default async function AdminSupplierPage() {
           <h1 className="text-2xl font-bold text-slate-900">Supplier Fulfilment CRM</h1>
           <p className="text-sm text-slate-500">Manage dropshipping orders and forward them to your manufacturers.</p>
         </div>
+        <ExportCsvButton orders={orders || []} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
