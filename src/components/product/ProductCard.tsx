@@ -30,9 +30,9 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
 
   return (
     <div 
-      className={\group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 \\}
+      className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''}`}
     >
-      <Link href={\/shop/\\} className="block relative aspect-[4/5] bg-slate-100 rounded mb-3 overflow-hidden">
+      <Link href={`/shop/${product.id}`} className="block relative aspect-[4/5] bg-slate-100 rounded mb-3 overflow-hidden">
         <img 
           src={product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"} 
           alt={product.name} 
@@ -55,16 +55,16 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
       </Link>
       
       <div className="flex-1 flex flex-col">
-        <Link href={\/shop/\\} className="block mb-1">
+        <Link href={`/shop/${product.id}`} className="block mb-1">
           {ageRange && (
             <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">{ageRange}</span>
           )}
           <h3 className="font-bold text-slate-900 text-sm line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{product.name}</h3>
         </Link>
         <div className="mt-auto pt-2 flex flex-col gap-2">
-          <p className="font-black text-rose-600 text-sm md:text-base">?{product.base_selling_price?.toLocaleString() || "0"}</p>
+          <p className="font-black text-rose-600 text-sm md:text-base">₦{product.base_selling_price?.toLocaleString() || "0"}</p>
           <Button 
-            className={\w-full text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5 \\} 
+            className={`w-full text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5 ${added ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-900 hover:bg-slate-800'}`} 
             onClick={handleAddToCart}
           >
             {added ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
