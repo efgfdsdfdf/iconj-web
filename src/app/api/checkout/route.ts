@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { items, email, name } = body;
+    const { items, email, name, userId } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -11,7 +12,7 @@ export async function POST(request: Request) {
 
     // 1. Calculate Total Price securely on the server
     const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-    const shippingFee = 15000;
+    const shippingFee = 0;
     const totalAmount = subtotal + shippingFee;
     
     // Rough estimate based on the 30% margin rule (Selling Price = Cost / 0.70)
@@ -19,11 +20,11 @@ export async function POST(request: Request) {
     const estimatedProfit = subtotal - supplierCost;
 
     // Create a server Supabase client using Service Role to bypass RLS
-    const { createClient } = require("@supabase/supabase-js");
-    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
     // 2. Save the pending order to the database
     const { data: orderData, error: orderError } = await supabaseAdmin.from("orders").insert([{
+      user_id: userId || null,
       total_amount: totalAmount,
       shipping_cost: shippingFee,
       supplier_cost: supplierCost,
@@ -41,7 +42,7 @@ export async function POST(request: Request) {
       product_id: item.id,
       quantity: item.quantity,
       unit_price: item.price,
-      configuration: item // store width, height, motor, etc here
+      configuration: item
     }));
     await supabaseAdmin.from("order_items").insert(orderItems);
     
@@ -55,36 +56,36 @@ export async function POST(request: Request) {
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json",
+        Authorization: \Bearer \\,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
         email: email,
         amount: amountInKobo,
-        callback_url: `${origin}/checkout/verify`,
+        reference: orderData.id,
+        callback_url: \\/api/callback\,
         metadata: {
           custom_fields: [
-            { display_name: "Order ID", variable_name: "order_id", value: orderData.id },
-            { display_name: "Customer Name", variable_name: "customer_name", value: name }
+            { display_name: "Customer Name", variable_name: "customer_name", value: name },
+            { display_name: "Phone", variable_name: "phone", value: body.phone }
           ]
         }
-      }),
+      })
     });
 
     const paystackData = await paystackResponse.json();
 
     if (!paystackData.status) {
-      return NextResponse.json({ error: paystackData.message }, { status: 400 });
+      throw new Error("Paystack initialization failed: " + paystackData.message);
     }
 
-    // 3. Return the secure checkout URL to the frontend
     return NextResponse.json({ 
       authorization_url: paystackData.data.authorization_url,
       reference: paystackData.data.reference 
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Checkout Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }

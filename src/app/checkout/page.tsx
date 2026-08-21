@@ -18,6 +18,7 @@ export default function CheckoutPage() {
   const [mounted, setMounted] = useState(false);
   const supabase = createClient();
   const [userEmail, setUserEmail] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     firstName: "", lastName: "", email: "", phone: "",
@@ -29,6 +30,7 @@ export default function CheckoutPage() {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserEmail(data.user.email || "");
+        setUserId(data.user.id);
         setFormData(prev => ({ ...prev, email: data.user?.email || "" }));
       }
     });
@@ -38,16 +40,15 @@ export default function CheckoutPage() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-[60vh] flex flex-col items-center justify-center p-4 bg-slate-50">
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Your Cart is Empty</h1>
-        <p className="text-slate-500 mb-6">Browse our shop to find the perfect window coverings.</p>
-        <Link href="/shop"><Button className="bg-orange-500 hover:bg-orange-600 font-bold uppercase tracking-wider">Continue Shopping</Button></Link>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-4">
+        <h1 className="text-2xl font-bold mb-4 text-slate-900">Your cart is empty</h1>
+        <Link href="/shop"><Button className="bg-rose-500 hover:bg-rose-600">Continue Shopping</Button></Link>
       </div>
     );
   }
 
   const subtotal = getTotalPrice();
-  const shipping = 0; // Free shipping
+  const shipping = 0;
   const total = subtotal + shipping;
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -60,6 +61,7 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           email: formData.email, 
+          userId: userId,
           name: `${formData.firstName} ${formData.lastName}`,
           phone: formData.phone,
           address: {
@@ -233,3 +235,4 @@ export default function CheckoutPage() {
     </div>
   );
 }
+
