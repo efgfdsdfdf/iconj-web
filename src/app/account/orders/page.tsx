@@ -5,6 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
 export const revalidate = 0;
 
 export default async function CustomerOrdersPage() {
@@ -15,7 +17,9 @@ export default async function CustomerOrdersPage() {
     redirect("/login");
   }
 
-  const { data: orders } = await supabase
+  const supabaseAdmin = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+  const { data: orders } = await supabaseAdmin
     .from("orders")
     .select("*, order_items(*, products(name))")
     .eq("user_id", user.id)
