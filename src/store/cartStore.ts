@@ -7,6 +7,10 @@ export interface CartItem {
   price: number;
   quantity: number;
   image: string;
+  width?: number;
+  height?: number;
+  motorType?: string;
+  fabric?: string;
   configuration?: any;
 }
 

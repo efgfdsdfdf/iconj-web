@@ -54,12 +54,16 @@ export default function CheckoutVerifyPage() {
             <p className="text-sm font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded mb-8">Ref: {reference}</p>
             
             <div className="space-y-3 w-full">
-              <Button asChild className="w-full bg-blue-600 hover:bg-blue-700 h-12">
-                <Link href="/account/orders"><Package className="w-4 h-4 mr-2" /> Track My Order</Link>
-              </Button>
-              <Button asChild variant="outline" className="w-full h-12">
-                <Link href="/"><Home className="w-4 h-4 mr-2" /> Back to Home</Link>
-              </Button>
+              <Link href="/account/orders" className="block w-full">
+                <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12">
+                  <Package className="w-4 h-4 mr-2" /> Track My Order
+                </Button>
+              </Link>
+              <Link href="/" className="block w-full">
+                <Button variant="outline" className="w-full h-12">
+                  <Home className="w-4 h-4 mr-2" /> Back to Home
+                </Button>
+              </Link>
             </div>
           </div>
         )}
@@ -68,9 +72,11 @@ export default function CheckoutVerifyPage() {
           <div className="flex flex-col items-center">
             <h1 className="text-2xl font-bold text-red-600 mb-2">Payment Verification Failed</h1>
             <p className="text-slate-600 mb-6">We could not verify your payment reference.</p>
-            <Button asChild className="w-full">
-              <Link href="/checkout">Return to Checkout</Link>
-            </Button>
+            <Link href="/checkout" className="w-full">
+              <Button className="w-full">
+                Return to Checkout
+              </Button>
+            </Link>
           </div>
         )}
 
