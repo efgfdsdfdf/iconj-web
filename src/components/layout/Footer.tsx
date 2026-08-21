@@ -15,22 +15,26 @@ export function Footer() {
           <ul className="space-y-2 text-sm">
             <li><Link href="/shop" className="hover:text-primary">All Products</Link></li>
             <li><Link href="/categories" className="hover:text-primary">Categories</Link></li>
-            <li><Link href="/track" className="hover:text-primary">Track Order</Link></li>
           </ul>
         </div>
+        {/* Customer Service */}
         <div>
-          <h4 className="font-semibold mb-4 text-blue-950">Support</h4>
-          <ul className="space-y-2 text-sm">
-            <li><Link href="/faq" className="hover:text-primary">FAQ</Link></li>
-            <li><Link href="/contact" className="hover:text-primary">Contact Us</Link></li>
-            <li><Link href="/returns" className="hover:text-primary">Returns & Issues</Link></li>
+          <h3 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Customer Service</h3>
+          <ul className="space-y-3 text-sm text-slate-600">
+            <li><Link href="/faq" className="hover:text-orange-500 transition-colors">FAQ</Link></li>
+            <li><Link href="/returns" className="hover:text-orange-500 transition-colors">Returns & Replacements</Link></li>
+            <li><Link href="/report-issue" className="hover:text-orange-500 transition-colors">Report an Issue</Link></li>
+            <li><Link href="/track" className="hover:text-orange-500 transition-colors">Track Order</Link></li>
+            <li><Link href="/contact" className="hover:text-orange-500 transition-colors">Contact Us</Link></li>
           </ul>
         </div>
+
+        {/* Legal */}
         <div>
-          <h4 className="font-semibold mb-4 text-blue-950">Legal</h4>
-          <ul className="space-y-2 text-sm">
-            <li><Link href="/privacy" className="hover:text-primary">Privacy Policy</Link></li>
-            <li><Link href="/terms" className="hover:text-primary">Terms & Conditions</Link></li>
+          <h3 className="font-bold text-slate-900 mb-4 uppercase tracking-wider text-sm">Legal</h3>
+          <ul className="space-y-3 text-sm text-slate-600">
+            <li><Link href="/privacy-policy" className="hover:text-orange-500 transition-colors">Privacy Policy</Link></li>
+            <li><Link href="/terms-and-conditions" className="hover:text-orange-500 transition-colors">Terms & Conditions</Link></li>
           </ul>
         </div>
       </div>

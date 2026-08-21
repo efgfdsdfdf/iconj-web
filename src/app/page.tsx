@@ -19,13 +19,14 @@ export default async function HomePage() {
     return "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&q=80";
   };
 
-  const categories = [
-    { name: "Motorized Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
+  const { data: settings } = await supabase.from('store_settings').select('value').eq('id', 'homepage_categories').single();
+  const categories: { name: string, icon: string }[] = settings?.value || [
+    { name: "Smart Motorized Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
     { name: "Blackout Shades", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80" },
     { name: "Curtain Tracks", icon: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" },
     { name: "Honeycomb", icon: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80" },
     { name: "Outdoor Patio", icon: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=80" },
-    { name: "Custom Sizes", icon: "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=200&q=80" },
+    { name: "Custom Sizes", icon: "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=200&q=80" }
   ];
 
   return (

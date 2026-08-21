@@ -94,3 +94,33 @@ export async function addReview(productId: string, review: { name: string, comme
   }
 }
 
+
+export async function updateIssue(issueId: string, data: { status: string, admin_notes: string }) {
+  try {
+    const { error } = await supabaseAdmin.from("order_issues").update(data).eq("id", issueId);
+    if (error) throw error;
+    revalidatePath("/admin/issues");
+    revalidatePath(`/admin/issues/${issueId}`);
+    revalidatePath("/account/issues");
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to update issue" };
+  }
+}
+
+
+export async function updateCategories(categories: { name: string, icon: string }[]) {
+  try {
+    const { error } = await supabaseAdmin
+      .from("store_settings")
+      .upsert({ id: "homepage_categories", value: categories, updated_at: new Date().toISOString() });
+      
+    if (error) throw error;
+    revalidatePath("/");
+    revalidatePath("/admin/categories");
+    return { success: true };
+  } catch (err: any) {
+    return { success: false, error: err.message || "Failed to update categories" };
+  }
+}
+

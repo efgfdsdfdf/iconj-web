@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, User, MapPin, Heart, Clock, ChevronRight, CheckCircle2 } from "lucide-react";
+import { Package, User, MapPin, Heart, Clock, ChevronRight, CheckCircle2, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -46,6 +46,9 @@ export default async function CustomerDashboard() {
                 </Link>
                 <Link href="/account/orders" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
                   <Package className="w-5 h-5 text-slate-400" /> My Orders
+                </Link>
+                <Link href="/account/issues" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
+                  <AlertCircle className="w-5 h-5 text-slate-400" /> My Issues
                 </Link>
                 <Link href="#" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
                   <Heart className="w-5 h-5 text-slate-400" /> Saved Items

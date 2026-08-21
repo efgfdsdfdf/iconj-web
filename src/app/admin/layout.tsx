@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, ShoppingBag, Users, Truck, Settings, WalletCards, Package, LogOut, Menu } from "lucide-react";
+import { Box, LayoutDashboard, Settings, ShoppingCart, Users, Truck, Menu, AlertCircle, Image as ImageIcon, WalletCards, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 function AdminNavLinks() {
@@ -11,13 +11,19 @@ function AdminNavLinks() {
         <LayoutDashboard className="w-5 h-5" /> Dashboard
       </Link>
       <Link href="/admin/orders" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
-        <ShoppingBag className="w-5 h-5" /> Orders
+        <ShoppingCart className="w-5 h-5" /> Orders
       </Link>
       <Link href="/admin/products" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
-        <Package className="w-5 h-5" /> Products
+        <Box className="w-5 h-5" /> Products
       </Link>
       <Link href="/admin/supplier" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
         <Truck className="w-5 h-5" /> Supplier Balance
+      </Link>
+      <Link href="/admin/issues" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors text-orange-400">
+        <AlertCircle className="w-5 h-5" /> Order Issues
+      </Link>
+      <Link href="/admin/categories" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
+        <ImageIcon className="w-5 h-5" /> Categories
       </Link>
       <Link href="/admin/customers" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
         <Users className="w-5 h-5" /> Customers
