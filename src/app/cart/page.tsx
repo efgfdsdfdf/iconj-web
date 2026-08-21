@@ -84,7 +84,7 @@ export default function CartPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span className="text-amber-600 font-medium">Calculated at checkout</span>
+                    <span className="text-emerald-600 font-bold uppercase text-sm tracking-wider">Free</span>
                   </div>
                 </div>
                 <div className="flex justify-between items-center py-4 text-lg font-bold text-slate-900">

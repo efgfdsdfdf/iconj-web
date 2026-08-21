@@ -47,7 +47,7 @@ export default function CheckoutPage() {
   }
 
   const subtotal = getTotalPrice();
-  const shipping = 15000; // Flat rate for now
+  const shipping = 0; // Free shipping
   const total = subtotal + shipping;
 
   const handleCheckout = async (e: React.FormEvent) => {
@@ -204,7 +204,7 @@ export default function CheckoutPage() {
                   </div>
                   <div className="flex justify-between text-slate-600">
                     <span>Shipping Fee</span>
-                    <span className="font-medium text-slate-900">₦{shipping.toLocaleString()}</span>
+                    <span className="font-bold text-emerald-600 uppercase text-sm tracking-wider">Free</span>
                   </div>
                   <div className="flex justify-between text-slate-900 font-bold text-lg border-t pt-3">
                     <span>Total</span>
