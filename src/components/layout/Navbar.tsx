@@ -13,6 +13,8 @@ export function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [tapCount, setTapCount] = useState(0);
   
   const items = useCartStore((state) => state.items);
   const pathname = usePathname();
@@ -26,6 +28,7 @@ export function Navbar() {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        setUserEmail(user.email || null);
         const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
         if (profile && profile.name) {
           setUserName(profile.name.split(" ")[0]);
@@ -44,7 +47,21 @@ export function Navbar() {
     await fetch("/auth/signout", { method: "POST" });
     await supabase.auth.signOut();
     setUserName(null);
+    setUserEmail(null);
     router.push("/login");
+  };
+
+  const handleAdminTap = (e: React.MouseEvent) => {
+    if (userEmail === "ezeilodavid292@gmail.com") {
+      e.preventDefault();
+      e.stopPropagation();
+      const newCount = tapCount + 1;
+      setTapCount(newCount);
+      if (newCount >= 5) {
+        setTapCount(0);
+        router.push("/admin");
+      }
+    }
   };
 
   // Lock body scroll when mobile menu is open
@@ -86,7 +103,7 @@ export function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="bg-blue-600 text-white p-2 rounded-lg shadow-sm">
+            <div onClick={handleAdminTap} className="bg-blue-600 text-white p-2 rounded-lg shadow-sm cursor-pointer select-none">
               <Package className="w-6 h-6" />
             </div>
             <span className="font-extrabold text-2xl tracking-tight text-slate-900 hidden sm:block">ICONJ</span>
