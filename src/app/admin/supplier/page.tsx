@@ -76,7 +76,7 @@ export default async function AdminSupplierPage() {
                 orders.map((order) => (
                   <TableRow key={order.id} className="hover:bg-slate-50/50">
                     <TableCell className="pl-6 font-medium text-blue-600">
-                      <Link href={\/admin/orders/\\}>
+                      <Link href={`/admin/orders/${order.id}`}>
                         #{order.id.split('-')[0].toUpperCase()}
                       </Link>
                       <p className="text-xs text-slate-400 font-normal mt-1">{new Date(order.created_at).toLocaleDateString()}</p>
