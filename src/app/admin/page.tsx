@@ -17,9 +17,15 @@ export default async function AdminDashboardPage() {
   const { data: orders } = await supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(5);
   
   // Calculate real revenue from all orders
-  const { data: allOrders } = await supabase.from("orders").select("total_amount, status");
-  const totalRevenue = allOrders?.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0) || 0;
-  const activeOrdersCount = allOrders?.filter(o => o.status !== "Delivered" && o.status !== "Cancelled").length || 0;
+  const { data: allOrders } = await supabase.from("orders").select("total_amount, order_status, payment_status, supplier_cost");
+  const paidOrders = allOrders?.filter(o => o.payment_status === 'paid') || [];
+  const totalRevenue = paidOrders.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
+  const activeOrdersCount = allOrders?.filter(o => o.order_status !== "delivered" && o.order_status !== "cancelled").length || 0;
+  
+  // Calculate Pending Supplier Payments
+  const pendingSupplierPayments = paidOrders
+    .filter(o => o.order_status === "in_production" || o.order_status === "processing")
+    .reduce((sum, order) => sum + (Number(order.supplier_cost) || 0), 0);
 
   return (
     <main className="flex-1 p-4 md:p-8 overflow-auto bg-slate-50 min-h-[calc(100vh-130px)]">
@@ -86,7 +92,7 @@ export default async function AdminDashboardPage() {
             </div>
             <p className="text-sm font-medium text-slate-500 mb-1">Pending Supplier Payment</p>
             <h3 className={`text-2xl font-bold ${activeOrdersCount > 0 ? "text-slate-900" : "text-slate-400"}`}>
-              {activeOrdersCount > 0 ? "₦" + (totalRevenue * 0.7).toLocaleString() : "₦0"}
+              {activeOrdersCount > 0 ? "₦" + pendingSupplierPayments.toLocaleString() : "₦0"}
             </h3>
           </CardContent>
         </Card>
@@ -191,5 +197,6 @@ export default async function AdminDashboardPage() {
     </main>
   );
 }
+
 
 
