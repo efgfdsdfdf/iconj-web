@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { MessageCircle, FileText, Factory, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import CopyOrderButton from "./CopyOrderButton";
@@ -9,10 +9,10 @@ import CopyOrderButton from "./CopyOrderButton";
 export const revalidate = 0;
 
 export default async function AdminSupplierPage() {
-  const supabase = await createClient();
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
   // Fetch orders that have been paid but are still in processing/production
-  const { data: orders } = await supabase
+  const { data: orders } = await supabaseAdmin
     .from("orders")
     .select("*, order_items(*, products(*)), profiles(name, email)")
     .eq("payment_status", "paid")

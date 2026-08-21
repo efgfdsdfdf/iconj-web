@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Package, User, Clock, ChevronLeft } from "lucide-react";
@@ -7,13 +7,13 @@ import { Button } from "@/components/ui/button";
 import { SendToSupplierButton } from "./SendToSupplierButton";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const resolvedParams = await params;
   
-  const { data: order } = await supabase.from("orders").select("*").eq("id", resolvedParams.id).single();
+  const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", resolvedParams.id).single();
   if (!order) return notFound();
 
-  const { data: items } = await supabase.from("order_items").select(`
+  const { data: items } = await supabaseAdmin.from("order_items").select(`
     *,
     product:products(name, sku, images)
   `).eq("order_id", order.id);
