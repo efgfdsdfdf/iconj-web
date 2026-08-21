@@ -103,6 +103,7 @@ export default function CheckoutPage() {
       const data = await response.json();
       
       if (data.authorization_url) {
+        clearCart();
         window.location.href = data.authorization_url;
       } else {
         alert("Payment initialization failed: " + (data.error || "Unknown error"));
