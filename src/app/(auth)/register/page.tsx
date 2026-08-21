@@ -112,7 +112,7 @@ export default function RegisterPage() {
               {loading ? "Creating account..." : "Create account"}
             </Button>
             <div className="text-center text-sm text-slate-500">
-              Already have an account?{" "}
+              Already have an account₦{" "}
               <Link href="/login" className="font-semibold text-blue-600 hover:underline">
                 Sign in
               </Link>

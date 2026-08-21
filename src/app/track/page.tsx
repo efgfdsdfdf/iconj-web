@@ -120,7 +120,7 @@ export default function TrackOrderPage() {
               <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 border-b pb-6 mb-6">
                 <div>
                   <p className="text-sm text-slate-500 mb-1">Order #{order.id.split("-")[0].toUpperCase()}</p>
-                  <h3 className="font-bold text-xl text-slate-900">?{Number(order.total_amount).toLocaleString()}</h3>
+                  <h3 className="font-bold text-xl text-slate-900">₦{Number(order.total_amount).toLocaleString()}</h3>
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-slate-500 mb-1">Date Placed</p>
@@ -172,7 +172,7 @@ export default function TrackOrderPage() {
                         <p className="text-xs text-slate-500 mt-1">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold text-sm text-slate-900">?{Number(item.unit_price * item.quantity).toLocaleString()}</p>
+                        <p className="font-bold text-sm text-slate-900">₦{Number(item.unit_price * item.quantity).toLocaleString()}</p>
                       </div>
                     </div>
                   ))}

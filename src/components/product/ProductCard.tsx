@@ -36,8 +36,8 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
       <h3 className="font-medium text-sm text-slate-700 line-clamp-2 leading-tight mb-2 group-hover:text-orange-500">{product.name}</h3>
       
       <div className="mt-auto mb-3">
-        <span className="text-base font-bold text-slate-900 block">?{Number(product.base_selling_price).toLocaleString()}</span>
-        <span className="text-xs text-slate-400 line-through">?{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
+        <span className="text-base font-bold text-slate-900 block">₦{Number(product.base_selling_price).toLocaleString()}</span>
+        <span className="text-xs text-slate-400 line-through">₦{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
       </div>
 
       <Button 

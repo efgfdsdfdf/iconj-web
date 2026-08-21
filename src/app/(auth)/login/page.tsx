@@ -92,7 +92,7 @@ function LoginForm() {
             {loading ? "Signing In..." : "Sign In"}
           </Button>
           <div className="text-center text-sm text-slate-500">
-            Don&apos;t have an account?{" "}
+            Don&apos;t have an account₦{" "}
             <Link href="/register" className="font-semibold text-blue-600 hover:underline">
               Sign up
             </Link>
