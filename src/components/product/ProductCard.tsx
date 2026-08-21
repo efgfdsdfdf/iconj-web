@@ -2,14 +2,17 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
+import { useState } from "react";
 
 export function ProductCard({ product, hideOnLg = false }: { product: any, hideOnLg?: boolean }) {
   const addItem = useCartStore(state => state.addItem);
+  const [added, setAdded] = useState(false);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     addItem({
       id: product.id,
       name: product.name,
@@ -17,6 +20,8 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
       quantity: 1,
       image: product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"
     });
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2000);
   };
 
   const isFeatured = product.metadata?.is_featured || product.is_featured;
@@ -24,11 +29,10 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
   const ageRange = product.metadata?.age_range;
 
   return (
-    <Link 
-      href={`/shop/${product.id}`} 
-      className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''}`}
+    <div 
+      className={\group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 \\}
     >
-      <div className="aspect-[4/5] bg-slate-100 rounded mb-3 relative overflow-hidden">
+      <Link href={\/shop/\\} className="block relative aspect-[4/5] bg-slate-100 rounded mb-3 overflow-hidden">
         <img 
           src={product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"} 
           alt={product.name} 
@@ -48,26 +52,26 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
             </span>
           )}
         </div>
-      </div>
+      </Link>
       
       <div className="flex-1 flex flex-col">
-        {ageRange && (
-          <span className="text-[10px] uppercase font-bold text-slate-400 mb-1">{ageRange}</span>
-        )}
-        <h3 className="font-bold text-slate-900 text-sm mb-1 line-clamp-2 leading-tight">{product.name}</h3>
+        <Link href={\/shop/\\} className="block mb-1">
+          {ageRange && (
+            <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">{ageRange}</span>
+          )}
+          <h3 className="font-bold text-slate-900 text-sm line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{product.name}</h3>
+        </Link>
         <div className="mt-auto pt-2 flex flex-col gap-2">
-          <p className="font-black text-rose-600 text-sm md:text-base">₦{product.base_selling_price?.toLocaleString() || "0"}</p>
+          <p className="font-black text-rose-600 text-sm md:text-base">?{product.base_selling_price?.toLocaleString() || "0"}</p>
           <Button 
-            className="w-full bg-slate-900 hover:bg-slate-800 text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5" 
+            className={\w-full text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5 \\} 
             onClick={handleAddToCart}
           >
-            <ShoppingCart className="w-3.5 h-3.5" />
-            Add to Cart
+            {added ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
+            {added ? 'Added!' : 'Add to Cart'}
           </Button>
         </div>
       </div>
-    </Link>
+    </div>
   );
-
-
 }
