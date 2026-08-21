@@ -75,13 +75,11 @@ export default function AddProductPage() {
         const fileData = new FormData();
         fileData.append("file", file);
         
-        try {
-          const result = await uploadProductImage(fileData);
-          if (result.success) {
-            uploadedUrls.push(result.url);
-          }
-        } catch (uploadError: any) {
-          throw new Error("Image upload failed: " + uploadError.message);
+        const result = await uploadProductImage(fileData);
+        if (result.success && result.url) {
+          uploadedUrls.push(result.url);
+        } else {
+          throw new Error("Image upload failed: " + (result.error || "Unknown error"));
         }
       }
 
@@ -92,7 +90,7 @@ export default function AddProductPage() {
       // 3. Insert Product via Server Action (bypasses RLS)
       const finalCost = productCost + shippingCost;
       
-      await createProduct({
+      const createResult = await createProduct({
         name: formData.name,
         sku: formData.sku,
         category: formData.category,
@@ -108,6 +106,10 @@ export default function AddProductPage() {
         images: uploadedUrls,
         variants: {}
       });
+
+      if (!createResult.success) {
+        throw new Error(createResult.error || "Failed to create product");
+      }
 
       router.push("/admin/products");
       router.refresh();
