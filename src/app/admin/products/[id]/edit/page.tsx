@@ -19,6 +19,17 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categoriesList, setCategoriesList] = useState<string[]>(["Nursery & Furniture", "Baby Feeding & Nursing", "Baby Care & Bath", "Baby Clothing & Accessories", "Baby Travel", "Toys & Development", "Maternity & Mother Care", "Gifts & Bundles"]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
+      if (data?.value && Array.isArray(data.value)) {
+        setCategoriesList(data.value.map((c: any) => c.name));
+      }
+    };
+    fetchCategories();
+  }, [supabase]);
 
   const [formData, setFormData] = useState({
     name: "", sku: "", category: "",
@@ -116,7 +127,15 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <div className="space-y-2"><Label>Full Description</Label><Textarea className="h-32" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2"><Label>SKU Code</Label><Input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} /></div>
-                <div className="space-y-2"><Label>Category</Label><Input required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} /></div>
+                <div className="space-y-2">
+                  <Label>Category</Label>
+                  <select required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                    <option value="">Select Category...</option>
+                    {categoriesList.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </CardContent>
           </Card>

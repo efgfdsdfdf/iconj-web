@@ -10,10 +10,23 @@ import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { createProduct, uploadProductImage } from "../../actions";
+import { createClient } from "@/lib/supabase/client";
 
 export default function AddProductPage() {
+  const supabase = createClient();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [categoriesList, setCategoriesList] = useState<string[]>(["Nursery & Furniture", "Baby Feeding & Nursing", "Baby Care & Bath", "Baby Clothing & Accessories", "Baby Travel", "Toys & Development", "Maternity & Mother Care", "Gifts & Bundles"]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
+      if (data?.value && Array.isArray(data.value)) {
+        setCategoriesList(data.value.map((c: any) => c.name));
+      }
+    };
+    fetchCategories();
+  }, [supabase]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -170,16 +183,11 @@ export default function AddProductPage() {
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <select required value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                    <option>Newborn Essentials</option>
-                    <option>Baby Feeding</option>
-                    <option>Baby Care & Bath</option>
-                    <option>Baby Safety</option>
-                    <option>Baby Clothing & Accessories</option>
-                    <option>Baby Travel</option>
-                    <option>Toys & Development</option>
-                    <option>Maternity & Mother Care</option>
-                    <option>Gifts & Bundles</option>
+                  <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                    <option value="">Select Category...</option>
+                    {categoriesList.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
