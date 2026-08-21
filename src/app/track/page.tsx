@@ -143,11 +143,11 @@ export default function TrackOrderPage() {
                       <span className="font-mono text-slate-700">{order.tracking_number}</span>
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" asChild>
-                    <a href={`https://parcelsapp.com/en/tracking/${order.tracking_number}`} target="_blank" rel="noopener noreferrer">
+                  <a href={`https://parcelsapp.com/en/tracking/${order.tracking_number}`} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="sm">
                       Track on parcelsapp
-                    </a>
-                  </Button>
+                    </Button>
+                  </a>
                 </div>
               )}
 
