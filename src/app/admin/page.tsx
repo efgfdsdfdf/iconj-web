@@ -12,12 +12,12 @@ export default async function AdminDashboardPage() {
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   
   // Fetch real metrics
-  const { count: productCount } = await supabase.from("products").select("*", { count: "exact", head: true });
+  const { count: productCount } = await supabaseAdmin.from("products").select("*", { count: "exact", head: true });
   const { count: userCount } = await supabaseAdmin.from("profiles").select("*", { count: "exact", head: true });
-  const { data: orders } = await supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(5);
+  const { data: orders } = await supabaseAdmin.from("orders").select("*").order("created_at", { ascending: false }).limit(5);
   
   // Calculate real revenue from all orders
-  const { data: allOrders } = await supabase.from("orders").select("total_amount, order_status, payment_status, supplier_cost");
+  const { data: allOrders } = await supabaseAdmin.from("orders").select("total_amount, order_status, payment_status, supplier_cost");
   const paidOrders = allOrders?.filter(o => o.payment_status === 'paid') || [];
   const totalRevenue = paidOrders.reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
   const activeOrdersCount = allOrders?.filter(o => o.order_status !== "delivered" && o.order_status !== "cancelled").length || 0;

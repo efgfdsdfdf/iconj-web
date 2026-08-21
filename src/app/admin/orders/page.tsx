@@ -1,15 +1,15 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { Eye } from "lucide-react";
 import Link from "next/link";
 
 export const revalidate = 0;
 
 export default async function AdminOrdersPage() {
-  const supabase = await createClient();
-  const { data: orders } = await supabase.from("orders").select("*").order("created_at", { ascending: false });
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  const { data: orders } = await supabaseAdmin.from("orders").select("*").order("created_at", { ascending: false });
 
   return (
     <main className="flex-1 p-8">
