@@ -19,6 +19,31 @@ export default async function HomePage() {
 
   return (
     <div className="bg-slate-50 min-h-screen pb-12">
+      {/* QUICK CATEGORIES (Mobile Horizontal Scroll) */}
+      <section className="container mx-auto px-4 mb-8">
+        <Card className="border-none shadow-sm rounded-lg overflow-hidden">
+          <CardContent className="p-4">
+            <div className="flex overflow-x-auto gap-4 md:gap-8 pb-2 snap-x no-scrollbar">
+              {[
+                { name: "Motorized Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
+                { name: "Blackout Shades", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80" },
+                { name: "Curtain Tracks", icon: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" },
+                { name: "Honeycomb", icon: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80" },
+                { name: "Outdoor Patio", icon: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=80" },
+                { name: "Custom Sizes", icon: "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=200&q=80" },
+              ].map((cat, i) => (
+                <Link href="/shop" key={i} className="flex flex-col items-center gap-2 min-w-[80px] snap-center group">
+                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-colors p-1 bg-slate-50">
+                    <img src={cat.icon} alt={cat.name} className="w-full h-full rounded-full object-cover" />
+                  </div>
+                  <span className="text-xs text-center font-medium text-slate-700">{cat.name}</span>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
       {/* JUMIA STYLE HERO SECTION */}
       <section className="container mx-auto px-4 pt-4 lg:pt-6 mb-8">
         <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[400px]">
@@ -61,31 +86,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* QUICK CATEGORIES (Mobile Horizontal Scroll) */}
-      <section className="container mx-auto px-4 mb-8">
-        <Card className="border-none shadow-sm rounded-lg overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex overflow-x-auto gap-4 md:gap-8 pb-2 snap-x no-scrollbar">
-              {[
-                { name: "Motorized Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
-                { name: "Blackout Shades", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80" },
-                { name: "Curtain Tracks", icon: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" },
-                { name: "Honeycomb", icon: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80" },
-                { name: "Outdoor Patio", icon: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=80" },
-                { name: "Custom Sizes", icon: "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=200&q=80" },
-              ].map((cat, i) => (
-                <Link href="/shop" key={i} className="flex flex-col items-center gap-2 min-w-[80px] snap-center group">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-colors p-1 bg-slate-50">
-                    <img src={cat.icon} alt={cat.name} className="w-full h-full rounded-full object-cover" />
-                  </div>
-                  <span className="text-xs text-center font-medium text-slate-700">{cat.name}</span>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
       </section>
 
       {/* TOP SELLING PRODUCTS */}
