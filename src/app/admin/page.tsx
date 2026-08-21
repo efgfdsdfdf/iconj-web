@@ -20,15 +20,15 @@ export default async function AdminDashboardPage() {
   const activeOrdersCount = allOrders?.filter(o => o.status !== "Delivered" && o.status !== "Cancelled").length || 0;
 
   return (
-    <main className="flex-1 p-8 overflow-auto bg-slate-50 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
+    <main className="flex-1 p-4 md:p-8 overflow-auto bg-slate-50 min-h-[calc(100vh-130px)]">
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard Overview</h1>
-          <p className="text-sm text-slate-500">Welcome to your store control center.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500">Welcome back, here is what is happening today.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="bg-white">Download Report</Button>
-          <Link href="/admin/products/new"><Button className="bg-blue-600 hover:bg-blue-700">Add Product</Button></Link>
+          <Button variant="outline"><AlertTriangle className="w-4 h-4 mr-2" /> Issues</Button>
+          <Button className="bg-blue-600 hover:bg-blue-700"><TrendingUp className="w-4 h-4 mr-2" /> Generate Report</Button>
         </div>
       </div>
 

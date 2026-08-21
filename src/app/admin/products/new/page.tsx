@@ -8,8 +8,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { ChevronLeft, Info, UploadCloud, Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, Upload, X, UploadCloud, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
+import { createProduct, uploadProductImage } from "../../actions";
 
 export default function AddProductPage() {
   const router = useRouter();
@@ -68,47 +69,45 @@ export default function AddProductPage() {
     setError(null);
 
     try {
-      // 1. Upload Images to Supabase Storage
+      // 1. Upload Images to Supabase Storage via Server Action (bypasses RLS)
       const uploadedUrls: string[] = [];
       for (const file of imageFiles) {
-        const fileExt = file.name.split(".").pop();
-        const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${Date.now()}-${fileName}`;
+        const fileData = new FormData();
+        fileData.append("file", file);
         
-        const { error: uploadError } = await supabase.storage
-          .from("product-images")
-          .upload(filePath, file);
-
-        if (uploadError) throw new Error("Image upload failed: " + uploadError.message);
-
-        const { data } = supabase.storage.from("product-images").getPublicUrl(filePath);
-        uploadedUrls.push(data.publicUrl);
+        try {
+          const result = await uploadProductImage(fileData);
+          if (result.success) {
+            uploadedUrls.push(result.url);
+          }
+        } catch (uploadError: any) {
+          throw new Error("Image upload failed: " + uploadError.message);
+        }
       }
 
       // 2. Clean up dynamic lists (remove empties)
       const cleanFeatures = features.filter(f => f.trim() !== "");
       const cleanSpecs = specs.filter(s => s.key.trim() !== "" && s.value.trim() !== "");
 
-      // 3. Insert Product
+      // 3. Insert Product via Server Action (bypasses RLS)
       const finalCost = productCost + shippingCost;
-      const { error: insertError } = await supabase.from("products").insert([{
+      
+      await createProduct({
         name: formData.name,
         sku: formData.sku,
         category: formData.category,
         base_supplier_cost: finalCost,
         base_selling_price: parseFloat(formData.selling_price),
         is_configurable: true,
+        requires_quote: formData.requires_quote,
+        stock_status: formData.stock_status,
+        is_featured: formData.is_featured,
         description: formData.description,
         features: cleanFeatures,
         specifications: cleanSpecs,
         images: uploadedUrls,
-        stock_status: formData.stock_status,
-        is_featured: formData.is_featured,
-        requires_quote: formData.requires_quote,
-        variants: {} // We will build a complex variant manager in the Edit page
-      }]);
-
-      if (insertError) throw insertError;
+        variants: {}
+      });
 
       router.push("/admin/products");
       router.refresh();

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, Package, User, Clock, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { SendToSupplierButton } from "./SendToSupplierButton";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -20,17 +21,17 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
   const address = order.delivery_address || {};
 
   return (
-    <main className="flex-1 p-8 bg-slate-50 min-h-screen">
+    <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
       <div className="mb-6">
         <Link href="/admin/orders" className="text-sm text-slate-500 hover:text-blue-600 flex items-center mb-4">
           <ChevronLeft className="w-4 h-4 mr-1" /> Back to Orders
         </Link>
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Order #{order.id.split("-")[0].toUpperCase()}</h1>
             <p className="text-sm text-slate-500">Placed on {new Date(order.created_at).toLocaleString()}</p>
           </div>
-          <Button className="bg-blue-600 hover:bg-blue-700"><Package className="w-4 h-4 mr-2" /> Send to Supplier</Button>
+          <SendToSupplierButton order={order} items={items || []} />
         </div>
       </div>
 

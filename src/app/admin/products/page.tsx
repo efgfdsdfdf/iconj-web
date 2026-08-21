@@ -13,13 +13,13 @@ export default async function AdminProductsPage() {
   const { data: products } = await supabase.from("products").select("*").order("created_at", { ascending: false });
 
   return (
-    <main className="flex-1 p-8">
-      <div className="flex justify-between items-center mb-8">
+    <main className="flex-1 p-4 md:p-8 min-h-[calc(100vh-130px)] overflow-x-hidden">
+      <div className="flex flex-col md:flex-row justify-between md:items-center gap-4 mb-8">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Products</h1>
           <p className="text-sm text-slate-500">Manage your catalog directly from the database.</p>
         </div>
-        <Link href="/admin/products/new">
+        <Link href="/admin/products/new" className="self-start md:self-auto">
           <Button className="bg-blue-600 hover:bg-blue-700">Add New Product</Button>
         </Link>
       </div>

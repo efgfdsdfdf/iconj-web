@@ -24,3 +24,27 @@ export async function updateProduct(productId: string, data: any) {
   return { success: true };
 }
 
+
+export async function createProduct(data: any) {
+  const { error } = await supabaseAdmin.from("products").insert([data]);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/products");
+  revalidatePath("/shop");
+  return { success: true };
+}
+
+
+export async function uploadProductImage(formData: FormData) {
+  const file = formData.get("file") as File;
+  if (!file) throw new Error("No file provided");
+  
+  const fileExt = file.name.split(".").pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+  
+  const { error } = await supabaseAdmin.storage.from("product-images").upload(fileName, file);
+  if (error) throw new Error(error.message);
+  
+  const { data } = supabaseAdmin.storage.from("product-images").getPublicUrl(fileName);
+  return { success: true, url: data.publicUrl };
+}
+
