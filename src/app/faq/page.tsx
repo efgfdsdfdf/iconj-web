@@ -8,7 +8,7 @@ const FAQ_DATA = [
   {
     category: "Orders",
     items: [
-      { q: "How do I place an order?", a: "Simply browse our categories, customize your required dimensions (where applicable), add the item to your cart, and proceed to checkout securely via Paystack." },
+      { q: "How do I place an order?", a: "Simply browse our categories, select your preferred sizes, colors, and variants, add the item to your cart, and proceed to checkout securely via Paystack." },
       { q: "Can I modify my order?", a: "Once an order is placed, it is immediately processed to the factory. However, if you contact us within 12 hours of placing the order, we may be able to make modifications." },
       { q: "How do I know if my order was confirmed?", a: "You will receive an email confirmation, and the order will appear in your Account Dashboard under 'My Orders'." }
     ]
@@ -26,7 +26,7 @@ const FAQ_DATA = [
     items: [
       { q: "How do I report a damaged product?", a: "Use our 'Report an Issue' form located in the footer or in your account dashboard. Provide clear photos of the damage and packaging." },
       { q: "How do replacements work?", a: "Our supplier guarantees that if an item is damaged or missing parts, they will either resend the parts or remake the item entirely based on the situation." },
-      { q: "Can customized products be returned?", a: "Because custom sizes are made specifically for you, they cannot be returned for measurement errors. They are only eligible for replacement if defective or damaged." }
+      { q: "Can customized products be returned?", a: "For hygiene and safety reasons, certain baby products cannot be returned if they have been opened or used, unless they arrived defective. They are only eligible for replacement if defective or damaged." }
     ]
   }
 ];
@@ -113,3 +113,4 @@ export default function FAQPage() {
     </div>
   );
 }
+

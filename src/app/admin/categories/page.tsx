@@ -24,9 +24,9 @@ export default async function AdminCategories() {
   }
 
   const initialCategories = settings?.value || [
-    {"name": "Smart Motorized Blinds", "icon": "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80"},
-    {"name": "Blackout Shades", "icon": "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80"},
-    {"name": "Curtain Tracks", "icon": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80"}
+    {"name": "Newborn Essentials", "icon": "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80"},
+    {"name": "Baby Feeding", "icon": "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80"},
+    {"name": "Baby Care & Bath", "icon": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80"}
   ];
 
   return (
@@ -40,4 +40,5 @@ export default async function AdminCategories() {
     </div>
   );
 }
+
 

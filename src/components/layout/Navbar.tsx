@@ -80,14 +80,14 @@ export function Navbar() {
     <div className="w-full">
       {/* Top Utility Bar (Jumia Style) */}
       <div className="bg-slate-100 hidden md:block border-b">
-        <div className="container mx-auto px-4 h-8 flex items-center justify-between text-[11px] text-slate-600 font-medium">
-          <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 h-9 flex items-center justify-between">
+          <div className="flex gap-4 text-[11px] text-slate-600 font-medium">
             <Link href="#" className="hover:text-blue-600 flex items-center gap-1"><Phone className="w-3 h-3"/> Call to Order: 0800 ICONJ HELP</Link>
+            <Link href="/faq" className="hover:text-blue-600 flex items-center gap-1"><HelpCircle className="w-3 h-3"/> Help & Support</Link>
           </div>
-          <div className="flex items-center gap-4">
-            <Link href="#" className="hover:text-blue-600 flex items-center gap-1"><HelpCircle className="w-3 h-3"/> Help & Support</Link>
-            <Link href="#" className="hover:text-blue-600">Track Order</Link>
-            <Link href="/quote" className="hover:text-blue-600 text-blue-700 font-bold">Request Custom Quote</Link>
+          <div className="flex gap-4 text-[11px] text-slate-600 font-medium">
+            <Link href="/track" className="hover:text-blue-600">Track Order</Link>
+            <Link href="/shop?bundle=true" className="hover:text-rose-600 text-rose-500 font-bold">Shop Gift Bundles</Link>
           </div>
         </div>
       </div>
@@ -178,11 +178,11 @@ export function Navbar() {
             <Menu className="w-5 h-5" /> All Categories
           </button>
           <div className="w-px h-6 bg-slate-600"></div>
-          <Link href="/shop" className="hover:text-orange-400 transition-colors">Smart Motorized Blinds</Link>
-          <Link href="/shop" className="hover:text-orange-400 transition-colors">Blackout Shades</Link>
-          <Link href="/shop" className="hover:text-orange-400 transition-colors">Curtain Tracks</Link>
-          <Link href="/shop" className="hover:text-orange-400 transition-colors">Honeycomb Blinds</Link>
-          <Link href="/shop" className="hover:text-orange-400 transition-colors">Outdoor Shading</Link>
+          <Link href="/shop" className="hover:text-orange-400 transition-colors">Newborn Essentials</Link>
+          <Link href="/shop" className="hover:text-orange-400 transition-colors">Baby Feeding</Link>
+          <Link href="/shop" className="hover:text-orange-400 transition-colors">Baby Care & Bath</Link>
+          <Link href="/shop" className="hover:text-orange-400 transition-colors">Toys & Development</Link>
+          <Link href="/shop" className="hover:text-orange-400 transition-colors">Maternity</Link>
         </div>
       </nav>
 
@@ -221,10 +221,10 @@ export function Navbar() {
               <Link href="/contact" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Contact Us</Link>
               
               <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Our Categories</p>
-              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Smart Motorized Blinds</Link>
-              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Blackout Shades</Link>
-              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Curtain Tracks</Link>
-              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Outdoor Shading</Link>
+              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Newborn Essentials</Link>
+              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Baby Feeding</Link>
+              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Baby Care & Bath</Link>
+              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Maternity</Link>
               
               <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">My Account</p>
               <Link href="/account" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Dashboard</Link>
@@ -243,3 +243,4 @@ export function Navbar() {
     </div>
   );
 }
+

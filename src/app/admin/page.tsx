@@ -160,7 +160,7 @@ export default async function AdminDashboardPage() {
                 <>
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-medium">
-                      <span className="text-slate-600">Smart Motorized Blinds</span>
+                      <span className="text-slate-600">Newborn Starter Kit</span>
                       <span className="text-slate-900">65%</span>
                     </div>
                     <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -169,7 +169,7 @@ export default async function AdminDashboardPage() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs font-medium">
-                      <span className="text-slate-600">Blackout Shades</span>
+                      <span className="text-slate-600">Premium Baby Monitor</span>
                       <span className="text-slate-900">25%</span>
                     </div>
                     <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
@@ -189,3 +189,4 @@ export default async function AdminDashboardPage() {
     </main>
   );
 }
+

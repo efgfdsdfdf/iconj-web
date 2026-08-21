@@ -22,7 +22,7 @@ export default function QuotePage() {
             <div className="space-y-2">
               <Label>Product Interest</Label>
               <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                <option>Smart Motorized Blinds</option>
+                <option>Baby Shower Gift Bundle</option>
                 <option>Blackout Blinds</option>
                 <option>Smart Curtain Track System</option>
                 <option>Custom / Large Project</option>
@@ -73,3 +73,4 @@ export default function QuotePage() {
     </div>
   );
 }
+

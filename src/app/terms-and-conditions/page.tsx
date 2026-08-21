@@ -28,7 +28,7 @@ export default function TermsPage() {
             <h2 className="text-xl font-bold text-slate-900 mb-4">2. Products & Pricing</h2>
             <ul className="list-disc pl-5 space-y-2">
               <li><strong>Product Information:</strong> We strive to display product colors and configurations accurately, but we cannot guarantee that your device's display will accurately reflect the real color of the products.</li>
-              <li><strong>Custom Configurations:</strong> Many of our products (such as motorized blinds) are custom-made to your specific dimensions. It is your responsibility to ensure all measurements provided during checkout are accurate.</li>
+              <li><strong>Custom Configurations:</strong> Many of our products (such as nursery bundles\) are custom-made to your specific dimensions. It is your responsibility to ensure all sizes and options selected during checkout are accurate.</li>
               <li><strong>Pricing:</strong> All prices are in Naira (?) unless stated otherwise. Product availability and final pricing for "Request a Quote" items are subject to supplier confirmation.</li>
             </ul>
           </section>
@@ -65,4 +65,5 @@ export default function TermsPage() {
     </div>
   );
 }
+
 

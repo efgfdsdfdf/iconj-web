@@ -7,8 +7,8 @@ import { Footer } from "@/components/layout/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ICONJ | Premium Dropshipping Platform",
-  description: "Premium window coverings, motorized blinds, and smart curtains delivered direct to your location in Nigeria.",
+  title: "ICONJ — Premium Mother & Baby Essentials in Nigeria",
+  description: "Premium mother and baby essentials, maternity care, and nursery products thoughtfully chosen for you and your baby. Delivered across Nigeria.",
   appleWebApp: {
     capable: true,
     title: "ICONJ",

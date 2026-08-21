@@ -7,7 +7,7 @@ export function Footer() {
         <div>
           <h3 className="font-bold text-lg text-blue-700 mb-4">ICONJ</h3>
           <p className="text-sm">
-            Premium prefabricated container solutions and dropshipping e-commerce platform. Delivered direct to your location in Nigeria.
+            Premium mother & baby essentials, maternity care, and nursery products thoughtfully chosen for you. Delivered across Nigeria.
           </p>
         </div>
         <div>

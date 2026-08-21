@@ -22,7 +22,7 @@ export default function ReturnsPage() {
           
           <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r">
             <p className="font-bold text-slate-900">Important Notice Regarding Custom Products</p>
-            <p className="text-sm mt-1">Many ICONJ products (like motorized blinds) are custom-configured and cut to your exact measurements. Because these items are uniquely manufactured for you, they cannot be returned simply for a "change of mind" or measurement errors made by the customer.</p>
+            <p className="text-sm mt-1">Many ICONJ products (like curated bundles or specific hygiene products\) are uniquely packaged or subject to hygiene laws. Because these items are uniquely manufactured for you, they cannot be returned simply for a "change of mind" or incorrect sizes ordered by the customer.</p>
           </div>
 
           <section>
@@ -33,7 +33,7 @@ export default function ReturnsPage() {
               <li>You received the wrong product or incorrect color.</li>
               <li>The item is defective or malfunctioning out of the box.</li>
               <li>Missing components or parts.</li>
-              <li>The configuration does not match what you explicitly ordered.</li>
+              <li>The product size, color, or variant does not match what you explicitly ordered.</li>
             </ul>
           </section>
 
@@ -43,7 +43,7 @@ export default function ReturnsPage() {
             <blockquote className="border-l-4 border-slate-300 pl-4 italic my-4 text-slate-600 bg-slate-50 py-2 pr-2">
               "We will resend the parts or remake the item, depending on the specific situation."
             </blockquote>
-            <p>If a component is missing or damaged (e.g., a broken bracket or missing remote), we will expedite the shipping of a replacement part. If the entire unit is defective or manufactured incorrectly, the item will be remade at no cost to you.</p>
+            <p>If a component is missing or damaged \(e.g., a broken bottle cap or missing toy part\), we will expedite the shipping of a replacement part. If the entire unit is defective or manufactured incorrectly, the item will be remade at no cost to you.</p>
           </section>
 
           <section>
@@ -90,4 +90,5 @@ export default function ReturnsPage() {
     </div>
   );
 }
+
 

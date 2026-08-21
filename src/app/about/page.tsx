@@ -18,7 +18,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Our Mission</h2>
             <p className="text-slate-600 leading-relaxed text-lg">
-              At ICONJ, we recognized the growing demand for modern, smart, and durable window coverings in Nigeria. Our mission is to eliminate the complexity of sourcing high-quality smart blinds, blackout shades, and custom curtains by providing a streamlined, secure e-commerce dropshipping platform connected directly to top manufacturers.
+              At ICONJ, we recognized the growing demand for premium, safe, and modern mother and baby essentials in Nigeria. Our mission is to eliminate the complexity of sourcing high-quality newborn essentials, maternity care, and baby safety products by providing a streamlined, secure e-commerce dropshipping platform connected directly to top manufacturers.
             </p>
           </div>
 
@@ -57,3 +57,4 @@ export default function AboutPage() {
     </div>
   );
 }
+

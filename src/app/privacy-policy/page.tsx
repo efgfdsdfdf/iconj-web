@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-bold text-slate-900 mb-4">2. Information We Collect</h2>
             <ul className="list-disc pl-5 space-y-2">
               <li><strong>Account Information:</strong> Name, email address, phone number, and delivery address when you create an account.</li>
-              <li><strong>Order & Delivery Information:</strong> Specific dimensions, window configurations, and delivery instructions required to fulfill your custom orders.</li>
+              <li><strong>Order & Delivery Information:</strong> Specific preferences, baby ages/sizes, and delivery instructions required to fulfill your custom orders.</li>
               <li><strong>Payment Information:</strong> We do NOT store your credit/debit card details. All payments are securely processed by Paystack. We only receive verification that your payment was successful.</li>
             </ul>
           </section>
@@ -40,7 +40,7 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-bold text-slate-900 mb-4">3. How We Use Information</h2>
             <p>We use your information primarily to:</p>
             <ul className="list-disc pl-5 space-y-2 mt-2">
-              <li>Process and deliver your orders (including communicating custom configurations to our suppliers).</li>
+              <li>Process and deliver your orders (including communicating product variants and sizing to our suppliers).</li>
               <li>Manage your account and order history.</li>
               <li>Provide customer support and resolve order issues.</li>
               <li>Send you essential updates regarding your shipment or quotes.</li>
@@ -88,4 +88,5 @@ export default function PrivacyPolicyPage() {
     </div>
   );
 }
+
 

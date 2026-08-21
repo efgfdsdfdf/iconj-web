@@ -39,10 +39,12 @@ export default async function ShopPage() {
                 <div>
                   <h3 className="font-bold text-slate-900 mb-3 pb-2 border-b">Category</h3>
                   <div className="space-y-2 text-sm text-slate-600">
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-orange-500"><input type="checkbox" className="rounded" /> Smart Motorized Blinds</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-orange-500"><input type="checkbox" className="rounded" /> Blackout Shades</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-orange-500"><input type="checkbox" className="rounded" /> Curtain Tracks</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-orange-500"><input type="checkbox" className="rounded" /> Honeycomb Cellular</label>
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Newborn Essentials</label>
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Baby Feeding</label>
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Baby Care & Bath</label>
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Baby Safety</label>
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Maternity</label>
+                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Gifts & Bundles</label>
                   </div>
                 </div>
 
