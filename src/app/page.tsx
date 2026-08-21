@@ -62,11 +62,11 @@ export default async function HomePage() {
           </Card>
 
           {/* Main Hero Slider */}
-          <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm h-[200px] sm:h-[300px] lg:h-full group bg-slate-900">
-            <img src="https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?q=80&w=2000" alt="Premium Smart Blinds" className="w-full h-full object-cover opacity-60" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+          <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm min-h-[350px] sm:min-h-[400px] lg:h-full group bg-slate-900">
+            <img src="https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?q=80&w=2000" alt="Premium Smart Blinds" className="w-full h-full object-cover opacity-60 absolute inset-0" />
+            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center text-center p-6">
               <span className="bg-orange-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-sm mb-4">Official Store</span>
-              <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg">Automate Your Home.<br/>Elevate Your Style.</h1>
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg leading-tight">Automate Your Home.<br/>Elevate Your Style.</h1>
               <p className="text-white/90 text-sm md:text-lg mb-8 max-w-lg font-medium drop-shadow-md">Premium motorized and manual window coverings shipped directly from manufacturer to your door in Nigeria.</p>
               <Link href="/shop"><Button size="lg" className="bg-orange-500 hover:bg-orange-600 text-white font-bold px-8 h-12 shadow-lg border-none text-base">SHOP NOW</Button></Link>
             </div>
