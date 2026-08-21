@@ -2,16 +2,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WalletCards, ShoppingBag, Users, Truck, TrendingUp, AlertTriangle, ArrowUpRight, Package, MoreHorizontal } from "lucide-react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
 
 export const revalidate = 0;
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient();
+  const supabase = await createServerClient();
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   
   // Fetch real metrics
   const { count: productCount } = await supabase.from("products").select("*", { count: "exact", head: true });
-  const { count: userCount } = await supabase.from("profiles").select("*", { count: "exact", head: true });
+  const { count: userCount } = await supabaseAdmin.from("profiles").select("*", { count: "exact", head: true });
   const { data: orders } = await supabase.from("orders").select("*").order("created_at", { ascending: false }).limit(5);
   
   // Calculate real revenue from all orders
@@ -189,4 +191,5 @@ export default async function AdminDashboardPage() {
     </main>
   );
 }
+
 
