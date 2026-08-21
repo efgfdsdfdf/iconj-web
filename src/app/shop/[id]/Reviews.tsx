@@ -136,4 +136,3 @@ export function Reviews({ productId, initialReviews = [] }: { productId: string,
     </div>
   );
 }
-"
