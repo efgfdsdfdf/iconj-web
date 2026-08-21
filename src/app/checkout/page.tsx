@@ -41,17 +41,20 @@ export default function CheckoutPage() {
               firstName: profile.name ? profile.name.split(' ')[0] : "",
               lastName: profile.name ? profile.name.split(' ').slice(1).join(' ') : ""
             }));
-
-            if (profile.address_street) {
-              setSavedAddress({
-                street: profile.address_street,
-                city: profile.address_city,
-                state: profile.address_state
-              });
-              setUseSavedAddress(true);
-            }
           } else {
              setFormData(prev => ({ ...prev, email: data.user?.email || "" }));
+          }
+        });
+
+        supabase.from("addresses").select("*").eq("user_id", data.user.id).order("is_default", { ascending: false }).limit(1).then(({ data: addresses }) => {
+          if (addresses && addresses.length > 0) {
+            const addr = addresses[0];
+            setSavedAddress({
+              street: addr.street,
+              city: addr.city,
+              state: addr.state
+            });
+            setUseSavedAddress(true);
           }
         });
       }

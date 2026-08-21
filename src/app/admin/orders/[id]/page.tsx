@@ -1,10 +1,11 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Package, User, Clock, ChevronLeft } from "lucide-react";
+import { MapPin, Package, User, Clock, ChevronLeft, Truck } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SendToSupplierButton } from "./SendToSupplierButton";
+import { UpdateTrackingForm } from "./UpdateTrackingForm";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
@@ -102,6 +103,14 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                 <span className="text-slate-500">Fulfillment</span>
                 <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-700">{order.order_status}</span>
               </div>
+            </CardContent>
+          </Card>
+          <Card className="border-none shadow-sm mt-6">
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="text-lg flex items-center"><Truck className="w-4 h-4 mr-2" /> Tracking Update</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <UpdateTrackingForm order={order} />
             </CardContent>
           </Card>
         </div>
