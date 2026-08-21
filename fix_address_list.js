@@ -1,4 +1,5 @@
-"use client";
+const fs = require('fs');
+let code = \"use client";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ export function AddressList({ addresses }: { addresses: any[] }) {
   return (
     <div className="space-y-4">
       {addresses.map((address) => (
-        <Card key={address.id} className={`relative overflow-hidden ${address.is_default ? 'border-orange-500 ring-1 ring-orange-500 shadow-md' : 'border-slate-200'}`}>
+        <Card key={address.id} className={\\\elative overflow-hidden \\\\\\}>
           {address.is_default && (
             <div className="absolute top-0 right-0 bg-orange-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">
               Default
@@ -50,13 +51,13 @@ export function AddressList({ addresses }: { addresses: any[] }) {
                   size="sm" 
                   className="text-xs"
                   onClick={async () => {
-                    setLoading(`default-${address.id}`);
+                    setLoading(\\\default-\\\\\\);
                     await setDefaultAddress(address.id);
                     setLoading(null);
                   }}
                   disabled={loading !== null}
                 >
-                  {loading === `default-${address.id}` ? 'Saving...' : 'Set Default'}
+                  {loading === \\\default-\\\\\\ ? 'Saving...' : 'Set Default'}
                 </Button>
               )}
               <Button 
@@ -65,7 +66,7 @@ export function AddressList({ addresses }: { addresses: any[] }) {
                 className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
                 onClick={async () => {
                   if(confirm('Are you sure you want to delete this address?')) {
-                    setLoading(`delete-${address.id}`);
+                    setLoading(\\\delete-\\\\\\);
                     await deleteAddress(address.id);
                     setLoading(null);
                   }
@@ -81,3 +82,6 @@ export function AddressList({ addresses }: { addresses: any[] }) {
     </div>
   );
 }
+\;
+
+fs.writeFileSync('src/app/account/addresses/AddressList.tsx', code, 'utf8');
