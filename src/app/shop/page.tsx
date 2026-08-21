@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ChevronRight, Filter, SlidersHorizontal, ChevronDown, Star } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { ProductCard } from "@/components/product/ProductCard";
 
 export const revalidate = 0;
 
@@ -79,28 +80,10 @@ export default async function ShopPage() {
 
               <CardContent className="p-2 sm:p-4">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
-                  {products?.map((product: any) => (
-                    <Link href={`/shop/${product.id}`} key={product.id} className="group flex flex-col h-full bg-white rounded-md hover:shadow-lg transition-all p-2 border border-slate-100 hover:border-slate-300">
-                      <div className="aspect-square bg-slate-50 rounded mb-3 relative overflow-hidden">
-                        <img src={product.images?.[0] || getProductImage(product.category)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        <span className="absolute top-2 right-2 bg-orange-100 text-orange-600 text-[10px] font-bold px-1.5 py-0.5 rounded">-15%</span>
-                      </div>
-                      <h3 className="font-medium text-xs sm:text-sm text-slate-700 line-clamp-2 leading-tight mb-1 group-hover:text-orange-500">{product.name}</h3>
-                      <div className="flex items-center gap-1 mb-2">
-                        <div className="flex text-amber-400">
-                          <Star className="w-3 h-3 fill-current"/><Star className="w-3 h-3 fill-current"/><Star className="w-3 h-3 fill-current"/><Star className="w-3 h-3 fill-current"/><Star className="w-3 h-3 fill-current text-slate-200"/>
-                        </div>
-                        <span className="text-[10px] text-slate-400">(24)</span>
-                      </div>
-                      <div className="mt-auto pt-1">
-                        <span className="text-sm sm:text-lg font-bold text-slate-900 block">₦{Number(product.base_selling_price).toLocaleString()}</span>
-                        <span className="text-[10px] sm:text-xs text-slate-400 line-through">₦{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
-                      </div>
-                      <div className="mt-3 w-full bg-blue-600 text-white text-center py-1.5 text-xs font-bold rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
-                        Add To Cart
-                      </div>
-                    </Link>
-                  ))}
+                  {products?.map((product: any) => {
+                    const p = { ...product, images: product.images || [getProductImage(product.category)] };
+                    return <ProductCard key={product.id} product={p} />;
+                  })}
                   
                   {(!products || products.length === 0) && (
                     <div className="col-span-full py-12 text-center text-slate-500">

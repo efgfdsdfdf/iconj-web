@@ -4,6 +4,8 @@ import { ChevronRight, ShieldCheck, Truck, Clock, CreditCard, Star, ChevronDown,
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
+import { ProductCard } from "@/components/product/ProductCard";
+
 export const revalidate = 0;
 
 export default async function HomePage() {
@@ -17,26 +19,42 @@ export default async function HomePage() {
     return "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&q=80";
   };
 
+  const categories = [
+    { name: "Motorized Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
+    { name: "Blackout Shades", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80" },
+    { name: "Curtain Tracks", icon: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" },
+    { name: "Honeycomb", icon: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80" },
+    { name: "Outdoor Patio", icon: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=80" },
+    { name: "Custom Sizes", icon: "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=200&q=80" },
+  ];
+
   return (
     <div className="bg-slate-50 min-h-screen pb-12">
-      {/* QUICK CATEGORIES (Mobile Horizontal Scroll) */}
-      <section className="container mx-auto px-4 mb-8">
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes scroll-infinite {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-scroll-infinite {
+          animation: scroll-infinite 20s linear infinite;
+          width: max-content;
+        }
+        .animate-scroll-infinite:hover, .animate-scroll-infinite:active {
+          animation-play-state: paused;
+        }
+      `}} />
+      
+      {/* QUICK CATEGORIES (Auto Horizontal Scroll) */}
+      <section className="container mx-auto px-4 mb-8 pt-4 overflow-hidden">
         <Card className="border-none shadow-sm rounded-lg overflow-hidden">
-          <CardContent className="p-4">
-            <div className="flex overflow-x-auto gap-4 md:gap-8 pb-2 snap-x no-scrollbar">
-              {[
-                { name: "Motorized Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
-                { name: "Blackout Shades", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80" },
-                { name: "Curtain Tracks", icon: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" },
-                { name: "Honeycomb", icon: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80" },
-                { name: "Outdoor Patio", icon: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=200&q=80" },
-                { name: "Custom Sizes", icon: "https://images.unsplash.com/photo-1600607688969-a5bfcd64bd40?w=200&q=80" },
-              ].map((cat, i) => (
-                <Link href="/shop" key={i} className="flex flex-col items-center gap-2 min-w-[80px] snap-center group">
+          <CardContent className="p-4 overflow-hidden relative">
+            <div className="flex gap-4 md:gap-8 animate-scroll-infinite pb-2">
+              {[...categories, ...categories, ...categories].map((cat, i) => (
+                <Link href="/shop" key={i} className="flex flex-col items-center gap-2 w-[80px] shrink-0 group">
                   <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-transparent group-hover:border-orange-500 transition-colors p-1 bg-slate-50">
                     <img src={cat.icon} alt={cat.name} className="w-full h-full rounded-full object-cover" />
                   </div>
-                  <span className="text-xs text-center font-medium text-slate-700">{cat.name}</span>
+                  <span className="text-xs text-center font-medium text-slate-700 whitespace-normal line-clamp-2 leading-tight">{cat.name}</span>
                 </Link>
               ))}
             </div>
@@ -45,7 +63,7 @@ export default async function HomePage() {
       </section>
 
       {/* JUMIA STYLE HERO SECTION */}
-      <section className="container mx-auto px-4 pt-4 lg:pt-6 mb-8">
+      <section className="container mx-auto px-4 lg:pt-2 mb-8">
         <div className="flex flex-col lg:flex-row gap-4 h-auto lg:h-[400px]">
           
           {/* Left Sidebar (Desktop Only) */}
@@ -97,20 +115,11 @@ export default async function HomePage() {
           </div>
           <CardContent className="p-4">
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {products?.map((product: any, idx: number) => (
-                <Link href={`/shop/${product.id}`} key={product.id} className={`group flex flex-col h-full bg-white rounded hover:shadow-lg transition-shadow p-2 border border-transparent hover:border-slate-200 ${idx === 4 ? 'hidden lg:flex' : ''}`}>
-                  <div className="aspect-square bg-slate-100 rounded mb-3 relative overflow-hidden">
-                    <img src={product.images?.[0] || getProductImage(product.category)} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    {/* Fake discount badge for visual realism */}
-                    <span className="absolute top-2 right-2 bg-orange-100 text-orange-600 text-[10px] font-bold px-1.5 py-0.5 rounded">-15%</span>
-                  </div>
-                  <h3 className="font-medium text-sm text-slate-700 line-clamp-2 leading-tight mb-2 group-hover:text-orange-500">{product.name}</h3>
-                  <div className="mt-auto">
-                    <span className="text-base font-bold text-slate-900 block">₦{Number(product.base_selling_price).toLocaleString()}</span>
-                    <span className="text-xs text-slate-400 line-through">₦{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
-                  </div>
-                </Link>
-              ))}
+              {products?.map((product: any, idx: number) => {
+                // Attach fallback image if missing
+                const p = { ...product, images: product.images || [getProductImage(product.category)] };
+                return <ProductCard key={product.id} product={p} hideOnLg={idx === 4} />;
+              })}
             </div>
           </CardContent>
         </Card>

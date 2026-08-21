@@ -2,6 +2,8 @@ import { ChevronRight, Check, Star, Truck, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductDetailsClient } from "./ProductDetailsClient";
+import { Reviews } from "./Reviews";
+import { ProductCard } from "@/components/product/ProductCard";
 
 export const revalidate = 0;
 
@@ -14,6 +16,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     .select("*")
     .eq("id", id)
     .single();
+
+  const { data: recommended } = await supabase
+    .from("products")
+    .select("*")
+    .neq("id", id)
+    .limit(5);
 
   if (error || !product) {
     return (
@@ -120,6 +128,28 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             </div>
           </div>
         </div>
+
+        {/* Reviews Section */}
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Reviews />
+          </div>
+        </div>
+
+        {/* Recommended Products */}
+        <div className="mt-16 mb-8 border-t pt-8">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-slate-900">You Might Also Like</h2>
+            <Link href="/shop" className="text-blue-600 hover:underline text-sm font-medium">View All</Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {recommended?.map((rec: any, idx: number) => {
+              const p = { ...rec, images: rec.images || [getProductImage(rec.category)] };
+              return <ProductCard key={rec.id} product={p} hideOnLg={idx === 4} />;
+            })}
+          </div>
+        </div>
+
       </div>
     </div>
   );
