@@ -53,7 +53,7 @@ export default function CartPage() {
                           </div>
                         )}
                       </div>
-                      <p className="font-bold text-lg text-slate-900 whitespace-nowrap">?{(item.price * item.quantity).toLocaleString()}</p>
+                      <p className="font-bold text-lg text-slate-900 whitespace-nowrap">₦{(item.price * item.quantity).toLocaleString()}</p>
                     </div>
 
                     <div className="flex items-center justify-between mt-6 pt-4 border-t">
@@ -80,7 +80,7 @@ export default function CartPage() {
                 <div className="space-y-3 text-sm text-slate-600 pb-4 border-b">
                   <div className="flex justify-between">
                     <span>Subtotal ({items.reduce((acc, i) => acc + i.quantity, 0)} items)</span>
-                    <span className="font-medium text-slate-900">?{getTotalPrice().toLocaleString()}</span>
+                    <span className="font-medium text-slate-900">₦{getTotalPrice().toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
@@ -89,7 +89,7 @@ export default function CartPage() {
                 </div>
                 <div className="flex justify-between items-center py-4 text-lg font-bold text-slate-900">
                   <span>Total</span>
-                  <span>?{getTotalPrice().toLocaleString()}</span>
+                  <span>₦{getTotalPrice().toLocaleString()}</span>
                 </div>
                 
                 <Button onClick={() => router.push("/checkout")} size="lg" className="w-full bg-blue-600 hover:bg-blue-700 mb-4 group">

@@ -190,7 +190,7 @@ export default function CheckoutPage() {
                         <p className="text-xs text-slate-500 truncate">Motor: {item.motorType}</p>
                         <div className="flex justify-between mt-1 items-center">
                           <span className="text-xs font-bold text-slate-700">Qty: {item.quantity}</span>
-                          <span className="text-sm font-bold text-slate-900">?{(item.price * item.quantity).toLocaleString()}</span>
+                          <span className="text-sm font-bold text-slate-900">₦{(item.price * item.quantity).toLocaleString()}</span>
                         </div>
                       </div>
                     </div>
@@ -200,15 +200,15 @@ export default function CheckoutPage() {
                 <div className="border-t pt-4 space-y-3 text-sm">
                   <div className="flex justify-between text-slate-600">
                     <span>Subtotal</span>
-                    <span className="font-medium text-slate-900">?{subtotal.toLocaleString()}</span>
+                    <span className="font-medium text-slate-900">₦{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-600">
                     <span>Shipping Fee</span>
-                    <span className="font-medium text-slate-900">?{shipping.toLocaleString()}</span>
+                    <span className="font-medium text-slate-900">₦{shipping.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-900 font-bold text-lg border-t pt-3">
                     <span>Total</span>
-                    <span className="text-orange-600">?{total.toLocaleString()}</span>
+                    <span className="text-orange-600">₦{total.toLocaleString()}</span>
                   </div>
                 </div>
 

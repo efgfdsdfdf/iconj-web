@@ -43,8 +43,8 @@ export default async function AdminProductsPage() {
                   <TableCell className="pl-6 font-medium">{product.name}</TableCell>
                   <TableCell className="text-xs text-slate-500">{product.sku}</TableCell>
                   <TableCell>{product.category}</TableCell>
-                  <TableCell>?{Number(product.base_supplier_cost).toLocaleString()}</TableCell>
-                  <TableCell className="font-bold text-slate-900">?{Number(product.base_selling_price).toLocaleString()}</TableCell>
+                  <TableCell>₦{Number(product.base_supplier_cost).toLocaleString()}</TableCell>
+                  <TableCell className="font-bold text-slate-900">₦{Number(product.base_selling_price).toLocaleString()}</TableCell>
                   <TableCell className="text-emerald-600 font-medium bg-emerald-50/50">
                     {Math.round(((product.base_selling_price - product.base_supplier_cost) / product.base_selling_price) * 100)}%
                   </TableCell>

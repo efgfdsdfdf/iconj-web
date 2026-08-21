@@ -90,8 +90,8 @@ export function ProductDetailsClient({ product, images }: { product: any, images
 
         <div className="mb-6 pb-6 border-b">
           <div className="flex items-end gap-3">
-            <span className="text-3xl md:text-4xl font-black text-slate-900">?{Number(product.base_selling_price).toLocaleString()}</span>
-            <span className="text-lg text-slate-400 line-through mb-1">?{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
+            <span className="text-3xl md:text-4xl font-black text-slate-900">₦{Number(product.base_selling_price).toLocaleString()}</span>
+            <span className="text-lg text-slate-400 line-through mb-1">₦{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
             <span className="bg-orange-100 text-orange-600 text-sm font-bold px-2 py-1 rounded mb-1.5 ml-2">-15%</span>
           </div>
           <p className="text-xs text-slate-500 mt-2">+ delivery charges depending on location</p>

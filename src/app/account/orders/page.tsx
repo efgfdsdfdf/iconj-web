@@ -38,7 +38,7 @@ export default function CustomerOrdersPage() {
 
               <div className="flex flex-row md:flex-col items-center md:items-end justify-between w-full md:w-auto gap-4">
                 <div className="text-left md:text-right">
-                  <p className="font-bold text-lg text-slate-900">?{order.total}</p>
+                  <p className="font-bold text-lg text-slate-900">₦{order.total}</p>
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${order.color} mt-1`}>
                     {order.status}
                   </span>

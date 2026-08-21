@@ -257,11 +257,11 @@ export default function AddProductPage() {
               <div className="bg-slate-50 p-4 rounded-lg space-y-2 text-sm border">
                 <div className="flex justify-between text-slate-500">
                   <span>Total Landed Cost:</span>
-                  <span>?{totalCost.toLocaleString()}</span>
+                  <span>₦{totalCost.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between font-bold text-emerald-600 border-t pt-2 mt-2">
                   <span>Your Profit/Sale:</span>
-                  <span>?{Math.max(0, calculatedSellingPrice - totalCost).toLocaleString()}</span>
+                  <span>₦{Math.max(0, calculatedSellingPrice - totalCost).toLocaleString()}</span>
                 </div>
               </div>
             </CardContent>

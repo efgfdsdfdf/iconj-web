@@ -62,7 +62,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold text-slate-900">?{Number(item.unit_price).toLocaleString()}</p>
+                      <p className="font-bold text-slate-900">₦{Number(item.unit_price).toLocaleString()}</p>
                       <p className="text-xs text-slate-500">Qty: {item.quantity}</p>
                     </div>
                   </div>

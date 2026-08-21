@@ -93,8 +93,8 @@ export default async function ShopPage() {
                         <span className="text-[10px] text-slate-400">(24)</span>
                       </div>
                       <div className="mt-auto pt-1">
-                        <span className="text-sm sm:text-lg font-bold text-slate-900 block">?{Number(product.base_selling_price).toLocaleString()}</span>
-                        <span className="text-[10px] sm:text-xs text-slate-400 line-through">?{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
+                        <span className="text-sm sm:text-lg font-bold text-slate-900 block">₦{Number(product.base_selling_price).toLocaleString()}</span>
+                        <span className="text-[10px] sm:text-xs text-slate-400 line-through">₦{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
                       </div>
                       <div className="mt-3 w-full bg-blue-600 text-white text-center py-1.5 text-xs font-bold rounded uppercase opacity-0 group-hover:opacity-100 transition-opacity hidden lg:block">
                         Add To Cart
