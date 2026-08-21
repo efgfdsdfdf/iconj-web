@@ -22,6 +22,16 @@ export async function POST(request: Request) {
     // Create a server Supabase client using Service Role to bypass RLS
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
+    // If the user checked out with a new address and they are logged in, save it to their profile
+    if (body.saveAddress && userId) {
+      await supabaseAdmin.from('profiles').update({
+        address_street: body.address?.street,
+        address_city: body.address?.city,
+        address_state: body.address?.state,
+        phone: body.phone
+      }).eq('id', userId);
+    }
+
     // 2. Save the pending order to the database
     const { data: orderData, error: orderError } = await supabaseAdmin.from("orders").insert([{
       user_id: userId || null,
