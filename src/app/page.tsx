@@ -36,8 +36,13 @@ export default async function HomePage() {
           100% { transform: translateX(-50%); }
         }
         .animate-scroll-infinite {
-          animation: scroll-infinite 20s linear infinite;
+          animation: scroll-infinite 10s linear infinite;
           width: max-content;
+        }
+        @media (min-width: 768px) {
+          .animate-scroll-infinite {
+            animation: scroll-infinite 20s linear infinite;
+          }
         }
         .animate-scroll-infinite:hover, .animate-scroll-infinite:active {
           animation-play-state: paused;
