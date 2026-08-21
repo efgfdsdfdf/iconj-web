@@ -54,7 +54,10 @@ export async function POST(request: Request) {
       unit_price: item.price,
       configuration: item
     }));
-    await supabaseAdmin.from("order_items").insert(orderItems);
+    const { error: itemsError } = await supabaseAdmin.from("order_items").insert(orderItems);
+    if (itemsError) {
+      console.error("Order items insert error:", itemsError);
+    }
     
     // Paystack expects amount in kobo (multiply Naira by 100)
     const amountInKobo = totalAmount * 100;

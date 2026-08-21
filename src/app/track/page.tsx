@@ -18,22 +18,32 @@ export default function TrackOrderPage() {
 
   const supabase = createClient();
 
+  const fetchOrder = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    setOrder(null);
+    try {
+      const res = await fetch(`/api/track?id=${encodeURIComponent(id.trim())}`);
+      const data = await res.json();
+      if (!res.ok || !data.order) {
+        throw new Error("We couldn't find an order with that ID. Please check and try again.");
+      }
+      setOrder(data.order);
+    } catch (err: any) {
+      setError(err.message || "Failed to find order.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const id = params.get("id");
     if (id) {
       setOrderId(id);
-      setLoading(true);
-      supabase.from("orders").select("*").eq("id", id).single().then(({ data, error }) => {
-        if (error || !data) {
-          setError("We couldn't find an order with that ID. Please check and try again.");
-        } else {
-          setOrder(data);
-        }
-        setLoading(false);
-      });
+      fetchOrder(id);
     }
-  }, [supabase]);
+  }, []);
 
   const handleTrack = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,30 +51,7 @@ export default function TrackOrderPage() {
       setError("Please enter an Order ID.");
       return;
     }
-    
-    setLoading(true);
-    setError(null);
-    setOrder(null);
-    
-    try {
-      const { data, error: fetchError } = await supabase
-        .from("orders")
-        .select(`*, items:order_items(*, product:products(name, images))`)
-        .eq("id", orderId.trim())
-        .single();
-        
-      if (fetchError || !data) {
-        throw new Error("Order not found. Please check your Order ID.");
-      }
-      
-      // Basic security check: if they provided an email, we could verify it against the profile or checkout email,
-      // but for this MVP, if they have the exact UUID, we show them the status.
-      setOrder(data);
-    } catch (err: any) {
-      setError(err.message || "Failed to find order.");
-    } finally {
-      setLoading(false);
-    }
+    fetchOrder(orderId);
   };
 
   const statusList = [
@@ -175,17 +162,17 @@ export default function TrackOrderPage() {
               <div>
                 <h4 className="font-bold text-slate-900 mb-4">Order Items</h4>
                 <div className="space-y-4">
-                  {order.items?.map((item: any, idx: number) => (
+                  {order.order_items?.map((item: any, idx: number) => (
                     <div key={idx} className="flex gap-4 p-4 border rounded-lg bg-slate-50/50">
                       <div className="w-16 h-16 bg-white rounded overflow-hidden shadow-sm">
-                        {item.product?.images?.[0] ? (
-                          <img src={item.product.images[0]} className="w-full h-full object-cover" />
+                        {item.products?.images?.[0] ? (
+                          <img src={item.products.images[0]} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-slate-300"><Package className="w-6 h-6"/></div>
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-sm text-slate-900">{item.product?.name || "Premium Baby Product"}</p>
+                        <p className="font-bold text-sm text-slate-900">{item.products?.name || "Premium Baby Product"}</p>
                         <p className="text-xs text-slate-500 mt-1">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-right">
