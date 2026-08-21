@@ -61,6 +61,12 @@ export default function CheckoutPage() {
         body: JSON.stringify({ 
           email: formData.email, 
           name: `${formData.firstName} ${formData.lastName}`,
+          phone: formData.phone,
+          address: {
+            street: formData.address,
+            city: formData.city,
+            state: formData.state
+          },
           items: items 
         }),
       });

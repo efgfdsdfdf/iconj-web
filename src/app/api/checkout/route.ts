@@ -10,10 +10,40 @@ export async function POST(request: Request) {
     }
 
     // 1. Calculate Total Price securely on the server
-    // (In production, you fetch the prices from Supabase using the item IDs to prevent frontend tampering)
     const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
     const shippingFee = 15000;
     const totalAmount = subtotal + shippingFee;
+    
+    // Rough estimate based on the 30% margin rule (Selling Price = Cost / 0.70)
+    const supplierCost = subtotal * 0.70;
+    const estimatedProfit = subtotal - supplierCost;
+
+    // Create a server Supabase client using Service Role to bypass RLS
+    const { createClient } = require("@supabase/supabase-js");
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+    // 2. Save the pending order to the database
+    const { data: orderData, error: orderError } = await supabaseAdmin.from("orders").insert([{
+      total_amount: totalAmount,
+      shipping_cost: shippingFee,
+      supplier_cost: supplierCost,
+      estimated_profit: estimatedProfit,
+      payment_status: "pending",
+      order_status: "pending_payment",
+      delivery_address: body.address || {},
+    }]).select().single();
+
+    if (orderError) throw new Error("Failed to create order: " + orderError.message);
+
+    // 3. Save Order Items
+    const orderItems = items.map((item: any) => ({
+      order_id: orderData.id,
+      product_id: item.id,
+      quantity: item.quantity,
+      unit_price: item.price,
+      configuration: item // store width, height, motor, etc here
+    }));
+    await supabaseAdmin.from("order_items").insert(orderItems);
     
     // Paystack expects amount in kobo (multiply Naira by 100)
     const amountInKobo = totalAmount * 100;
@@ -21,7 +51,7 @@ export async function POST(request: Request) {
     // Extract origin dynamically so it works seamlessly on localhost and Vercel
     const origin = new URL(request.url).origin;
 
-    // 2. Initialize Paystack Transaction
+    // 4. Initialize Paystack Transaction
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
@@ -34,8 +64,8 @@ export async function POST(request: Request) {
         callback_url: `${origin}/checkout/verify`,
         metadata: {
           custom_fields: [
-            { display_name: "Customer Name", variable_name: "customer_name", value: name },
-            { display_name: "Cart Items", variable_name: "cart_items", value: JSON.stringify(items) }
+            { display_name: "Order ID", variable_name: "order_id", value: orderData.id },
+            { display_name: "Customer Name", variable_name: "customer_name", value: name }
           ]
         }
       }),

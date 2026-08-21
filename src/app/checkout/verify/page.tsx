@@ -6,6 +6,7 @@ import { useCartStore } from "@/store/cartStore";
 import { CheckCircle2, Loader2, Home, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { verifyPaymentAndCompleteOrder } from "./actions";
 
 function VerifyContent() {
   const searchParams = useSearchParams();
@@ -21,14 +22,21 @@ function VerifyContent() {
       return;
     }
 
-    // In a production app, we would make a server-side call here to Paystack 
-    // to cryptographically verify the transaction using the Secret Key.
-    // For this MVP, if Paystack returned a reference, we assume success.
+    async function verify() {
+      try {
+        const res = await verifyPaymentAndCompleteOrder(reference as string);
+        if (res.success) {
+          clearCart();
+          setStatus("success");
+        } else {
+          setStatus("failed");
+        }
+      } catch (e) {
+        setStatus("failed");
+      }
+    }
     
-    setTimeout(() => {
-      clearCart();
-      setStatus("success");
-    }, 1500);
+    verify();
 
   }, [reference, clearCart]);
 
