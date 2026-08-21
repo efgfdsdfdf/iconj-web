@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 import { CheckCircle2, Loader2, Home, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export default function CheckoutVerifyPage() {
+function VerifyContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const reference = searchParams.get("reference");
@@ -33,54 +33,67 @@ export default function CheckoutVerifyPage() {
   }, [reference, clearCart]);
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-slate-50 p-4">
-      <div className="max-w-md w-full bg-white rounded-xl shadow-sm border p-8 text-center">
-        
-        {status === "loading" && (
-          <div className="flex flex-col items-center">
-            <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-4" />
-            <h1 className="text-2xl font-bold text-slate-900 mb-2">Verifying Payment...</h1>
-            <p className="text-slate-500">Please do not close this window.</p>
-          </div>
-        )}
+    <div className="max-w-md w-full bg-white rounded-xl shadow-sm border p-8 text-center">
+      
+      {status === "loading" && (
+        <div className="flex flex-col items-center">
+          <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-4" />
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Verifying Payment...</h1>
+          <p className="text-slate-500">Please do not close this window.</p>
+        </div>
+      )}
 
-        {status === "success" && (
-          <div className="flex flex-col items-center animate-in fade-in zoom-in duration-500">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
-              <CheckCircle2 className="w-12 h-12 text-emerald-600" />
-            </div>
-            <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Payment Successful!</h1>
-            <p className="text-slate-600 mb-2">Thank you for your order.</p>
-            <p className="text-sm font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded mb-8">Ref: {reference}</p>
-            
-            <div className="space-y-3 w-full">
-              <Link href="/account/orders" className="block w-full">
-                <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12">
-                  <Package className="w-4 h-4 mr-2" /> Track My Order
-                </Button>
-              </Link>
-              <Link href="/" className="block w-full">
-                <Button variant="outline" className="w-full h-12">
-                  <Home className="w-4 h-4 mr-2" /> Back to Home
-                </Button>
-              </Link>
-            </div>
+      {status === "success" && (
+        <div className="flex flex-col items-center animate-in fade-in zoom-in duration-500">
+          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-6">
+            <CheckCircle2 className="w-12 h-12 text-emerald-600" />
           </div>
-        )}
-
-        {status === "failed" && (
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-red-600 mb-2">Payment Verification Failed</h1>
-            <p className="text-slate-600 mb-6">We could not verify your payment reference.</p>
-            <Link href="/checkout" className="w-full">
-              <Button className="w-full">
-                Return to Checkout
+          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Payment Successful!</h1>
+          <p className="text-slate-600 mb-2">Thank you for your order.</p>
+          <p className="text-sm font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded mb-8">Ref: {reference}</p>
+          
+          <div className="space-y-3 w-full">
+            <Link href="/account/orders" className="block w-full">
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12">
+                <Package className="w-4 h-4 mr-2" /> Track My Order
+              </Button>
+            </Link>
+            <Link href="/" className="block w-full">
+              <Button variant="outline" className="w-full h-12">
+                <Home className="w-4 h-4 mr-2" /> Back to Home
               </Button>
             </Link>
           </div>
-        )}
+        </div>
+      )}
 
-      </div>
+      {status === "failed" && (
+        <div className="flex flex-col items-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-2">Payment Verification Failed</h1>
+          <p className="text-slate-600 mb-6">We could not verify your payment reference.</p>
+          <Link href="/checkout" className="w-full">
+            <Button className="w-full">
+              Return to Checkout
+            </Button>
+          </Link>
+        </div>
+      )}
+
+    </div>
+  );
+}
+
+export default function CheckoutVerifyPage() {
+  return (
+    <div className="min-h-[80vh] flex items-center justify-center bg-slate-50 p-4">
+      <Suspense fallback={
+        <div className="max-w-md w-full bg-white rounded-xl shadow-sm border p-8 text-center flex flex-col items-center">
+          <Loader2 className="w-16 h-16 text-blue-600 animate-spin mb-4" />
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Loading...</h1>
+        </div>
+      }>
+        <VerifyContent />
+      </Suspense>
     </div>
   );
 }
