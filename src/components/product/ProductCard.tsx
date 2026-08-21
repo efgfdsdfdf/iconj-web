@@ -55,14 +55,19 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
           <span className="text-[10px] uppercase font-bold text-slate-400 mb-1">{ageRange}</span>
         )}
         <h3 className="font-bold text-slate-900 text-sm mb-1 line-clamp-2 leading-tight">{product.name}</h3>
-        <div className="mt-auto pt-2 flex items-center justify-between">
-          <p className="font-black text-rose-600 text-sm md:text-base">?{product.base_selling_price?.toLocaleString() || "0"}</p>
-          <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-rose-50 hover:text-rose-600 rounded-full" onClick={handleAddToCart}>
-            <ShoppingCart className="w-4 h-4" />
+        <div className="mt-auto pt-2 flex flex-col gap-2">
+          <p className="font-black text-rose-600 text-sm md:text-base">₦{product.base_selling_price?.toLocaleString() || "0"}</p>
+          <Button 
+            className="w-full bg-slate-900 hover:bg-slate-800 text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5" 
+            onClick={handleAddToCart}
+          >
+            <ShoppingCart className="w-3.5 h-3.5" />
+            Add to Cart
           </Button>
         </div>
       </div>
     </Link>
   );
-}
 
+
+}

@@ -107,7 +107,7 @@ export default async function Home() {
             <Link href="/shop" className="text-white text-sm font-medium hover:underline flex items-center">See All <ChevronRight className="w-4 h-4"/></Link>
           </div>
           <CardContent className="p-4 md:px-8">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
               {products?.map((product: any, idx: number) => {
                 // Keep the placeholder images for now if they don't have real ones, but this logic assumes existing images
                 return <ProductCard key={product.id} product={product} hideOnLg={false} />;
