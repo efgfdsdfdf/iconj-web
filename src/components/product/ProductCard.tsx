@@ -28,7 +28,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
       href={`/shop/${product.id}`} 
       className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''}`}
     >
-      <div className="aspect-square bg-slate-100 rounded mb-3 relative overflow-hidden">
+      <div className="aspect-[4/5] bg-slate-100 rounded mb-3 relative overflow-hidden">
         <img 
           src={product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"} 
           alt={product.name} 
@@ -65,3 +65,4 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
     </Link>
   );
 }
+

@@ -81,7 +81,7 @@ export default async function ShopPage() {
               </div>
 
               <CardContent className="p-2 sm:p-4">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {products?.map((product: any) => {
                     const p = { ...product, images: product.images || [getProductImage(product.category)] };
                     return <ProductCard key={product.id} product={p} />;
@@ -102,3 +102,4 @@ export default async function ShopPage() {
     </div>
   );
 }
+

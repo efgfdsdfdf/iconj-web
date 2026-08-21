@@ -79,13 +79,13 @@ export function Navbar() {
   return (
     <div className="w-full">
       {/* Top Utility Bar (Jumia Style) */}
-      <div className="bg-slate-100 hidden md:block border-b">
+      <div className="bg-sky-100 hidden md:block border-b border-sky-200">
         <div className="container mx-auto px-4 h-9 flex items-center justify-between">
-          <div className="flex gap-4 text-[11px] text-slate-600 font-medium">
+          <div className="flex gap-4 text-[11px] text-sky-800 font-medium">
             <Link href="#" className="hover:text-blue-600 flex items-center gap-1"><Phone className="w-3 h-3"/> Call to Order: 0800 ICONJ HELP</Link>
             <Link href="/faq" className="hover:text-blue-600 flex items-center gap-1"><HelpCircle className="w-3 h-3"/> Help & Support</Link>
           </div>
-          <div className="flex gap-4 text-[11px] text-slate-600 font-medium">
+          <div className="flex gap-4 text-[11px] text-sky-800 font-medium">
             <Link href="/track" className="hover:text-blue-600">Track Order</Link>
             <Link href="/shop?bundle=true" className="hover:text-rose-600 text-rose-500 font-bold">Shop Gift Bundles</Link>
           </div>
@@ -106,7 +106,7 @@ export function Navbar() {
             <div onClick={handleAdminTap} className="bg-blue-600 text-white p-2 rounded-lg shadow-sm cursor-pointer select-none">
               <Package className="w-6 h-6" />
             </div>
-            <span className="font-extrabold text-2xl tracking-tight text-slate-900 hidden sm:block">ICONJ</span>
+            <span className="font-extrabold text-2xl tracking-tight text-slate-900 block">ICONJ</span>
           </Link>
 
           {/* Huge Search Bar (Jumia Style) */}
@@ -243,4 +243,5 @@ export function Navbar() {
     </div>
   );
 }
+
 
