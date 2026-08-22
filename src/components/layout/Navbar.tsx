@@ -46,6 +46,7 @@ export function Navbar() {
   const handleLogout = async () => {
     await fetch("/auth/signout", { method: "POST" });
     await supabase.auth.signOut();
+    useCartStore.getState().clearCart();
     setUserName(null);
     setUserEmail(null);
     router.push("/login");
