@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { notifyAdminNewUser } from "./actions";
+import { notifyAdminNewUser, registerAction } from "./actions";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
@@ -30,35 +30,15 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    try {
-      const { data, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/welcome`,
-          data: {
-            full_name: `${formData.firstName} ${formData.lastName}`
-          }
-        }
-      });
+    const fd = new FormData();
+    fd.append("firstName", formData.firstName);
+    fd.append("lastName", formData.lastName);
+    fd.append("email", formData.email);
+    fd.append("password", formData.password);
 
-      if (authError) {
-        throw authError;
-      }
-
-      // Notify admin of successful signup
-      await notifyAdminNewUser(`${formData.firstName} ${formData.lastName}`, formData.email).catch(console.error);
-
-      if (data.session) {
-        router.push("/welcome");
-      } else {
-        router.push("/verify-email");
-      }
-      router.refresh();
-      
-    } catch (err: any) {
-      setError(err.message || "An error occurred during registration.");
-    } finally {
+    const res = await registerAction(fd);
+    if (res && res.error) {
+      setError(res.error);
       setLoading(false);
     }
   };

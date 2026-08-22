@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { loginAction } from "./actions";
 import { toast } from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -27,22 +28,17 @@ function LoginForm() {
     setLoading(true);
     setError(null);
     
-    try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      if (authError) throw authError;
-
-      toast.success("Successfully authenticated!");
-      router.push(redirectUrl);
-      router.refresh();
-    } catch (err: any) {
-      setError(err.message || "Invalid login credentials.");
-    } finally {
+    const fd = new FormData();
+    fd.append("email", formData.email);
+    fd.append("password", formData.password);
+    fd.append("redirectUrl", redirectUrl);
+    
+    const res = await loginAction(fd);
+    if (res && res.error) {
+      setError(res.error);
       setLoading(false);
     }
+    // If successful, loginAction will redirect on the server, which sets cookies 100% reliably.
   };
 
   return (

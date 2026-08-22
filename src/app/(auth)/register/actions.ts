@@ -14,3 +14,38 @@ export async function notifyAdminNewUser(name: string, email: string) {
 
   await sendAdminNotification(`👤 New User Registration: ${name}`, htmlContent);
 }
+import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+
+export async function registerAction(formData: FormData) {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const firstName = formData.get("firstName") as string;
+  const lastName = formData.get("lastName") as string;
+
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/welcome`,
+      data: {
+        full_name: `${firstName} ${lastName}`
+      }
+    }
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Notify admin
+  await notifyAdminNewUser(`${firstName} ${lastName}`, email).catch(console.error);
+
+  if (data.session) {
+    redirect("/welcome");
+  } else {
+    redirect("/verify-email");
+  }
+}
