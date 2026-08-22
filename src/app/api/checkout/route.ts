@@ -104,6 +104,7 @@ export async function POST(request: Request) {
         reference: orderData.id,
         callback_url: `${origin}/api/callback`,
         metadata: {
+          order_id: orderData.id,
           custom_fields: [
             { display_name: "Customer Name", variable_name: "customer_name", value: name },
             { display_name: "Phone", variable_name: "phone", value: body.phone }

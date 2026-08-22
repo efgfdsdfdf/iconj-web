@@ -70,7 +70,7 @@ export async function GET(request: Request) {
         }
       }
 
-      return NextResponse.redirect(new URL(`/checkout/success?order=${orderId}`, request.url));
+      return NextResponse.redirect(new URL(`/account/orders`, request.url));
     } else {
       // Transaction failed
       return NextResponse.redirect(new URL('/checkout?error=payment_failed', request.url));

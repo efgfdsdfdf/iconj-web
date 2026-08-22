@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, Truck, Package, Clock, MapPin, AlertCircle } from "lucide-react";
 import Link from "next/link";
 
-export default function OrderTrackingPage({ params }: { params: { id: string } }) {
+export default async function OrderTrackingPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Track Your Order</h1>
-          <p className="text-slate-500">Order #{params.id} � Placed on May 12, 2024</p>
+          <p className="text-slate-500">Order #{id} - Placed on May 12, 2024</p>
         </div>
         <span className="bg-amber-100 text-amber-700 font-bold px-3 py-1 rounded-full text-sm">
           In Production
