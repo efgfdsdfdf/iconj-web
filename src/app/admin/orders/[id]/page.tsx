@@ -9,6 +9,7 @@ import { OrderTimeline } from "./components/OrderTimeline";
 import { AdminNotes } from "./components/AdminNotes";
 import { requireAdmin } from "@/lib/auth/admin";
 import { EmailHistory } from "./components/EmailHistory";
+import { UpdateTrackingForm } from "./UpdateTrackingForm";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
@@ -152,6 +153,15 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                 <span className="font-bold text-slate-900">Estimated Profit</span>
                 <span className="font-bold text-emerald-600">₦{Number(order.estimated_profit).toLocaleString()}</span>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm">
+            <CardHeader className="border-b pb-4">
+              <CardTitle className="text-lg flex items-center"><Truck className="w-4 h-4 mr-2" /> Update Order Status</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <UpdateTrackingForm order={order} />
             </CardContent>
           </Card>
 
