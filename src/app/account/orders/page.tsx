@@ -5,6 +5,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LogoutButton } from "../LogoutButton";
+import { Suspense } from "react";
+import { CartClearer } from "./CartClearer";
 
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
@@ -39,6 +41,9 @@ export default async function CustomerOrdersPage() {
 
   return (
     <div className="bg-slate-50 min-h-screen pb-12">
+      <Suspense fallback={null}>
+        <CartClearer />
+      </Suspense>
       <div className="bg-white border-b shadow-sm mb-8">
         <div className="container mx-auto px-4 py-6">
           <h1 className="text-2xl font-bold text-slate-900">My Orders</h1>
