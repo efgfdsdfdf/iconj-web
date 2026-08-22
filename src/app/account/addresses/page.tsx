@@ -16,12 +16,12 @@ export default async function AddressesPage() {
 
   if (!user) redirect("/login");
 
-  const { data: addresses } = await supabase
-    .from("addresses")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("is_default", { ascending: false })
-    .order("created_at", { ascending: false });
+  // Load addresses from auth metadata instead of a separate DB table
+  const rawAddresses = user.user_metadata?.addresses || [];
+  const addresses = Array.isArray(rawAddresses) ? rawAddresses : [];
+  
+  // Sort defaults to top
+  addresses.sort((a, b) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
 
   return (
     <div className="bg-slate-50 min-h-screen pb-12">

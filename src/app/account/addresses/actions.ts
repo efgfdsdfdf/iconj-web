@@ -8,31 +8,44 @@ export async function addAddress(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
+  const id = formData.get("id") as string || crypto.randomUUID();
   const label = formData.get("label") as string;
   const street = formData.get("street") as string;
   const city = formData.get("city") as string;
   const state = formData.get("state") as string;
   const phone = formData.get("phone") as string;
-  const setAsDefault = formData.get("is_default") === "on";
+  let setAsDefault = formData.get("is_default") === "on";
+
+  let addresses = user.user_metadata?.addresses || [];
+  if (!Array.isArray(addresses)) addresses = [];
+
+  const isFirst = addresses.length === 0;
+  if (isFirst) setAsDefault = true;
 
   if (setAsDefault) {
-    // Reset other defaults
-    await supabase.from("addresses").update({ is_default: false }).eq("user_id", user.id);
+    addresses = addresses.map((addr: any) => ({ ...addr, is_default: false }));
   }
 
-  // Check if they have any addresses at all; if not, force default
-  const { count } = await supabase.from("addresses").select("*", { count: "exact", head: true }).eq("user_id", user.id);
-  const isFirst = count === 0;
-
-  const { error } = await supabase.from("addresses").insert([{
-    user_id: user.id,
+  const existingIndex = addresses.findIndex((a: any) => a.id === id);
+  const newAddress = {
+    id,
     label,
     street,
     city,
     state,
     phone,
-    is_default: setAsDefault || isFirst
-  }]);
+    is_default: setAsDefault
+  };
+
+  if (existingIndex >= 0) {
+    addresses[existingIndex] = newAddress;
+  } else {
+    addresses.push(newAddress);
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    data: { addresses }
+  });
 
   if (error) return { error: error.message };
 
@@ -46,8 +59,17 @@ export async function deleteAddress(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  await supabase.from("addresses").delete().eq("id", id).eq("user_id", user.id);
-  
+  let addresses = user.user_metadata?.addresses || [];
+  if (!Array.isArray(addresses)) addresses = [];
+
+  addresses = addresses.filter((a: any) => a.id !== id);
+
+  const { error } = await supabase.auth.updateUser({
+    data: { addresses }
+  });
+
+  if (error) return { error: error.message };
+
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
   return { success: true };
@@ -58,11 +80,20 @@ export async function setDefaultAddress(id: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Unauthorized" };
 
-  // First, set all to false
-  await supabase.from("addresses").update({ is_default: false }).eq("user_id", user.id);
-  // Set the selected to true
-  await supabase.from("addresses").update({ is_default: true }).eq("id", id).eq("user_id", user.id);
-  
+  let addresses = user.user_metadata?.addresses || [];
+  if (!Array.isArray(addresses)) addresses = [];
+
+  addresses = addresses.map((addr: any) => ({
+    ...addr,
+    is_default: addr.id === id
+  }));
+
+  const { error } = await supabase.auth.updateUser({
+    data: { addresses }
+  });
+
+  if (error) return { error: error.message };
+
   revalidatePath("/account/addresses");
   revalidatePath("/checkout");
   return { success: true };

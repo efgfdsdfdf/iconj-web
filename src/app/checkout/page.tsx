@@ -46,7 +46,8 @@ export default function CheckoutPage() {
           }
         });
 
-        supabase.from("addresses").select("*").eq("user_id", data.user.id).order("is_default", { ascending: false }).limit(1).then(({ data: addresses }) => {
+          const rawAddresses = data.user.user_metadata?.addresses || [];
+          const addresses = Array.isArray(rawAddresses) ? rawAddresses.sort((a: any, b: any) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0)) : [];
           if (addresses && addresses.length > 0) {
             const addr = addresses[0];
             setSavedAddress({
@@ -56,7 +57,6 @@ export default function CheckoutPage() {
             });
             setUseSavedAddress(true);
           }
-        });
       }
     });
   }, [supabase]);
