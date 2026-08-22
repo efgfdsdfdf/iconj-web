@@ -16,7 +16,7 @@ export default async function CustomerDashboard() {
 
   // Fetch profile to get the user's name
   const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
-  const userName = profile?.name || (user.email ? user.email.split("@")[0] : "Customer");
+  const userName = profile?.name || user.user_metadata?.full_name || (user.email ? user.email.split("@")[0] : "Customer");
 
   // Fetch their most recent order
   const { data: activeOrder } = await supabase

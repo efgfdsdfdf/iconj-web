@@ -27,15 +27,23 @@ export function Navbar() {
     
     // Check auth status
     const checkAuth = async () => {
+      // 1. INSTANT LOCAL CHECK (0ms delay) - Instantly updates the sidebar
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        setUserEmail(session.user.email || null);
+        if (session.user.user_metadata?.full_name) {
+          setUserName(session.user.user_metadata.full_name.split(" ")[0]);
+        } else {
+          setUserName(session.user.email ? session.user.email.split("@")[0] : "User");
+        }
+      }
+
+      // 2. BACKGROUND NETWORK CHECK - Syncs the cloud cart and verifies profile
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        setUserEmail(user.email || null);
         const { data: profile } = await supabase.from("profiles").select("name, cart").eq("id", user.id).single();
         if (profile && profile.name) {
           setUserName(profile.name.split(" ")[0]);
-        } else {
-          // Fallback to the first part of their email if profile fetch fails (e.g. RLS)
-          setUserName(user.email ? user.email.split("@")[0] : "User");
         }
 
         // Cloud Cart Sync Down
