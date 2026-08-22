@@ -10,6 +10,8 @@ export const revalidate = 0;
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const isAdmin = user?.email === "ezeilodavid292@gmail.com";
   
   const { data: product, error } = await supabase
     .from("products")
@@ -47,12 +49,19 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   return (
     <div className="bg-slate-50 min-h-screen pb-12">
       <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
-        <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500 overflow-x-auto whitespace-nowrap">
-          <Link href="/" className="hover:text-blue-600">Home</Link>
-          <ChevronRight className="w-3 h-3 mx-2 shrink-0" />
-          <Link href="/shop" className="hover:text-blue-600">Products</Link>
-          <ChevronRight className="w-3 h-3 mx-2 shrink-0" />
-          <span className="text-slate-900 truncate max-w-[200px]">{product.name}</span>
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center text-xs font-medium text-slate-500 overflow-x-auto whitespace-nowrap">
+            <Link href="/" className="hover:text-blue-600">Home</Link>
+            <ChevronRight className="w-3 h-3 mx-2 shrink-0" />
+            <Link href="/shop" className="hover:text-blue-600">Products</Link>
+            <ChevronRight className="w-3 h-3 mx-2 shrink-0" />
+            <span className="text-slate-900 truncate max-w-[200px]">{product.name}</span>
+          </div>
+          {isAdmin && (
+            <Link href={`/admin/products/${product.id}/edit`} className="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded hover:bg-blue-100 flex items-center gap-1 shrink-0">
+              Edit Product
+            </Link>
+          )}
         </div>
       </div>
 

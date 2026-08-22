@@ -11,8 +11,12 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const supabase = await createClient();
   const params = await searchParams;
   const q = params.q;
+  const category = params.category;
 
   let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+  if (category) {
+    query = query.eq('category', category);
+  }
   if (q) {
     query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%`);
   }
@@ -32,7 +36,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500">
           <Link href="/" className="hover:text-blue-600">Home</Link>
           <ChevronRight className="w-3 h-3 mx-2" />
-          <span className="text-slate-900">{q ? `Search Results for "${q}"` : "All Products"}</span>
+          <span className="text-slate-900">{q ? `Search Results for "${q}"` : category ? category : "All Products"}</span>
         </div>
       </div>
 
@@ -45,13 +49,14 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               <CardContent className="p-4 space-y-6">
                 <div>
                   <h3 className="font-bold text-slate-900 mb-3 pb-2 border-b">Category</h3>
-                  <div className="space-y-2 text-sm text-slate-600">
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Newborn Essentials</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Baby Feeding</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Baby Care & Bath</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Baby Safety</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Maternity</label>
-                    <label className="flex items-center gap-2 cursor-pointer hover:text-rose-500"><input type="checkbox" className="rounded" /> Gifts & Bundles</label>
+                  <div className="space-y-3 text-sm text-slate-600 flex flex-col">
+                    <Link href="/shop" className={`hover:text-rose-500 transition-colors ${!category ? 'font-bold text-rose-500' : ''}`}>All Categories</Link>
+                    <Link href="/shop?category=Newborn+Essentials" className={`hover:text-rose-500 transition-colors ${category === 'Newborn Essentials' ? 'font-bold text-rose-500' : ''}`}>Newborn Essentials</Link>
+                    <Link href="/shop?category=Baby+Feeding" className={`hover:text-rose-500 transition-colors ${category === 'Baby Feeding' ? 'font-bold text-rose-500' : ''}`}>Baby Feeding</Link>
+                    <Link href="/shop?category=Baby+Care+%26+Bath" className={`hover:text-rose-500 transition-colors ${category === 'Baby Care & Bath' ? 'font-bold text-rose-500' : ''}`}>Baby Care & Bath</Link>
+                    <Link href="/shop?category=Baby+Safety" className={`hover:text-rose-500 transition-colors ${category === 'Baby Safety' ? 'font-bold text-rose-500' : ''}`}>Baby Safety</Link>
+                    <Link href="/shop?category=Maternity" className={`hover:text-rose-500 transition-colors ${category === 'Maternity' ? 'font-bold text-rose-500' : ''}`}>Maternity</Link>
+                    <Link href="/shop?category=Gifts+%26+Bundles" className={`hover:text-rose-500 transition-colors ${category === 'Gifts & Bundles' ? 'font-bold text-rose-500' : ''}`}>Gifts & Bundles</Link>
                   </div>
                 </div>
 
