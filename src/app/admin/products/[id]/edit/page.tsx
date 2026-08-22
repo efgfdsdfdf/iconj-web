@@ -6,14 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect, use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ChevronLeft, Info, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { updateProduct, getSuppliers } from "../../../actions";
 
-export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function EditProductPage() {
+  const params = useParams();
+  const id = params.id as string;
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
