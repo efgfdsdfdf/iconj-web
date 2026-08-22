@@ -23,29 +23,34 @@ export async function registerAction(formData: FormData) {
   const firstName = formData.get("firstName") as string;
   const lastName = formData.get("lastName") as string;
 
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/welcome`,
-      data: {
-        full_name: `${firstName} ${lastName}`
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/welcome`,
+        data: {
+          full_name: `${firstName} ${lastName}`
+        }
       }
+    });
+
+    if (error) {
+      return { error: error.message };
     }
-  });
 
-  if (error) {
-    return { error: error.message };
-  }
+    // Notify admin
+    await notifyAdminNewUser(`${firstName} ${lastName}`, email).catch(console.error);
 
-  // Notify admin
-  await notifyAdminNewUser(`${firstName} ${lastName}`, email).catch(console.error);
-
-  if (data.session) {
-    return { success: true, redirectUrl: "/welcome" };
-  } else {
-    return { success: true, redirectUrl: "/verify-email" };
+    if (data.session) {
+      return { success: true, redirectUrl: "/welcome" };
+    } else {
+      return { success: true, redirectUrl: "/verify-email" };
+    }
+  } catch (err: any) {
+    console.error("Register Error:", err);
+    return { error: err.message || "An unexpected error occurred during registration." };
   }
 }

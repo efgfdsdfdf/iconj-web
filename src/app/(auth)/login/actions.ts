@@ -8,16 +8,21 @@ export async function loginAction(formData: FormData) {
   const password = formData.get("password") as string;
   const redirectUrl = (formData.get("redirectUrl") as string) || "/account";
 
-  const supabase = await createClient();
+  try {
+    const supabase = await createClient();
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-  if (error) {
-    return { error: error.message };
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { success: true, redirectUrl };
+  } catch (err: any) {
+    console.error("Login Error:", err);
+    return { error: err.message || "An unexpected error occurred during login on the server." };
   }
-
-  return { success: true, redirectUrl };
 }

@@ -36,7 +36,11 @@ export default function RegisterPage() {
     fd.append("email", formData.email);
     fd.append("password", formData.password);
 
-    const res = await registerAction(fd);
+    const res: any = await registerAction(fd).catch(err => {
+      console.error("Server Action Error:", err);
+      return { error: "Could not connect to the server. Please try again." };
+    });
+    
     if (res && res.error) {
       setError(res.error);
       setLoading(false);

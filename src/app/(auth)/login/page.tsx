@@ -33,7 +33,11 @@ function LoginForm() {
     fd.append("password", formData.password);
     fd.append("redirectUrl", redirectUrl);
     
-    const res = await loginAction(fd);
+    const res: any = await loginAction(fd).catch(err => {
+      console.error("Server Action Error:", err);
+      return { error: "Could not connect to the server. Please try again." };
+    });
+    
     if (res && res.error) {
       setError(res.error);
       setLoading(false);
