@@ -44,8 +44,8 @@ export async function registerAction(formData: FormData) {
   await notifyAdminNewUser(`${firstName} ${lastName}`, email).catch(console.error);
 
   if (data.session) {
-    redirect("/welcome");
+    return { success: true, redirectUrl: "/welcome" };
   } else {
-    redirect("/verify-email");
+    return { success: true, redirectUrl: "/verify-email" };
   }
 }

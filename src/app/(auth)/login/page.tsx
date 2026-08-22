@@ -37,8 +37,10 @@ function LoginForm() {
     if (res && res.error) {
       setError(res.error);
       setLoading(false);
+    } else if (res && res.success) {
+      toast.success("Successfully authenticated!");
+      window.location.href = res.redirectUrl;
     }
-    // If successful, loginAction will redirect on the server, which sets cookies 100% reliably.
   };
 
   return (

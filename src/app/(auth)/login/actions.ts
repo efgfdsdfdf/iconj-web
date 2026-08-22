@@ -19,5 +19,5 @@ export async function loginAction(formData: FormData) {
     return { error: error.message };
   }
 
-  redirect(redirectUrl);
+  return { success: true, redirectUrl };
 }

@@ -40,6 +40,8 @@ export default function RegisterPage() {
     if (res && res.error) {
       setError(res.error);
       setLoading(false);
+    } else if (res && res.success) {
+      window.location.href = res.redirectUrl;
     }
   };
 
