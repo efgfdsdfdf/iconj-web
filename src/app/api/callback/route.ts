@@ -60,10 +60,10 @@ export async function GET(request: Request) {
 
           // Send Email fallback
           try {
-            await sendAdminNotification({
-              subject: `New Paid Order #${orderId.split("-")[0].toUpperCase()}`,
-              text: `A new order has been paid and is waiting for you in the dashboard.`
-            });
+            await sendAdminNotification(
+              `New Paid Order #${orderId.split("-")[0].toUpperCase()}`,
+              `A new order has been paid and is waiting for you in the dashboard.`
+            );
           } catch (e) {
             console.warn("Failed to send email fallback", e);
           }

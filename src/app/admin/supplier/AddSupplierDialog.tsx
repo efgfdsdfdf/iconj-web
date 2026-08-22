@@ -46,8 +46,8 @@ export function AddSupplierDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-slate-900 hover:bg-slate-800 text-white">
+      <DialogTrigger>
+        <Button className="bg-slate-900 hover:bg-slate-800 text-white" type="button">
           <Plus className="w-4 h-4 mr-2" /> Add Supplier
         </Button>
       </DialogTrigger>

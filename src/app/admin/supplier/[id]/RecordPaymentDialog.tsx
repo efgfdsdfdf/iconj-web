@@ -44,8 +44,8 @@ export function RecordPaymentDialog({ supplier, currentBalance, pendingOrders }:
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-slate-900 hover:bg-slate-800 text-white">
+      <DialogTrigger>
+        <Button className="bg-slate-900 hover:bg-slate-800 text-white" type="button">
           <ArrowUpRight className="w-4 h-4 mr-2" /> Record Payment
         </Button>
       </DialogTrigger>

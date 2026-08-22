@@ -34,8 +34,8 @@ export function AddFundsDialog({ supplier }: { supplier: any }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800">
+      <DialogTrigger>
+        <Button variant="outline" className="bg-white border-emerald-200 text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800" type="button">
           <Plus className="w-4 h-4 mr-2" /> Add Funds
         </Button>
       </DialogTrigger>
