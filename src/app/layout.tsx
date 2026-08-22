@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
 import { Toaster } from "react-hot-toast";
+import { WhatsAppWidget } from "@/components/WhatsAppWidget";
 import { Footer } from "@/components/layout/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -36,6 +37,7 @@ export default function RootLayout({
         <main className="flex-1">
           {children}
         <Toaster position="top-center" />
+        <WhatsAppWidget />
         </main>
         <Footer />
       </body>
