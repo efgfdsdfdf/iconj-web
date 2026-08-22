@@ -55,10 +55,11 @@ export default function TrackOrderPage() {
   };
 
   const statusList = [
-    { id: "pending_payment", label: "Awaiting Payment" },
-    { id: "in_production", label: "Processing Order" },
-    { id: "shipped", label: "In Transit" },
-    { id: "delivered", label: "Delivered" }
+    { id: "NEW", label: "Awaiting Payment" },
+    { id: "PAYMENT_CONFIRMED", label: "Payment Confirmed" },
+    { id: "PROCESSING", label: "Processing Order" },
+    { id: "SHIPPED", label: "In Transit" },
+    { id: "DELIVERED", label: "Delivered" }
   ];
 
   const currentStatusIndex = Math.max(

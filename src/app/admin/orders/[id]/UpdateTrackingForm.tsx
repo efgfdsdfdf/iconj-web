@@ -38,21 +38,22 @@ export function UpdateTrackingForm({ order }: { order: any }) {
       
       <div className="space-y-2">
         <Label>Payment Status</Label>
-        <select name="payment_status" defaultValue={order.payment_status || "pending"} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-          <option value="pending">Pending / Unpaid</option>
-          <option value="paid">Paid</option>
-          <option value="failed">Failed</option>
-          <option value="refunded">Refunded</option>
+        <select name="payment_status" defaultValue={order.payment_status || "PENDING"} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <option value="PENDING">Pending / Unpaid</option>
+          <option value="PAID">Paid</option>
+          <option value="FAILED">Failed</option>
+          <option value="REFUNDED">Refunded</option>
         </select>
       </div>
 
       <div className="space-y-2">
         <Label>Order Status</Label>
         <select name="status" defaultValue={order.order_status} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-          <option value="pending_payment">Awaiting Payment</option>
-          <option value="in_production">Processing Order (Supplier)</option>
-          <option value="shipped">Shipped / In Transit</option>
-          <option value="delivered">Delivered</option>
+          <option value="NEW">New (Awaiting Payment)</option>
+          <option value="PAYMENT_CONFIRMED">Payment Confirmed</option>
+          <option value="PROCESSING">Processing Order (Supplier)</option>
+          <option value="SHIPPED">Shipped / In Transit</option>
+          <option value="DELIVERED">Delivered</option>
         </select>
       </div>
 

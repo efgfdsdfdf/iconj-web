@@ -62,8 +62,8 @@ export async function POST(request: Request) {
       shipping_cost: shippingFee,
       supplier_cost: actualSupplierCost,
       estimated_profit: estimatedProfit,
-      payment_status: "pending",
-      order_status: "pending_payment",
+      payment_status: "PENDING",
+      order_status: "NEW",
       delivery_address: {
         ...body.address,
         name: body.name,
