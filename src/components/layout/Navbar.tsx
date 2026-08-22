@@ -38,19 +38,15 @@ export function Navbar() {
         }
       }
 
-      // 2. BACKGROUND NETWORK CHECK - Syncs the cloud cart and verifies profile
+      // 2. BACKGROUND NETWORK CHECK - Syncs the cloud cart
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const { data: profile } = await supabase.from("profiles").select("name, cart").eq("id", user.id).single();
-        if (profile && profile.name) {
-          setUserName(profile.name.split(" ")[0]);
-        }
-
         // Cloud Cart Sync Down
-        if (profile?.cart && Array.isArray(profile.cart) && profile.cart.length > 0) {
+        const savedCart = user.user_metadata?.cart;
+        if (savedCart && Array.isArray(savedCart) && savedCart.length > 0) {
           const currentLocalCart = useCartStore.getState().items;
           if (currentLocalCart.length === 0) {
-            setItems(profile.cart);
+            setItems(savedCart);
           } else {
             // Push local cart up if they started shopping before logging in
             fetch('/api/cart/sync', {
