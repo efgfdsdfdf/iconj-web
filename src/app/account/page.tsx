@@ -27,6 +27,11 @@ export default async function CustomerDashboard() {
     .limit(1)
     .single();
 
+  // Load addresses from auth metadata
+  const rawAddresses = user.user_metadata?.addresses || [];
+  const addresses = Array.isArray(rawAddresses) ? rawAddresses : [];
+  const defaultAddress = addresses.find((a: any) => a.is_default) || addresses[0];
+
   return (
     <div className="bg-slate-50 min-h-screen pb-12">
       <div className="bg-white border-b shadow-sm mb-8">
@@ -91,7 +96,7 @@ export default async function CustomerDashboard() {
                     <div>
                       <h3 className="font-bold text-slate-900 mb-1">Your Order Items</h3>
                       <p className="text-sm font-medium text-slate-700 mb-2">Total Amount: ₦{Number(activeOrder.total_amount).toLocaleString()}</p>
-                      <p className="text-sm font-medium text-slate-700">Status: <span className="text-emerald-600 font-bold uppercase">{activeOrder.status || "Pending"}</span></p>
+                      <p className="text-sm font-medium text-slate-700">Status: <span className="text-emerald-600 font-bold uppercase">{activeOrder.order_status || "Pending"}</span></p>
                     </div>
                   </div>
 
@@ -99,7 +104,7 @@ export default async function CustomerDashboard() {
                   <div className="relative pt-2 pb-8 px-4">
                     {/* Progress Line */}
                     <div className="absolute top-6 left-8 right-8 h-1 bg-slate-200 rounded">
-                      <div className={`h-full bg-emerald-500 rounded ${activeOrder.status === 'Pending' ? 'w-1/4' : activeOrder.status === 'Production' ? 'w-1/2' : activeOrder.status === 'Shipped' ? 'w-3/4' : 'w-full'}`}></div>
+                      <div className={`h-full bg-emerald-500 rounded ${activeOrder.order_status === 'NEW' ? 'w-1/4' : activeOrder.order_status === 'PROCESSING' ? 'w-1/2' : activeOrder.order_status === 'SHIPPED' ? 'w-3/4' : 'w-full'}`}></div>
                     </div>
                     
                     <div className="relative z-10 flex justify-between">
@@ -108,22 +113,29 @@ export default async function CustomerDashboard() {
                         <span className="text-xs font-bold text-emerald-700 text-center">Placed</span>
                       </div>
                       <div className="flex flex-col items-center gap-2">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${["Paid", "Production", "Shipped", "Delivered"].includes(activeOrder.status) ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><CheckCircle2 className="w-5 h-5"/></div>
-                        <span className={`text-xs font-bold text-center ${["Paid", "Production", "Shipped", "Delivered"].includes(activeOrder.status) ? "text-emerald-700" : "text-slate-500"}`}>Paid</span>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${["PAYMENT_CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"].includes(activeOrder.order_status) ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><CheckCircle2 className="w-5 h-5"/></div>
+                        <span className={`text-xs font-bold text-center ${["PAYMENT_CONFIRMED", "PROCESSING", "SHIPPED", "DELIVERED"].includes(activeOrder.order_status) ? "text-emerald-700" : "text-slate-500"}`}>Paid</span>
                       </div>
                       <div className="flex flex-col items-center gap-2">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${["Production", "Shipped", "Delivered"].includes(activeOrder.status) ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><Clock className="w-5 h-5"/></div>
-                        <span className={`text-xs font-bold text-center ${["Production", "Shipped", "Delivered"].includes(activeOrder.status) ? "text-emerald-700" : "text-slate-500"}`}>Production</span>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${["PROCESSING", "SHIPPED", "DELIVERED"].includes(activeOrder.order_status) ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><Clock className="w-5 h-5"/></div>
+                        <span className={`text-xs font-bold text-center ${["PROCESSING", "SHIPPED", "DELIVERED"].includes(activeOrder.order_status) ? "text-emerald-700" : "text-slate-500"}`}>Processing</span>
                       </div>
                       <div className="flex flex-col items-center gap-2">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${["Shipped", "Delivered"].includes(activeOrder.status) ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><Package className="w-5 h-5"/></div>
-                        <span className={`text-xs font-medium text-center ${["Shipped", "Delivered"].includes(activeOrder.status) ? "text-emerald-700 font-bold" : "text-slate-500"}`}>Shipped</span>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${["SHIPPED", "DELIVERED"].includes(activeOrder.order_status) ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><Package className="w-5 h-5"/></div>
+                        <span className={`text-xs font-medium text-center ${["SHIPPED", "DELIVERED"].includes(activeOrder.order_status) ? "text-emerald-700 font-bold" : "text-slate-500"}`}>Shipped</span>
                       </div>
                       <div className="flex flex-col items-center gap-2">
-                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${activeOrder.status === "Delivered" ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><MapPin className="w-5 h-5"/></div>
-                        <span className={`text-xs font-medium text-center ${activeOrder.status === "Delivered" ? "text-emerald-700 font-bold" : "text-slate-500"}`}>Delivered</span>
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm ${activeOrder.order_status === "DELIVERED" ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-400"}`}><MapPin className="w-5 h-5"/></div>
+                        <span className={`text-xs font-medium text-center ${activeOrder.order_status === "DELIVERED" ? "text-emerald-700 font-bold" : "text-slate-500"}`}>Delivered</span>
                       </div>
                     </div>
+                  </div>
+                  <div className="mt-6 flex justify-end">
+                    <Link href={`/track?id=${activeOrder.id}`}>
+                      <Button variant="outline" size="sm" className="text-blue-600 hover:text-blue-700">
+                        View Full Details <ChevronRight className="w-4 h-4 ml-1"/>
+                      </Button>
+                    </Link>
                   </div>
                 </CardContent>
               </Card>
@@ -146,18 +158,30 @@ export default async function CustomerDashboard() {
                 <CardContent className="pt-4 text-sm text-slate-600 space-y-1">
                   <p className="font-bold text-slate-900">{userName}</p>
                   <p>{user.email}</p>
-                  <p className="pt-2 text-blue-600 hover:underline cursor-pointer">Change Password</p>
+                  <Link href="/forgot-password"><p className="pt-2 text-blue-600 hover:underline cursor-pointer">Change Password</p></Link>
                 </CardContent>
               </Card>
-              <Card className="border-none shadow-sm">
-                <CardHeader className="border-b bg-slate-50/50 pb-3">
+              <Card className="border-none shadow-sm flex flex-col">
+                <CardHeader className="border-b bg-slate-50/50 pb-3 flex flex-row items-center justify-between">
                   <CardTitle className="text-base">Default Address</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-4 text-sm text-slate-600 space-y-1">
-                  <p className="font-bold text-slate-900">{userName}</p>
-                  <p>14 Admiralty Way</p>
-                  <p>Lekki Phase 1, Lagos</p>
-                  <p>Nigeria</p>
+                <CardContent className="pt-4 text-sm text-slate-600 space-y-1 flex-1">
+                  {defaultAddress ? (
+                    <>
+                      <p className="font-bold text-slate-900">{defaultAddress.name}</p>
+                      <p>{defaultAddress.street}</p>
+                      <p>{defaultAddress.city}{defaultAddress.state ? `, ${defaultAddress.state}` : ''}</p>
+                      <p>{defaultAddress.country || 'Nigeria'}</p>
+                      {defaultAddress.phone && <p className="pt-1">{defaultAddress.phone}</p>}
+                    </>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-4">
+                      <p className="text-slate-500 mb-2">No addresses saved yet</p>
+                      <Link href="/account/addresses">
+                        <Button variant="outline" size="sm">Add Address</Button>
+                      </Link>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
