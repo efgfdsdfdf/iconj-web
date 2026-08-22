@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { notifyAdminNewUser, registerAction } from "./actions";
+import { notifyAdminNewUser } from "./actions";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
@@ -30,22 +30,39 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    const fd = new FormData();
-    fd.append("firstName", formData.firstName);
-    fd.append("lastName", formData.lastName);
-    fd.append("email", formData.email);
-    fd.append("password", formData.password);
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/welcome`,
+          data: {
+            full_name: `${formData.firstName} ${formData.lastName}`
+          }
+        }
+      });
 
-    const res: any = await registerAction(fd).catch(err => {
-      console.error("Server Action Error:", err);
-      return { error: "Could not connect to the server. Please try again." };
-    });
-    
-    if (res && res.error) {
-      setError(res.error);
+      if (authError) {
+        throw authError;
+      }
+
+      // Notify admin of successful signup
+      await notifyAdminNewUser(`${formData.firstName} ${formData.lastName}`, formData.email).catch(console.error);
+
+      router.refresh();
+      
+      setTimeout(() => {
+        if (data.session) {
+          window.location.href = "/welcome";
+        } else {
+          window.location.href = "/verify-email";
+        }
+      }, 800);
+      
+    } catch (err: any) {
+      console.error("Register Error:", err);
+      setError(err.message || "An error occurred during registration.");
       setLoading(false);
-    } else if (res && res.success) {
-      window.location.href = res.redirectUrl;
     }
   };
 
@@ -106,7 +123,7 @@ export default function RegisterPage() {
               {loading ? "Creating account..." : "Create account"}
             </Button>
             <div className="text-center text-sm text-slate-500">
-              Already have an account₦{" "}
+              Already have an account?{" "}
               <Link href="/login" className="font-semibold text-blue-600 hover:underline">
                 Sign in
               </Link>

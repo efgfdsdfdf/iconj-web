@@ -8,7 +8,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { loginAction } from "./actions";
 import { toast } from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
@@ -28,22 +27,28 @@ function LoginForm() {
     setLoading(true);
     setError(null);
     
-    const fd = new FormData();
-    fd.append("email", formData.email);
-    fd.append("password", formData.password);
-    fd.append("redirectUrl", redirectUrl);
-    
-    const res: any = await loginAction(fd).catch(err => {
-      console.error("Server Action Error:", err);
-      return { error: "Could not connect to the server. Please try again." };
-    });
-    
-    if (res && res.error) {
-      setError(res.error);
-      setLoading(false);
-    } else if (res && res.success) {
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (authError) throw authError;
+
       toast.success("Successfully authenticated!");
-      window.location.href = res.redirectUrl;
+      
+      // Force Next.js to refresh all active router hooks and server components
+      router.refresh();
+      
+      // Wait a tiny bit for the cookie to be completely flushed to the browser
+      setTimeout(() => {
+        window.location.href = redirectUrl;
+      }, 800);
+      
+    } catch (err: any) {
+      console.error("Login Error:", err);
+      setError(err.message || "Invalid login credentials.");
+      setLoading(false);
     }
   };
 
@@ -96,7 +101,7 @@ function LoginForm() {
             {loading ? "Signing In..." : "Sign In"}
           </Button>
           <div className="text-center text-sm text-slate-500">
-            Don&apos;t have an account₦{" "}
+            Don't have an account?{" "}
             <Link href="/register" className="font-semibold text-blue-600 hover:underline">
               Sign up
             </Link>
