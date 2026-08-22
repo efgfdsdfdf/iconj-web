@@ -57,12 +57,6 @@ export default async function CustomerDashboard() {
                 <Link href="/account/support" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
                   <MessageCircle className="w-5 h-5 text-slate-400" /> Contact Support
                 </Link>
-                <Link href="#" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
-                  <Heart className="w-5 h-5 text-slate-400" /> Saved Items
-                </Link>
-                <Link href="#" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
-                  <MapPin className="w-5 h-5 text-slate-400" /> Address Book
-                </Link>
                 <div className="p-4 border-t bg-slate-50">
                   <LogoutButton />
                 </div>
