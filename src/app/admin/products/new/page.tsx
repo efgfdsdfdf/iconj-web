@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { createProduct, uploadProductImage } from "../../actions";
+import { createProduct, uploadProductImage, getSuppliers } from "../../actions";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AddProductPage() {
@@ -27,10 +27,8 @@ export default function AddProductPage() {
         setCategoriesList(catData.value.map((c: any) => c.name));
       }
       
-      const { data: supData } = await supabase.from("suppliers").select("id, name");
-      if (supData) {
-        setSuppliersList(supData);
-      }
+      const sups = await getSuppliers();
+      setSuppliersList(sups);
     };
     fetchSettings();
   }, [supabase]);

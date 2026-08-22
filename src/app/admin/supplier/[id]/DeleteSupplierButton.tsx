@@ -35,7 +35,6 @@ export function DeleteSupplierButton({ supplierId, supplierName }: { supplierId:
       size="sm" 
       onClick={handleDelete}
       disabled={loading}
-      className="ml-4"
     >
       <Trash2 className="w-4 h-4 mr-2" />
       {loading ? "Deleting..." : "Delete Supplier"}

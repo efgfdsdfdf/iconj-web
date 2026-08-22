@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ChevronLeft, Info, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { updateProduct } from "../../../actions";
+import { updateProduct, getSuppliers } from "../../../actions";
 
 export default function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -49,8 +49,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     async function fetchProduct() {
-      const { data: supData } = await supabase.from("suppliers").select("id, name");
-      if (supData) setSuppliersList(supData);
+      const sups = await getSuppliers();
+      setSuppliersList(sups);
 
       const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
       if (data) {

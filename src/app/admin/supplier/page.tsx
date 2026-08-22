@@ -6,6 +6,7 @@ import { Truck, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/admin";
 import { AddSupplierDialog } from "./AddSupplierDialog";
+import { DeleteSupplierButton } from "./[id]/DeleteSupplierButton";
 
 export const revalidate = 0;
 
@@ -88,12 +89,13 @@ export default async function AdminSupplierListPage() {
                           <span className="text-slate-400">None</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-right pr-6">
+                      <TableCell className="text-right pr-6 flex justify-end items-center gap-2">
                         <Link href={`/admin/supplier/${supplier.id}`}>
                           <Button size="sm" variant="outline" className="hover:bg-blue-50 hover:text-blue-600">
                             View Ledger <ArrowRight className="w-4 h-4 ml-2" />
                           </Button>
                         </Link>
+                        <DeleteSupplierButton supplierId={supplier.id} supplierName={supplier.name} />
                       </TableCell>
                     </TableRow>
                   );

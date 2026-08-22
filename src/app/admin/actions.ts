@@ -124,3 +124,7 @@ export async function updateCategories(categories: { name: string, icon: string 
   }
 }
 
+export async function getSuppliers() {
+  const { data } = await supabaseAdmin.from('suppliers').select('id, name');
+  return data || [];
+}
