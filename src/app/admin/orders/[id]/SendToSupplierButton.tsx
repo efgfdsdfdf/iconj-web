@@ -26,36 +26,7 @@ export function SendToSupplierButton({ order, items }: { order: any, items: any[
     try {
       await sendOrderToSupplier(order.id);
       
-      const address = order.delivery_address || {};
-      const orderId = order.id.split("-")[0].toUpperCase();
-      
-      let body = `Hello Supplier Team,\n\n`;
-      body += `Please process the following new order (ID: #${orderId}).\n\n`;
-      
-      body += `--- ORDER ITEMS ---\n`;
-      items.forEach((item, index) => {
-        body += `${index + 1}. ${item.product?.name || "Unknown Product"} (SKU: ${item.product?.sku || "N/A"})\n`;
-        body += `   Quantity: ${item.quantity}\n`;
-        body += `\n`;
-      });
-      
-      body += `--- SHIPPING ADDRESS ---\n`;
-      body += `${address.name || "N/A"}\n`;
-      body += `${address.street || "N/A"}\n`;
-      body += `${address.city || "N/A"}\n`;
-      body += `${address.state || "N/A"}\n`;
-      body += `${address.phone || "N/A"}\n\n`;
-      
-      body += `Please confirm receipt of this order and provide tracking information when dispatched.\n\n`;
-      body += `Thank you,\nICONJ Team`;
-      
-      const encodedBody = encodeURIComponent(body);
-      const encodedSubject = encodeURIComponent(`New Order Request - ICONJ #${orderId}`);
-      
-      const supplierEmail = order.supplier?.email || "supplier@example.com";
-      window.location.href = `mailto:${supplierEmail}?subject=${encodedSubject}&body=${encodedBody}`;
-      
-      toast.success("Order marked as sent to supplier!");
+      toast.success("Order marked as sent and email dispatched to supplier!");
     } catch (err: any) {
       toast.error(err.message || "Failed to mark as sent.");
     } finally {
