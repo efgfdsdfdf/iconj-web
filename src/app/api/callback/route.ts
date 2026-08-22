@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { sendAdminNotification } from "@/lib/email";
 
 export async function GET(request: Request) {
   try {
@@ -34,6 +35,15 @@ export async function GET(request: Request) {
 
       if (error) {
         console.error('Error updating order:', error);
+      } else {
+        const htmlContent = `
+          <h2>New Order Paid! 🎉</h2>
+          <p><strong>Order ID:</strong> ${reference}</p>
+          <p><strong>Customer:</strong> ${verifyData.data.customer?.email || 'Unknown'}</p>
+          <p><strong>Amount Paid:</strong> ₦${(verifyData.data.amount / 100).toLocaleString()}</p>
+          <p><a href="${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/admin/orders/${reference}">Click here to view the order details in the Admin Panel</a></p>
+        `;
+        await sendAdminNotification("🎉 New Order Received & Paid!", htmlContent);
       }
     }
 

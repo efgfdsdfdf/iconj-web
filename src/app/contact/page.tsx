@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { ContactForm } from "./ContactForm";
 
 export default function ContactPage() {
   return (
@@ -53,40 +54,7 @@ export default function ContactPage() {
           <Card>
             <CardContent className="p-8">
               <h3 className="text-2xl font-bold mb-6 text-slate-900">Send us a message</h3>
-              <form className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" placeholder="First Name" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" placeholder="Last Name" />
-                  </div>
-                </div>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input id="email" type="email" placeholder="your@email.com" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="subject">Subject</Label>
-                    <select id="subject" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                      <option>General Inquiry</option>
-                      <option>Order Support</option>
-                      <option>Product Question</option>
-                      <option>Returns/Issues</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message</Label>
-                  <Textarea id="message" placeholder="How can we help you today?" className="min-h-[150px]" />
-                </div>
-                <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-                  Send Message
-                </Button>
-              </form>
+              <ContactForm />
             </CardContent>
           </Card>
         </div>
