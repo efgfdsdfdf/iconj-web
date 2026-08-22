@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { notifyAdminNewUser } from "./actions";
 import { Eye, EyeOff } from "lucide-react";
 
 export default function RegisterPage() {
@@ -44,6 +45,9 @@ export default function RegisterPage() {
       if (authError) {
         throw authError;
       }
+
+      // Notify admin of successful signup
+      await notifyAdminNewUser(`${formData.firstName} ${formData.lastName}`, formData.email).catch(console.error);
 
       if (data.session) {
         router.push("/welcome");

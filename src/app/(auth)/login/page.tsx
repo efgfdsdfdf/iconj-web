@@ -34,6 +34,7 @@ function LoginForm() {
 
       if (authError) throw authError;
 
+      toast.success("Successfully authenticated!");
       router.push(redirectUrl);
       router.refresh();
     } catch (err: any) {
