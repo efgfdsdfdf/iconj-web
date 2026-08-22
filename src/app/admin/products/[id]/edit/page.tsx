@@ -36,8 +36,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   const [formData, setFormData] = useState({
     name: "", sku: "", category: "",
     base_supplier_cost: "", base_selling_price: "",
-    description: "", stock_status: "", is_featured: false, requires_quote: false
+    description: "", stock_status: "", is_featured: false, requires_quote: false,
+    supplier_id: ""
   });
+
+  const [suppliersList, setSuppliersList] = useState<any[]>([]);
+  const [existingMetadata, setExistingMetadata] = useState<any>({});
 
   const [variants, setVariants] = useState<{sizes: string[], motors: string[], fabrics: string[]}>({
     sizes: [], motors: [], fabrics: []
@@ -45,8 +49,12 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
 
   useEffect(() => {
     async function fetchProduct() {
+      const { data: supData } = await supabase.from("suppliers").select("id, name");
+      if (supData) setSuppliersList(supData);
+
       const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
       if (data) {
+        setExistingMetadata(data.metadata || {});
         setFormData({
           name: data.name || "",
           sku: data.sku || "",
@@ -56,7 +64,8 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
           description: data.description || "",
           stock_status: data.stock_status || "In Stock",
           is_featured: data.is_featured || false,
-          requires_quote: data.requires_quote || false
+          requires_quote: data.requires_quote || false,
+          supplier_id: data.metadata?.supplier_id || ""
         });
         setVariants(data.variants || { sizes: [], motors: [], fabrics: [] });
         setMoq(data.moq || 1);
@@ -85,7 +94,11 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         stock_status: formData.stock_status,
         is_featured: formData.is_featured,
         requires_quote: formData.requires_quote,
-        variants: variants
+        variants: variants,
+        metadata: {
+          ...existingMetadata,
+          supplier_id: formData.supplier_id || null
+        }
       });
 
       router.push("/admin/products");
@@ -211,6 +224,21 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
                     <option value="">Select Category...</option>
                     {categoriesList.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Primary Supplier</Label>
+                  <select 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
+                    value={formData.supplier_id || ""} 
+                    onChange={e => setFormData({...formData, supplier_id: e.target.value})}
+                  >
+                    <option value="">No Supplier Assigned</option>
+                    {suppliersList.map(sup => (
+                      <option key={sup.id} value={sup.id}>{sup.name}</option>
                     ))}
                   </select>
                 </div>

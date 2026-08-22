@@ -18,18 +18,25 @@ export async function POST(request: Request) {
     // Create a server Supabase client using Service Role to bypass RLS
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-    // Fetch actual supplier costs from the database securely
+    // Fetch actual supplier costs and metadata from the database securely
     const productIds = items.map((i: any) => i.id);
     const { data: dbProducts } = await supabaseAdmin
       .from("products")
-      .select("id, base_supplier_cost")
+      .select("id, base_supplier_cost, metadata")
       .in("id", productIds);
       
     let actualSupplierCost = 0;
-    items.forEach((item: any) => {
+    let mainSupplierId: string | null = null;
+    
+    items.forEach((item: any, index: number) => {
       const dbProduct = dbProducts?.find((p: any) => p.id === item.id);
       const unitCost = dbProduct ? Number(dbProduct.base_supplier_cost) || 0 : 0;
       actualSupplierCost += (unitCost * item.quantity);
+      
+      // Assign the order to the supplier of the first product in the cart
+      if (index === 0 && dbProduct?.metadata?.supplier_id) {
+        mainSupplierId = dbProduct.metadata.supplier_id;
+      }
     });
     
     const estimatedProfit = subtotal - actualSupplierCost;
@@ -49,6 +56,7 @@ export async function POST(request: Request) {
 
     // 2. Save the pending order to the database
     const { data: orderData, error: orderError } = await supabaseAdmin.from("orders").insert([{
+      supplier_id: mainSupplierId || null,
       user_id: userId || null,
       total_amount: totalAmount,
       shipping_cost: shippingFee,

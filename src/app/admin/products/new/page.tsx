@@ -18,14 +18,21 @@ export default function AddProductPage() {
   const [loading, setLoading] = useState(false);
   const [categoriesList, setCategoriesList] = useState<string[]>(["Nursery & Furniture", "Baby Feeding & Nursing", "Baby Care & Bath", "Baby Clothing & Accessories", "Baby Travel", "Toys & Development", "Maternity & Mother Care", "Gifts & Bundles"]);
 
+  const [suppliersList, setSuppliersList] = useState<any[]>([]);
+
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
-      if (data?.value && Array.isArray(data.value)) {
-        setCategoriesList(data.value.map((c: any) => c.name));
+    const fetchSettings = async () => {
+      const { data: catData } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
+      if (catData?.value && Array.isArray(catData.value)) {
+        setCategoriesList(catData.value.map((c: any) => c.name));
+      }
+      
+      const { data: supData } = await supabase.from("suppliers").select("id, name");
+      if (supData) {
+        setSuppliersList(supData);
       }
     };
-    fetchCategories();
+    fetchSettings();
   }, [supabase]);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -293,8 +300,17 @@ export default function AddProductPage() {
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Supplier / Manufacturer ID</Label>
-                  <Input placeholder="e.g. SUP-ALI-091" value={formData.supplier_id} onChange={e => setFormData({...formData, supplier_id: e.target.value})} />
+                  <Label>Primary Supplier</Label>
+                  <select 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
+                    value={formData.supplier_id} 
+                    onChange={e => setFormData({...formData, supplier_id: e.target.value})}
+                  >
+                    <option value="">No Supplier Assigned</option>
+                    {suppliersList.map(sup => (
+                      <option key={sup.id} value={sup.id}>{sup.name}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="space-y-2">
                   <Label>Supplier SKU</Label>
