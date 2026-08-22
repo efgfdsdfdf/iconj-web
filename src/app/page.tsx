@@ -4,6 +4,7 @@ import { Truck, ShieldCheck, Heart, Star, ChevronRight, Baby, Gift, Shield } fro
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/product/ProductCard";
+import { AutoScrollingCategories } from "@/components/AutoScrollingCategories";
 
 export const revalidate = 0;
 
@@ -32,16 +33,7 @@ export default async function Home() {
       <section className="bg-white border-b shadow-sm mb-4">
         <Card className="border-none shadow-none rounded-none w-full overflow-hidden">
           <CardContent className="p-0">
-            <div className="flex overflow-x-auto hide-scrollbar snap-x py-3 px-4 gap-4 md:justify-center">
-              {categories.map((cat, idx) => (
-                <Link key={idx} href={`/shop?category=${encodeURIComponent(cat.name)}`} className="flex flex-col items-center gap-2 group snap-start shrink-0 w-[72px] md:w-[80px]">
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border border-slate-100 group-hover:border-blue-500 group-hover:shadow-md transition-all">
-                    <img src={cat.icon} alt={cat.name} className="w-full h-full object-cover" />
-                  </div>
-                  <span className="text-xs text-center font-medium text-slate-700 whitespace-normal line-clamp-2 leading-tight">{cat.name}</span>
-                </Link>
-              ))}
-            </div>
+            <AutoScrollingCategories categories={categories} />
           </CardContent>
         </Card>
       </section>
