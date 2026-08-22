@@ -66,7 +66,7 @@ export default function EditProductPage() {
           stock_status: data.stock_status || "In Stock",
           is_featured: data.is_featured || false,
           requires_quote: data.requires_quote || false,
-          supplier_id: data.metadata?.supplier_id || ""
+          supplier_id: data.supplier_id || ""
         });
         setVariants(data.variants || { sizes: [], motors: [], fabrics: [] });
         setMoq(data.moq || 1);
@@ -96,10 +96,7 @@ export default function EditProductPage() {
         is_featured: formData.is_featured,
         requires_quote: formData.requires_quote,
         variants: variants,
-        metadata: {
-          ...existingMetadata,
-          supplier_id: formData.supplier_id || null
-        }
+        supplier_id: formData.supplier_id || null
       });
 
       if (result?.error) throw new Error(result.error);

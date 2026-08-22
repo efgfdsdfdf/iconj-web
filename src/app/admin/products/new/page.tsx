@@ -119,19 +119,16 @@ export default function AddProductPage() {
         requires_quote: false,
         images: uploadedUrls,
         variants: {},
-        metadata: {
-          description: formData.description,
-          supplier_id: formData.supplier_id,
-          supplier_sku: formData.supplier_sku,
-          brand: formData.brand,
-          age_range: formData.age_range,
-          safety_info: formData.safety_info,
-          is_bundle: formData.is_bundle,
-          stock_status: formData.stock_status,
-          margin_percentage: marginPercentage,
-          features: [],
-          specs: []
-        }
+        description: formData.description,
+        supplier_id: formData.supplier_id || null,
+        supplier_sku: formData.supplier_sku || null,
+        brand: formData.brand || null,
+        age_range: formData.age_range || null,
+        safety_info: formData.safety_info || null,
+        is_bundle: formData.is_bundle,
+        stock_status: formData.stock_status,
+        features: [],
+        specifications: []
       });
 
       if (!createResult.success) {
