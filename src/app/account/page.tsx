@@ -4,6 +4,7 @@ import { Package, User, MapPin, Heart, Clock, ChevronRight, CheckCircle2, AlertC
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { LogoutButton } from "./LogoutButton";
 
 export const revalidate = 0;
 
@@ -60,9 +61,7 @@ export default async function CustomerDashboard() {
                   <MapPin className="w-5 h-5 text-slate-400" /> Address Book
                 </Link>
                 <div className="p-4 border-t bg-slate-50">
-                  <form action="/auth/signout" method="post">
-                    <Button type="submit" variant="outline" className="w-full text-red-600 hover:text-red-700 hover:bg-red-50">Log Out</Button>
-                  </form>
+                  <LogoutButton />
                 </div>
               </nav>
             </Card>
