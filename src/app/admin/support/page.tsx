@@ -11,7 +11,7 @@ export default async function AdminSupportPage() {
   try {
     const res = await supabaseAdmin
       .from("support_messages")
-      .select("*, profiles(name, email)")
+      .select("*")
       .order("created_at", { ascending: true });
     if (res.data) messages = res.data;
   } catch (e) {

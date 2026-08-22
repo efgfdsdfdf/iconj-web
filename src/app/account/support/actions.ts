@@ -22,6 +22,24 @@ export async function sendSupportMessage(message: string) {
     return { error: "Failed to send message. Note: support_messages table must be created." };
   }
 
+  // Check if this is their first message to send an automated response
+  const { count } = await supabase
+    .from("support_messages")
+    .select("*", { count: 'exact', head: true })
+    .eq("user_id", user.id);
+    
+  if (count === 1) {
+    const supabaseAdmin = require("@supabase/supabase-js").createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY
+    );
+    await supabaseAdmin.from("support_messages").insert([{
+      user_id: user.id,
+      message: "Hi there! 👋 Thank you for reaching out to ICONJ Support. We have received your message. One of our agents will be with you shortly. If this is urgent, please leave your phone number.",
+      is_from_admin: true
+    }]);
+  }
+
   const name = user.user_metadata?.full_name || user.email;
 
   // Send an email to the admin
