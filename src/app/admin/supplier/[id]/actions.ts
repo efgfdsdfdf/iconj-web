@@ -26,8 +26,8 @@ export async function addSupplierFunds(supplierId: string, amount: number, refer
   });
 
   if (error) throw new Error(error.message);
-  revalidatePath(`/admin/supplier/${supplierId}`);
-  revalidatePath("/admin/supplier");
+  // revalidatePath(`/admin/supplier/${supplierId}`);
+  // revalidatePath("/admin/supplier");
 }
 
 export async function recordSupplierPayment(supplierId: string, orderId: string, amount: number, reference: string) {
@@ -75,9 +75,9 @@ export async function recordSupplierPayment(supplierId: string, orderId: string,
     admin_id: adminId
   });
 
-  revalidatePath(`/admin/supplier/${supplierId}`);
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath("/admin/supplier");
+  // revalidatePath(`/admin/supplier/${supplierId}`);
+  // revalidatePath(`/admin/orders/${orderId}`);
+  // revalidatePath("/admin/supplier");
 }
 
 export async function deleteSupplier(supplierId: string) {
@@ -85,5 +85,5 @@ export async function deleteSupplier(supplierId: string) {
   const supabaseAdmin = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { cookies: { get() { return undefined; } } });
   const { error } = await supabaseAdmin.from('suppliers').delete().eq('id', supplierId);
   if (error) throw new Error(error.message);
-  revalidatePath('/admin/supplier');
+  // revalidatePath('/admin/supplier');
 }

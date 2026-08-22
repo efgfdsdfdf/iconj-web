@@ -18,9 +18,9 @@ export async function deleteProduct(productId: string) {
 export async function updateProduct(productId: string, data: any) {
   const { error } = await supabaseAdmin.from("products").update(data).eq("id", productId);
   if (error) throw new Error(error.message);
-  revalidatePath("/admin/products");
-  revalidatePath("/shop");
-  revalidatePath(`/shop/${productId}`);
+  // revalidatePath("/admin/products");
+  // revalidatePath("/shop");
+  // revalidatePath(`/shop/${productId}`);
   return { success: true };
 }
 
