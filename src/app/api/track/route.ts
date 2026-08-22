@@ -17,13 +17,21 @@ export async function GET(request: Request) {
 
     const { data: order, error } = await supabaseAdmin
       .from("orders")
-      .select("*, order_items(*, products(name, images)), order_events(id, event_type, description, created_at)")
+      .select("*, order_items(*, products(name, images))")
       .eq("id", orderId)
       .single();
 
     if (error || !order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
+
+    const { data: events } = await supabaseAdmin
+      .from("order_events")
+      .select("id, event_type, description, created_at")
+      .eq("order_id", orderId)
+      .order("created_at", { ascending: true });
+
+    order.order_events = events || [];
 
     return NextResponse.json({ order });
   } catch (err: any) {
