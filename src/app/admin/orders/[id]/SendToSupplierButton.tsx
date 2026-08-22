@@ -52,8 +52,8 @@ export function SendToSupplierButton({ order, items }: { order: any, items: any[
       const encodedBody = encodeURIComponent(body);
       const encodedSubject = encodeURIComponent(`New Order Request - ICONJ #${orderId}`);
       
-      // Attempt to open email client
-      window.location.href = `mailto:supplier@example.com?subject=${encodedSubject}&body=${encodedBody}`;
+      const supplierEmail = order.supplier?.email || "supplier@example.com";
+      window.location.href = `mailto:${supplierEmail}?subject=${encodedSubject}&body=${encodedBody}`;
       
       toast.success("Order marked as sent to supplier!");
     } catch (err: any) {
