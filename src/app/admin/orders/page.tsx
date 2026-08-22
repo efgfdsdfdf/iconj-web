@@ -35,9 +35,14 @@ export default async function AdminOrdersPage() {
             <TableBody>
               {orders && orders.length > 0 ? (
                 orders.map((order: any) => (
-                  <TableRow key={order.id}>
+                  <TableRow key={order.id} className={!order.is_read ? "bg-blue-50/50" : ""}>
                     <TableCell className="pl-6 font-medium text-slate-900">
-                      #{order.id.split("-")[0].toUpperCase()}
+                      <div className="flex items-center gap-2">
+                        #{order.id.split("-")[0].toUpperCase()}
+                        {!order.is_read && (
+                          <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Unread</span>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                     <TableCell className="font-bold">₦{Number(order.total_amount).toLocaleString()}</TableCell>

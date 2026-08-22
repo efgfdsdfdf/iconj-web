@@ -7,19 +7,21 @@ import Link from "next/link";
 import CopyOrderButton from "./CopyOrderButton";
 import { ExportCsvButton } from "./ExportCsvButton";
 import { ImportTrackingButton } from "./ImportTrackingButton";
+import { MarkSupplierPaidButton } from "./MarkSupplierPaidButton";
 
 export const revalidate = 0;
 
 export default async function AdminSupplierPage() {
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  // Fetch orders that have been paid but are still in processing/production
-  const { data: orders } = await supabaseAdmin
+  const { data: allOrders } = await supabaseAdmin
     .from("orders")
     .select("*, order_items(*, products(*)), profiles(name, email)")
     .eq("payment_status", "paid")
     .in("order_status", ["in_production", "processing"])
     .order("created_at", { ascending: true });
+
+  const orders = allOrders?.filter(o => o.supplier_paid !== true) || [];
 
   const totalOwed = orders?.reduce((sum, o) => sum + (Number(o.supplier_cost) || 0), 0) || 0;
   const totalOrders = orders?.length || 0;
@@ -106,8 +108,9 @@ export default async function AdminSupplierPage() {
                     <TableCell className="font-bold text-red-600">
                       ?{Number(order.supplier_cost).toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right pr-6">
+                    <TableCell className="text-right pr-6 flex items-center justify-end gap-2">
                       <CopyOrderButton order={order} />
+                      <MarkSupplierPaidButton orderId={order.id} />
                     </TableCell>
                   </TableRow>
                 ))

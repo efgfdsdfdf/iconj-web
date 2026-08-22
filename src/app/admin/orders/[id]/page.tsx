@@ -14,6 +14,11 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
   const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", resolvedParams.id).single();
   if (!order) return notFound();
 
+  // Mark as read when admin views the order details
+  if (order.is_read === false || order.is_read === null) {
+    await supabaseAdmin.from("orders").update({ is_read: true }).eq("id", order.id);
+  }
+
   const { data: items } = await supabaseAdmin.from("order_items").select(`
     *,
     product:products(name, sku, images)
