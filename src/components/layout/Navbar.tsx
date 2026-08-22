@@ -5,7 +5,7 @@ import { ShoppingCart, Menu, User, Search, Package, X, Phone, HelpCircle, Chevro
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cartStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,7 +14,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [tapCount, setTapCount] = useState(0);
+  const tapCountRef = useRef({ count: 0, lastTap: 0 });
   
   const items = useCartStore((state) => state.items);
   const setItems = useCartStore((state) => state.setItems);
@@ -86,10 +86,17 @@ export function Navbar() {
     if (userEmail === "ezeilodavid292@gmail.com") {
       e.preventDefault();
       e.stopPropagation();
-      const newCount = tapCount + 1;
-      setTapCount(newCount);
-      if (newCount >= 5) {
-        setTapCount(0);
+      const now = Date.now();
+      // Reset if more than 1s between taps
+      if (now - tapCountRef.current.lastTap > 1000) {
+        tapCountRef.current.count = 0;
+      }
+      
+      tapCountRef.current.count += 1;
+      tapCountRef.current.lastTap = now;
+      
+      if (tapCountRef.current.count >= 3) {
+        tapCountRef.current.count = 0;
         router.push("/admin");
       }
     }
@@ -164,11 +171,14 @@ export function Navbar() {
               {/* Dropdown for desktop (optional enhancement) */}
               {userName && (
                 <div className="absolute top-full right-0 w-48 bg-white shadow-lg border rounded-md hidden group-hover:block z-50">
-                  <div className="py-2">
-                    <Link href="/account" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Dashboard</Link>
-                    <Link href="/account/orders" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Orders</Link>
-                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100">Log Out</button>
-                  </div>
+                    <div className="py-2">
+                      <Link href="/account" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Dashboard</Link>
+                      {userEmail === "ezeilodavid292@gmail.com" && (
+                        <Link href="/admin" className="block px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50">Admin Panel</Link>
+                      )}
+                      <Link href="/account/orders" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Orders</Link>
+                      <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-slate-100">Log Out</button>
+                    </div>
                 </div>
               )}
             </div>
@@ -262,6 +272,10 @@ export function Navbar() {
               <Link href="/cart" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">My Cart</Link>
               <Link href="/account/orders" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Track Order</Link>
               
+              {userEmail === "ezeilodavid292@gmail.com" && (
+                <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3.5 hover:bg-blue-50 font-bold text-blue-700 border-b border-slate-100">Admin Panel</Link>
+              )}
+
               {userName && (
                 <button onClick={handleLogout} className="w-full text-left flex items-center gap-2 px-4 py-4 mt-4 bg-red-50 text-red-600 font-medium hover:bg-red-100 transition-colors">
                   <LogOut className="w-5 h-5" /> Log Out
