@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SendToSupplierButton } from "./SendToSupplierButton";
 import { UpdateTrackingForm } from "./UpdateTrackingForm";
+import { OrderReadMarker } from "./OrderReadMarker";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
@@ -13,11 +14,6 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
   
   const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", resolvedParams.id).single();
   if (!order) return notFound();
-
-  // Mark as read when admin views the order details
-  if (order.is_read === false || order.is_read === null) {
-    await supabaseAdmin.from("orders").update({ is_read: true }).eq("id", order.id);
-  }
 
   const { data: items } = await supabaseAdmin.from("order_items").select(`
     *,
@@ -28,6 +24,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
 
   return (
     <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
+      <OrderReadMarker orderId={order.id} isRead={!!order.is_read} />
       <div className="mb-6">
         <Link href="/admin/orders" className="text-sm text-slate-500 hover:text-blue-600 flex items-center mb-4">
           <ChevronLeft className="w-4 h-4 mr-1" /> Back to Orders

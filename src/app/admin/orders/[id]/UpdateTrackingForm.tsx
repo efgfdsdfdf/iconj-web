@@ -37,6 +37,16 @@ export function UpdateTrackingForm({ order }: { order: any }) {
       {success && <div className="p-3 bg-emerald-50 text-emerald-600 rounded text-sm">{success}</div>}
       
       <div className="space-y-2">
+        <Label>Payment Status</Label>
+        <select name="payment_status" defaultValue={order.payment_status || "pending"} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <option value="pending">Pending / Unpaid</option>
+          <option value="paid">Paid</option>
+          <option value="failed">Failed</option>
+          <option value="refunded">Refunded</option>
+        </select>
+      </div>
+
+      <div className="space-y-2">
         <Label>Order Status</Label>
         <select name="status" defaultValue={order.order_status} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
           <option value="pending_payment">Awaiting Payment</option>
