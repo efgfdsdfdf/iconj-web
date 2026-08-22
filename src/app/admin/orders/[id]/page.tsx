@@ -1,14 +1,16 @@
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Package, User, Clock, ChevronLeft, Truck } from "lucide-react";
+import { MapPin, Package, User, Clock, ChevronLeft, Truck, CreditCard, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { SendToSupplierButton } from "./SendToSupplierButton";
-import { UpdateTrackingForm } from "./UpdateTrackingForm";
 import { OrderReadMarker } from "./OrderReadMarker";
+import { OrderTimeline } from "./components/OrderTimeline";
+import { AdminNotes } from "./components/AdminNotes";
+import { requireAdmin } from "@/lib/auth/admin";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireAdmin();
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const resolvedParams = await params;
   
@@ -20,13 +22,17 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
     product:products(name, sku, images)
   `).eq("order_id", order.id);
 
+  const { data: timelineEvents } = await supabaseAdmin.from("order_events").select("*").eq("order_id", order.id).order("created_at", { ascending: true });
+  const { data: adminNotes } = await supabaseAdmin.from("admin_notes").select("*").eq("order_id", order.id).order("created_at", { ascending: true });
+
   const address = order.delivery_address || {};
 
   return (
     <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
-      <OrderReadMarker orderId={order.id} isRead={!!order.is_read} />
+      <OrderReadMarker orderId={order.id} adminViewed={!!order.admin_viewed} />
+      
       <div className="mb-6">
-        <Link href="/admin/orders" className="text-sm text-slate-500 hover:text-blue-600 flex items-center mb-4">
+        <Link href="/admin/orders" className="text-sm text-slate-500 hover:text-blue-600 flex items-center mb-4 w-fit">
           <ChevronLeft className="w-4 h-4 mr-1" /> Back to Orders
         </Link>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
@@ -39,8 +45,26 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Order Details */}
+        
+        {/* Main Column */}
         <div className="lg:col-span-2 space-y-6">
+          
+          {/* FULFILLMENT STATUS SPLIT */}
+          <div className="grid grid-cols-2 gap-4">
+            <Card className="border-none shadow-sm bg-blue-50/50">
+              <CardContent className="p-4">
+                <p className="text-xs font-bold text-blue-800 mb-1 uppercase tracking-wider">Customer Status</p>
+                <div className="text-lg font-bold text-slate-900">{order.order_status}</div>
+              </CardContent>
+            </Card>
+            <Card className="border-none shadow-sm bg-indigo-50/50">
+              <CardContent className="p-4">
+                <p className="text-xs font-bold text-indigo-800 mb-1 uppercase tracking-wider">Supplier Status</p>
+                <div className="text-lg font-bold text-slate-900">{order.supplier_order_status}</div>
+              </CardContent>
+            </Card>
+          </div>
+
           <Card className="border-none shadow-sm">
             <CardHeader className="border-b pb-4">
               <CardTitle className="text-lg">Order Items</CardTitle>
@@ -73,51 +97,66 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
               </div>
             </CardContent>
           </Card>
+
+          <OrderTimeline events={timelineEvents || []} />
+          
         </div>
 
         {/* Sidebar Info */}
         <div className="space-y-6">
           <Card className="border-none shadow-sm">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg flex items-center"><MapPin className="w-4 h-4 mr-2" /> Shipping Address</CardTitle>
+              <CardTitle className="text-lg flex items-center"><User className="w-4 h-4 mr-2" /> Customer & Shipping</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="space-y-1 text-sm text-slate-700">
-                <p className="font-bold text-slate-900 mb-2">Customer Details</p>
-                <p>{address.street || "No street provided"}</p>
-                <p>{address.city || "No city provided"}</p>
-                <p>{address.state || "No state provided"}</p>
-                {/* Fallback to checkout API saved name/phone if available inside address json */}
+              <div className="space-y-3 text-sm text-slate-700">
+                <div>
+                  <p className="font-bold text-slate-900">{address.name || "N/A"}</p>
+                  <p>{address.phone || "No phone"}</p>
+                </div>
+                <div className="pt-3 border-t">
+                  <p>{address.street || "No street"}</p>
+                  <p>{address.city || "No city"}</p>
+                  <p>{address.state || "No state"}</p>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           <Card className="border-none shadow-sm">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg flex items-center"><Clock className="w-4 h-4 mr-2" /> Status</CardTitle>
+              <CardTitle className="text-lg flex items-center"><CreditCard className="w-4 h-4 mr-2" /> Financial Breakdown</CardTitle>
             </CardHeader>
-            <CardContent className="pt-6 space-y-4">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500">Payment</span>
-                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${order.payment_status === "paid" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}`}>{order.payment_status}</span>
+            <CardContent className="pt-6 space-y-4 text-sm">
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Payment Status</span>
+                <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${order.payment_status === "PAID" ? "bg-emerald-100 text-emerald-700" : "bg-slate-200 text-slate-700"}`}>
+                  {order.payment_status}
+                </span>
               </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-slate-500">Fulfillment</span>
-                <span className="px-2 py-1 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-700">{order.order_status}</span>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Customer Paid</span>
+                <span className="font-bold text-slate-900">₦{Number(order.total_amount).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t border-slate-100">
+                <span className="text-slate-500">Supplier Cost</span>
+                <span className="font-bold text-rose-600">-₦{Number(order.supplier_cost).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-slate-500">Shipping Cost</span>
+                <span className="font-bold text-rose-600">-₦{Number(order.shipping_cost).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between items-center pt-3 border-t border-slate-200">
+                <span className="font-bold text-slate-900">Estimated Profit</span>
+                <span className="font-bold text-emerald-600">₦{Number(order.estimated_profit).toLocaleString()}</span>
               </div>
             </CardContent>
           </Card>
-          <Card className="border-none shadow-sm mt-6">
-            <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg flex items-center"><Truck className="w-4 h-4 mr-2" /> Tracking Update</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <UpdateTrackingForm order={order} />
-            </CardContent>
-          </Card>
+
+          <AdminNotes orderId={order.id} notes={adminNotes || []} />
+
         </div>
       </div>
     </main>
   );
 }
-

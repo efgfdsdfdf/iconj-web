@@ -2,123 +2,106 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@supabase/supabase-js";
-import { MessageCircle, FileText, Factory, ArrowRight } from "lucide-react";
+import { Truck, Plus, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import CopyOrderButton from "./CopyOrderButton";
-import { ExportCsvButton } from "./ExportCsvButton";
-import { ImportTrackingButton } from "./ImportTrackingButton";
-import { MarkSupplierPaidButton } from "./MarkSupplierPaidButton";
+import { requireAdmin } from "@/lib/auth/admin";
+import { AddSupplierDialog } from "./AddSupplierDialog";
 
 export const revalidate = 0;
 
-export default async function AdminSupplierPage() {
+export default async function AdminSupplierListPage() {
+  await requireAdmin();
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  const { data: allOrders } = await supabaseAdmin
+  // Fetch all suppliers
+  const { data: suppliers } = await supabaseAdmin.from("suppliers").select("*").order("name");
+
+  // Fetch latest balances for all suppliers
+  const { data: latestBalances } = await supabaseAdmin
+    .from("supplier_transactions")
+    .select("supplier_id, new_balance")
+    .order("sequence_num", { ascending: false });
+
+  // Fetch pending supplier payments (orders that are SENT or PAYMENT_PENDING)
+  const { data: pendingOrders } = await supabaseAdmin
     .from("orders")
-    .select("*, order_items(*, products(*)), profiles(name, email)")
-    .eq("payment_status", "paid")
-    .in("order_status", ["in_production", "processing"])
-    .order("created_at", { ascending: true });
+    .select("supplier_id, supplier_cost")
+    .eq("supplier_order_status", "PAYMENT_PENDING");
 
-  const orders = allOrders?.filter(o => o.supplier_paid !== true) || [];
+  const supplierMap = new Map();
+  latestBalances?.forEach(tx => {
+    if (!supplierMap.has(tx.supplier_id)) {
+      supplierMap.set(tx.supplier_id, tx.new_balance);
+    }
+  });
 
-  const totalOwed = orders?.reduce((sum, o) => sum + (Number(o.supplier_cost) || 0), 0) || 0;
-  const totalOrders = orders?.length || 0;
+  const pendingMap = new Map();
+  pendingOrders?.forEach(order => {
+    if (!pendingMap.has(order.supplier_id)) pendingMap.set(order.supplier_id, 0);
+    pendingMap.set(order.supplier_id, pendingMap.get(order.supplier_id) + Number(order.supplier_cost));
+  });
 
   return (
     <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Supplier Fulfilment CRM</h1>
-          <p className="text-sm text-slate-500">Manage dropshipping orders and forward them to your manufacturers.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Supplier Management</h1>
+          <p className="text-sm text-slate-500">Manage multiple suppliers, ledgers, and payments.</p>
         </div>
-        <div className="flex gap-3">
-          <ImportTrackingButton />
-          <ExportCsvButton orders={orders || []} />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <Card className="border-none shadow-sm">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
-              <Factory className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Orders to Fulfill</p>
-              <h3 className="text-2xl font-bold text-slate-900">{totalOrders}</h3>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-none shadow-sm ring-1 ring-red-100">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600">
-              <FileText className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Total Supplier Balance (Est.)</p>
-              <h3 className="text-2xl font-bold text-red-600">?{totalOwed.toLocaleString()}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <AddSupplierDialog />
       </div>
 
       <Card className="border-none shadow-sm overflow-hidden">
-        <CardHeader className="bg-white border-b pb-4">
-          <CardTitle className="text-lg">Pending Dropship Orders</CardTitle>
-        </CardHeader>
-        <CardContent className="p-0 overflow-x-auto">
+        <CardContent className="p-0">
           <Table>
-            <TableHeader className="bg-slate-50/50">
+            <TableHeader className="bg-slate-50">
               <TableRow>
-                <TableHead className="pl-6">Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Items / SKUs</TableHead>
-                <TableHead>Supplier Cost</TableHead>
+                <TableHead className="pl-6">Supplier Name</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Available Balance</TableHead>
+                <TableHead>Pending Payments</TableHead>
                 <TableHead className="text-right pr-6">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {orders && orders.length > 0 ? (
-                orders.map((order) => (
-                  <TableRow key={order.id} className="hover:bg-slate-50/50">
-                    <TableCell className="pl-6 font-medium text-blue-600">
-                      <Link href={`/admin/orders/${order.id}`}>
-                        #{order.id.split('-')[0].toUpperCase()}
-                      </Link>
-                      <p className="text-xs text-slate-400 font-normal mt-1">{new Date(order.created_at).toLocaleDateString()}</p>
-                    </TableCell>
-                    <TableCell>
-                      {order.profiles?.name || 'Guest'}
-                      <p className="text-xs text-slate-500">
-                        {order.delivery_address?.city}, {order.delivery_address?.state}
-                      </p>
-                    </TableCell>
-                    <TableCell>
-                      <div className="space-y-2">
-                        {order.order_items?.map((item: any, i: number) => (
-                          <div key={i} className="text-xs">
-                            <span className="font-semibold">{item.quantity}x</span> {item.products?.name}
-                            <div className="text-slate-500">SKU: {item.products?.supplier_sku || 'N/A'}</div>
-                          </div>
-                        ))}
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-bold text-red-600">
-                      ?{Number(order.supplier_cost).toLocaleString()}
-                    </TableCell>
-                    <TableCell className="text-right pr-6 flex items-center justify-end gap-2">
-                      <CopyOrderButton order={order} />
-                      <MarkSupplierPaidButton orderId={order.id} />
-                    </TableCell>
-                  </TableRow>
-                ))
+              {suppliers && suppliers.length > 0 ? (
+                suppliers.map((supplier) => {
+                  const balance = supplierMap.get(supplier.id) || 0;
+                  const pending = pendingMap.get(supplier.id) || 0;
+                  return (
+                    <TableRow key={supplier.id} className="hover:bg-slate-50">
+                      <TableCell className="pl-6 font-bold text-slate-900 flex items-center gap-2">
+                        <Truck className="w-4 h-4 text-slate-400" /> {supplier.name}
+                      </TableCell>
+                      <TableCell className="text-slate-500 text-xs">
+                        {supplier.email}<br/>{supplier.phone}
+                      </TableCell>
+                      <TableCell>
+                        <span className={`font-bold ${balance > 0 ? 'text-emerald-600' : balance < 0 ? 'text-red-600' : 'text-slate-600'}`}>
+                          {supplier.currency} {Number(balance).toLocaleString()}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {pending > 0 ? (
+                          <span className="font-bold text-red-600">{supplier.currency} {Number(pending).toLocaleString()}</span>
+                        ) : (
+                          <span className="text-slate-400">None</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right pr-6">
+                        <Link href={`/admin/supplier/${supplier.id}`}>
+                          <Button size="sm" variant="outline" className="hover:bg-blue-50 hover:text-blue-600">
+                            View Ledger <ArrowRight className="w-4 h-4 ml-2" />
+                          </Button>
+                        </Link>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-16 text-slate-500">
-                    <Factory className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-                    All paid orders have been forwarded to the supplier!
+                  <TableCell colSpan={5} className="h-32 text-center text-slate-500">
+                    No suppliers added yet.
                   </TableCell>
                 </TableRow>
               )}

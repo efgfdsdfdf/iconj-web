@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect } from "react";
-import { markOrderAsRead } from "./actions";
+import { markOrderAsViewed } from "./actions";
 
-export function OrderReadMarker({ orderId, isRead }: { orderId: string, isRead: boolean }) {
+export function OrderReadMarker({ orderId, adminViewed }: { orderId: string, adminViewed: boolean }) {
   useEffect(() => {
-    if (!isRead) {
-      markOrderAsRead(orderId).catch(console.error);
+    if (!adminViewed) {
+      markOrderAsViewed(orderId).catch(console.error);
     }
-  }, [orderId, isRead]);
+  }, [orderId, adminViewed]);
 
   return null;
 }

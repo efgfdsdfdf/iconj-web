@@ -1,37 +1,37 @@
 "use server";
 
-import { createClient } from "@supabase/supabase-js";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 
-export async function updateOrderTracking(formData: FormData) {
-  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+export async function markOrderAsViewed(orderId: string) {
+  const cookieStore = await cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: { get(name) { return cookieStore.get(name)?.value; } }
+    }
+  );
   
-  const orderId = formData.get("orderId") as string;
-  const status = formData.get("status") as string;
-  const carrier = formData.get("carrier") as string;
-  const trackingNumber = formData.get("tracking_number") as string;
-  const paymentStatus = formData.get("payment_status") as string;
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user || user.email !== "ezeilodavid292@gmail.com") return;
 
-  if (!orderId) return { error: "Order ID missing" };
+  const supabaseAdmin = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { cookies: { get() { return undefined; } } }
+  );
 
-  const { error } = await supabaseAdmin.from("orders").update({
-    order_status: status,
-    shipping_carrier: carrier || null,
-    tracking_number: trackingNumber || null,
-    payment_status: paymentStatus || undefined
+  // We add order_events tracking here for "Admin Viewed" if we want, but it might clutter.
+  // Actually, let's just update the flag.
+  await supabaseAdmin.from("orders").update({
+    admin_viewed: true,
+    admin_viewed_at: new Date().toISOString(),
+    admin_viewed_by: user.id
   }).eq("id", orderId);
 
-  if (error) return { error: error.message };
-
-  revalidatePath(`/admin/orders/${orderId}`);
-  revalidatePath(`/track`);
-  return { success: true };
-}
-
-export async function markOrderAsRead(orderId: string) {
-  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-  
-  await supabaseAdmin.from("orders").update({ is_read: true }).eq("id", orderId);
   revalidatePath("/admin/orders");
   revalidatePath(`/admin/orders/${orderId}`);
+  revalidatePath("/admin");
 }

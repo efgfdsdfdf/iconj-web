@@ -1,8 +1,10 @@
-import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Box, LayoutDashboard, Settings, ShoppingCart, Users, Truck, Menu, AlertCircle, Image as ImageIcon, WalletCards, LogOut } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { verifyAdmin } from "@/lib/auth/admin";
+import { RealtimeAdminUpdates } from "@/components/admin/RealtimeAdminUpdates";
+import { AdminHeader } from "@/components/admin/AdminHeader";
 
 function AdminNavLinks() {
   return (
@@ -36,19 +38,18 @@ function AdminNavLinks() {
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // STRICT ADMIN ACCESS CONTROL
-  if (!user || user.email !== "ezeilodavid292@gmail.com") {
+  // STRICT ADMIN ACCESS CONTROL using the centralized helper
+  const { isAdmin } = await verifyAdmin();
+  if (!isAdmin) {
     redirect("/account");
   }
 
   return (
-    <div className="flex flex-col md:flex-row min-h-[calc(100vh-130px)] bg-slate-50">
+    <div className="flex flex-col md:flex-row min-h-[calc(100vh-130px)] bg-slate-50 relative">
+      <RealtimeAdminUpdates />
       
       {/* Mobile Header */}
-      <div className="md:hidden flex items-center justify-between bg-slate-900 p-4">
+      <div className="md:hidden flex items-center justify-between bg-slate-900 p-4 sticky top-0 z-30">
         <div>
           <h2 className="text-white font-bold tracking-tight">ICONJ Admin</h2>
         </div>
@@ -67,7 +68,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="w-64 bg-slate-900 text-slate-300 hidden md:block shrink-0">
+      <aside className="w-64 bg-slate-900 text-slate-300 hidden md:block shrink-0 z-10">
         <div className="p-6 fixed w-64 h-[calc(100vh-130px)] overflow-y-auto">
           <div className="mb-8">
             <h2 className="text-white font-bold text-lg tracking-tight">ICONJ Admin</h2>
@@ -79,6 +80,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col w-full overflow-hidden">
+        <AdminHeader />
         {children}
       </div>
     </div>
