@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/admin";
 import { sendEmailTo } from "@/lib/email";
 
-export async function sendOrderToSupplier(orderId: string) {
+export async function sendOrderToSupplier(orderId: string, overrideEmail?: string) {
   const adminId = await requireAdmin();
 
   const supabaseAdmin = createServerClient(
@@ -24,7 +24,7 @@ export async function sendOrderToSupplier(orderId: string) {
   }
 
   // 2. Generate and Send Email
-  const supplierEmail = order.supplier?.email;
+  const supplierEmail = overrideEmail || order.supplier?.email;
   if (supplierEmail) {
     const address = order.delivery_address || {};
     const shortId = order.id.split("-")[0].toUpperCase();

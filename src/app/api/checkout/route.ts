@@ -89,10 +89,8 @@ export async function POST(request: Request) {
     // Paystack expects amount in kobo (multiply Naira by 100)
     const amountInKobo = totalAmount * 100;
 
-    // Extract origin dynamically so it works seamlessly on localhost and Vercel
-    const origin = new URL(request.url).origin;
-
     // 4. Initialize Paystack Transaction
+    const siteUrl = "https://iconj-web-rust.vercel.app";
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
@@ -103,7 +101,7 @@ export async function POST(request: Request) {
         email: email,
         amount: amountInKobo,
         reference: orderData.id,
-        callback_url: `${origin}/api/callback`,
+        callback_url: `${siteUrl}/api/callback`,
         metadata: {
           order_id: orderData.id,
           custom_fields: [

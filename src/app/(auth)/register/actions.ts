@@ -9,7 +9,7 @@ export async function notifyAdminNewUser(name: string, email: string) {
     <p><strong>Name:</strong> ${name}</p>
     <p><strong>Email:</strong> ${email}</p>
     <br/>
-    <p><a href="${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/admin/customers">View in Admin Panel</a></p>
+    <p><a href="https://iconj-web-rust.vercel.app/admin/customers">View in Admin Panel</a></p>
   `;
 
   await sendAdminNotification(`👤 New User Registration: ${name}`, htmlContent);
@@ -30,7 +30,7 @@ export async function registerAction(formData: FormData) {
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/welcome`,
+        emailRedirectTo: 'https://iconj-web-rust.vercel.app/welcome',
         data: {
           full_name: `${firstName} ${lastName}`
         }

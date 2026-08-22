@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       <p><strong>Order ID:</strong> ${data.order_id}</p>
       <p><strong>Issue Type:</strong> ${data.issue_type}</p>
       <p><strong>Description:</strong><br/>${data.description}</p>
-      <p><a href="${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/admin/issues">Log in to Admin Dashboard to view evidence and respond.</a></p>
+      <p><a href="https://iconj-web-rust.vercel.app/admin/issues">Log in to Admin Dashboard to view evidence and respond.</a></p>
     `;
 
     const success = await sendAdminNotification(`⚠️ New Order Issue Reported: ${data.issue_type}`, htmlContent);

@@ -49,7 +49,7 @@ export async function sendSupportMessage(message: string) {
     <p><strong>Message:</strong></p>
     <blockquote style="border-left: 4px solid #ccc; padding-left: 10px; margin-left: 0;">${message}</blockquote>
     <br/>
-    <p><a href="${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/admin/support">Reply in Admin Dashboard</a></p>
+    <p><a href="https://iconj-web-rust.vercel.app/admin/support">Reply in Admin Dashboard</a></p>
   `;
   await sendAdminNotification(`💬 New Message from ${name}`, htmlContent).catch(console.error);
 
