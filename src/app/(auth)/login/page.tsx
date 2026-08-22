@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "react-hot-toast";
 import { Eye, EyeOff } from "lucide-react";
 
 function LoginForm() {
