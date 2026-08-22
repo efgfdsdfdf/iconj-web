@@ -17,6 +17,7 @@ export function Navbar() {
   const [tapCount, setTapCount] = useState(0);
   
   const items = useCartStore((state) => state.items);
+  const setItems = useCartStore((state) => state.setItems);
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -29,19 +30,48 @@ export function Navbar() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserEmail(user.email || null);
-        const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
+        const { data: profile } = await supabase.from("profiles").select("name, cart").eq("id", user.id).single();
         if (profile && profile.name) {
           setUserName(profile.name.split(" ")[0]);
         } else {
           // Fallback to the first part of their email if profile fetch fails (e.g. RLS)
           setUserName(user.email ? user.email.split("@")[0] : "User");
         }
+
+        // Cloud Cart Sync Down
+        if (profile?.cart && Array.isArray(profile.cart) && profile.cart.length > 0) {
+          const currentLocalCart = useCartStore.getState().items;
+          if (currentLocalCart.length === 0) {
+            setItems(profile.cart);
+          } else {
+            // Push local cart up if they started shopping before logging in
+            fetch('/api/cart/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ items: currentLocalCart })
+            }).catch(console.error);
+          }
+        }
       }
     };
     checkAuth();
-  }, [supabase]);
+  }, [supabase, setItems]);
   
   useEffect(() => { setIsMobileMenuOpen(false); }, [pathname]);
+
+  // Cloud Cart Sync Up
+  useEffect(() => {
+    if (userEmail && mounted) {
+      const timer = setTimeout(() => {
+        fetch('/api/cart/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items })
+        }).catch(console.error);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [items, userEmail, mounted]);
 
   const handleLogout = async () => {
     await fetch("/auth/signout", { method: "POST" });
