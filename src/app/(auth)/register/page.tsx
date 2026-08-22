@@ -34,6 +34,7 @@ export default function RegisterPage() {
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/welcome`,
           data: {
             full_name: `${formData.firstName} ${formData.lastName}`
           }
@@ -44,8 +45,11 @@ export default function RegisterPage() {
         throw authError;
       }
 
-      // Automatically sign them in as well or redirect to account
-      router.push("/account");
+      if (data.session) {
+        router.push("/welcome");
+      } else {
+        router.push("/verify-email");
+      }
       router.refresh();
       
     } catch (err: any) {
