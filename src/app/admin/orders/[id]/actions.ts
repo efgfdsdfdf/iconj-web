@@ -28,6 +28,26 @@ export async function updateOrderTracking(formData: FormData) {
 
   if (error) return { error: error.message };
 
+  const emailStatuses = ['PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED'];
+  if (emailStatuses.includes(status)) {
+    try {
+      const { sendStatusNotification } = await import("@/lib/order-emails");
+      await sendStatusNotification(orderId, status, {
+        tracking_number: trackingNumber,
+        shipping_carrier: carrier
+      });
+    } catch (e) {
+      console.error('Failed to send status email:', e);
+    }
+  }
+
+  // Also add an order_event for status changes
+  await supabaseAdmin.from('order_events').insert({
+    order_id: orderId,
+    event_type: status,
+    description: `Order status updated to ${status}.`
+  });
+
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath(`/track`);
   return { success: true };

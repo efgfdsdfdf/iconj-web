@@ -67,6 +67,14 @@ export async function GET(request: Request) {
           } catch (e) {
             console.warn("Failed to send email fallback", e);
           }
+
+          // Send Payment Receipt to Customer
+          try {
+            const { sendPaymentReceipt } = await import("@/lib/order-emails");
+            await sendPaymentReceipt(orderId);
+          } catch (e) {
+            console.error("Failed to send payment receipt:", e);
+          }
         }
       }
 

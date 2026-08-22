@@ -68,6 +68,13 @@ export async function sendOrderToSupplier(orderId: string) {
     admin_id: adminId
   });
 
+  try {
+    const { sendStatusNotification } = await import("@/lib/order-emails");
+    await sendStatusNotification(orderId, 'SENT_TO_SUPPLIER');
+  } catch (e) {
+    console.error('Failed to send supplier notification email:', e);
+  }
+
   revalidatePath(`/admin/orders/${orderId}`);
   revalidatePath(`/admin/orders`);
 }

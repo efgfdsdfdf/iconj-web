@@ -4,10 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PackageSearch, Truck, Package, CheckCircle2, ChevronRight, Search } from "lucide-react";
-import Link from "next/link";
+import { PackageSearch, Truck, Package, CheckCircle2, Search, Clock, CreditCard, Box } from "lucide-react";
 import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 export default function TrackOrderPage() {
   const [orderId, setOrderId] = useState("");
@@ -15,8 +13,6 @@ export default function TrackOrderPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [order, setOrder] = useState<any>(null);
-
-  const supabase = createClient();
 
   const fetchOrder = async (id: string) => {
     setLoading(true);
@@ -54,18 +50,61 @@ export default function TrackOrderPage() {
     fetchOrder(orderId);
   };
 
+  // Define the full lifecycle of possible statuses
   const statusList = [
-    { id: "NEW", label: "Awaiting Payment" },
-    { id: "PAYMENT_CONFIRMED", label: "Payment Confirmed" },
-    { id: "PROCESSING", label: "Processing Order" },
-    { id: "SHIPPED", label: "In Transit" },
-    { id: "DELIVERED", label: "Delivered" }
+    { id: "NEW", label: "Order Placed", icon: Package },
+    { id: "PAYMENT_CONFIRMED", label: "Payment Confirmed", icon: CreditCard },
+    { id: "PROCESSING", label: "Processing", icon: Clock },
+    { id: "SENT_TO_SUPPLIER", label: "Sent for Fulfillment", icon: Box },
+    { id: "SHIPPED", label: "Shipped", icon: Truck },
+    { id: "DELIVERED", label: "Delivered", icon: CheckCircle2 },
   ];
 
-  const currentStatusIndex = Math.max(
-    0,
-    statusList.findIndex(s => s.id === order?.order_status)
-  );
+  // Determine which steps are completed based on order_events
+  const getCompletedSteps = () => {
+    if (!order) return new Set<string>();
+    const events = order.order_events || [];
+    const completedEventTypes = new Set(events.map((e: any) => e.event_type));
+    
+    // Also include the current order_status as completed
+    completedEventTypes.add(order.order_status);
+    
+    // Build the set of completed status IDs
+    const completed = new Set<string>();
+    for (const step of statusList) {
+      if (completedEventTypes.has(step.id)) {
+        completed.add(step.id);
+        // Also mark all prior steps as completed
+        for (const prior of statusList) {
+          completed.add(prior.id);
+          if (prior.id === step.id) break;
+        }
+      }
+    }
+    return completed;
+  };
+
+  const completedSteps = getCompletedSteps();
+  
+  // Find the index of the current status in the status list
+  const currentStatusIndex = (() => {
+    if (!order) return 0;
+    const idx = statusList.findIndex(s => s.id === order.order_status);
+    return idx >= 0 ? idx : 0;
+  })();
+
+  // Build the timeline from order_events
+  const getTimelineEntries = () => {
+    if (!order?.order_events) return [];
+    return (order.order_events as any[])
+      .filter((e: any) => !['ADMIN_NOTE'].includes(e.event_type))
+      .sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      .map((e: any) => ({
+        type: e.event_type,
+        description: e.description,
+        date: new Date(e.created_at).toLocaleString('en-NG', { dateStyle: 'medium', timeStyle: 'short' })
+      }));
+  };
 
   return (
     <div className="container flex min-h-[calc(100vh-200px)] flex-col items-center py-12 px-4">
@@ -161,22 +200,43 @@ export default function TrackOrderPage() {
                 />
                 
                 <div className="relative z-10 flex justify-between">
-                  {statusList.map((step, idx) => (
-                    <div key={idx} className="flex flex-col items-center gap-3 bg-white px-2">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm transition-colors ${
-                        idx <= currentStatusIndex ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400"
-                      }`}>
-                        {idx === 0 ? <Package className="w-4 h-4" /> : 
-                         idx === statusList.length - 1 ? <CheckCircle2 className="w-4 h-4" /> : 
-                         <Truck className="w-4 h-4" />}
+                  {statusList.map((step, idx) => {
+                    const StepIcon = step.icon;
+                    const isCompleted = completedSteps.has(step.id);
+                    const isCurrent = step.id === order.order_status;
+                    return (
+                      <div key={idx} className="flex flex-col items-center gap-3 bg-white px-1 md:px-2">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center border-4 border-white shadow-sm transition-colors ${
+                          isCompleted ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-400"
+                        } ${isCurrent ? "ring-2 ring-blue-300" : ""}`}>
+                          <StepIcon className="w-4 h-4" />
+                        </div>
+                        <span className={`text-[10px] md:text-xs font-semibold text-center leading-tight ${isCompleted ? "text-slate-900" : "text-slate-400"}`}>
+                          {step.label}
+                        </span>
                       </div>
-                      <span className={`text-xs md:text-sm font-semibold text-center ${idx <= currentStatusIndex ? "text-slate-900" : "text-slate-400"}`}>
-                        {step.label}
-                      </span>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
+
+              {/* Event Timeline */}
+              {getTimelineEntries().length > 0 && (
+                <div className="mb-8">
+                  <h4 className="font-bold text-slate-900 mb-4">Order Timeline</h4>
+                  <div className="space-y-3">
+                    {getTimelineEntries().map((entry: any, idx: number) => (
+                      <div key={idx} className="flex gap-3 items-start">
+                        <div className="w-2 h-2 rounded-full bg-blue-600 mt-2 shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">{entry.description}</p>
+                          <p className="text-xs text-slate-500">{entry.date}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Order Items */}
               <div>
@@ -210,5 +270,3 @@ export default function TrackOrderPage() {
     </div>
   );
 }
-
-

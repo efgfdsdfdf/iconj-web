@@ -8,6 +8,7 @@ import { OrderReadMarker } from "./OrderReadMarker";
 import { OrderTimeline } from "./components/OrderTimeline";
 import { AdminNotes } from "./components/AdminNotes";
 import { requireAdmin } from "@/lib/auth/admin";
+import { EmailHistory } from "./components/EmailHistory";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   await requireAdmin();
@@ -24,6 +25,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
 
   const { data: timelineEvents } = await supabaseAdmin.from("order_events").select("*").eq("order_id", order.id).order("created_at", { ascending: true });
   const { data: adminNotes } = await supabaseAdmin.from("admin_notes").select("*").eq("order_id", order.id).order("created_at", { ascending: true });
+  const { data: orderEmails } = await supabaseAdmin.from("order_emails").select("*").eq("order_id", order.id).order("created_at", { ascending: true });
 
   const address = order.delivery_address || {};
 
@@ -154,6 +156,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
           </Card>
 
           <AdminNotes orderId={order.id} notes={adminNotes || []} />
+          <EmailHistory orderId={order.id} emails={orderEmails || []} />
 
         </div>
       </div>

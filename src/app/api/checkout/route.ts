@@ -67,7 +67,8 @@ export async function POST(request: Request) {
       delivery_address: {
         ...body.address,
         name: body.name,
-        phone: body.phone
+        phone: body.phone,
+        email: email
       },
     }]).select().single();
 
