@@ -16,8 +16,11 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
     addItem({
       id: product.id,
       name: product.name,
-      price: product.base_selling_price,
-      quantity: 1,
+      basePrice: Number(product.base_selling_price) || 0,
+      price: Number(product.base_selling_price) || 0,
+      quantity: product.moq || 1,
+      moq: product.moq || 1,
+      pricingTiers: product.pricing_tiers || [],
       image: product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"
     });
     setAdded(true);
