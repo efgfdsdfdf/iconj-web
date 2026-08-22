@@ -83,7 +83,7 @@ export default function EditProductPage() {
     setError(null);
 
     try {
-      await updateProduct(id, {
+      const result = await updateProduct(id, {
         name: formData.name,
         sku: formData.sku,
         category: formData.category,
@@ -101,6 +101,8 @@ export default function EditProductPage() {
           supplier_id: formData.supplier_id || null
         }
       });
+
+      if (result?.error) throw new Error(result.error);
 
       router.push("/admin/products");
       router.refresh();

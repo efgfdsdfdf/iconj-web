@@ -18,7 +18,9 @@ export function DeleteSupplierButton({ supplierId, supplierName }: { supplierId:
     
     setLoading(true);
     try {
-      await deleteSupplier(supplierId);
+      const result = await deleteSupplier(supplierId);
+      if (result?.error) throw new Error(result.error);
+      
       toast.success("Supplier deleted successfully!");
       router.push("/admin/supplier");
       router.refresh();

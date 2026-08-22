@@ -84,6 +84,7 @@ export async function deleteSupplier(supplierId: string) {
   await requireAdmin();
   const supabaseAdmin = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { cookies: { get() { return undefined; } } });
   const { error } = await supabaseAdmin.from('suppliers').delete().eq('id', supplierId);
-  if (error) throw new Error(error.message);
+  if (error) return { success: false, error: error.message };
   // revalidatePath('/admin/supplier');
+  return { success: true };
 }
