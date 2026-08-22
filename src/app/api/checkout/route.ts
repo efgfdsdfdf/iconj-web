@@ -15,12 +15,24 @@ export async function POST(request: Request) {
     const shippingFee = 0;
     const totalAmount = subtotal + shippingFee;
     
-    // Rough estimate based on the 30% margin rule (Selling Price = Cost / 0.70)
-    const supplierCost = subtotal * 0.70;
-    const estimatedProfit = subtotal - supplierCost;
-
     // Create a server Supabase client using Service Role to bypass RLS
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Fetch actual supplier costs from the database securely
+    const productIds = items.map((i: any) => i.id);
+    const { data: dbProducts } = await supabaseAdmin
+      .from("products")
+      .select("id, base_supplier_cost")
+      .in("id", productIds);
+      
+    let actualSupplierCost = 0;
+    items.forEach((item: any) => {
+      const dbProduct = dbProducts?.find((p: any) => p.id === item.id);
+      const unitCost = dbProduct ? Number(dbProduct.base_supplier_cost) || 0 : 0;
+      actualSupplierCost += (unitCost * item.quantity);
+    });
+    
+    const estimatedProfit = subtotal - actualSupplierCost;
 
     // If the user checked out with a new address and they are logged in, save it to their addresses table
     if (body.saveAddress && userId) {
@@ -40,7 +52,7 @@ export async function POST(request: Request) {
       user_id: userId || null,
       total_amount: totalAmount,
       shipping_cost: shippingFee,
-      supplier_cost: supplierCost,
+      supplier_cost: actualSupplierCost,
       estimated_profit: estimatedProfit,
       payment_status: "pending",
       order_status: "pending_payment",

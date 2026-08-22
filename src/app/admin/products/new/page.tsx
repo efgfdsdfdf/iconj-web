@@ -31,6 +31,8 @@ export default function AddProductPage() {
   const [success, setSuccess] = useState(false);
 
   // 1. Basic Info
+  const [pricingTiers, setPricingTiers] = useState<any[]>([]);
+  const [moq, setMoq] = useState(1);
   const [formData, setFormData] = useState({
     name: "", sku: "", category: "Newborn Essentials",
     product_cost: "", shipping_cost: "", selling_price: "",
@@ -106,6 +108,8 @@ export default function AddProductPage() {
         category: formData.category,
         base_supplier_cost: finalCost,
         base_selling_price: parseFloat(formData.selling_price),
+        moq: moq,
+        pricing_tiers: pricingTiers,
         is_configurable: false,
         requires_quote: false,
         images: uploadedUrls,
@@ -169,6 +173,76 @@ export default function AddProductPage() {
         {/* LEFT COLUMN: Basic Info, Details, Images */}
         <div className="xl:col-span-2 space-y-8">
           
+          <Card className="border-none shadow-sm ring-1 ring-blue-100 mb-8">
+            <CardHeader className="bg-blue-50/50">
+              <CardTitle className="text-blue-900 flex justify-between items-center">
+                Wholesale Pricing Tiers
+                <Button type="button" variant="outline" size="sm" onClick={() => setPricingTiers([...pricingTiers, { minQty: moq, maxQty: null, price: formData.selling_price ? parseFloat(formData.selling_price) : 0 }])}>
+                  <Plus className="w-4 h-4 mr-2" /> Add Tier
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Minimum Order Quantity (MOQ)</Label>
+                  <Input type="number" min="1" value={moq} onChange={e => setMoq(parseInt(e.target.value) || 1)} />
+                  <p className="text-xs text-slate-500">Customers cannot order less than this amount.</p>
+                </div>
+              </div>
+              
+              {pricingTiers.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-12 gap-4 text-xs font-bold text-slate-500 uppercase tracking-wider px-2">
+                    <div className="col-span-3">Min Qty</div>
+                    <div className="col-span-3">Max Qty (Leave empty for +)</div>
+                    <div className="col-span-4">Unit Price (₦)</div>
+                    <div className="col-span-2"></div>
+                  </div>
+                  {pricingTiers.map((tier, index) => (
+                    <div key={index} className="grid grid-cols-12 gap-4 items-start bg-slate-50 p-2 rounded-md">
+                      <div className="col-span-3">
+                        <Input type="number" min="1" value={tier.minQty} onChange={(e) => {
+                          const newTiers = [...pricingTiers];
+                          newTiers[index].minQty = parseInt(e.target.value) || 1;
+                          setPricingTiers(newTiers);
+                        }} />
+                      </div>
+                      <div className="col-span-3">
+                        <Input type="number" placeholder="e.g. 5, or leave empty" value={tier.maxQty || ''} onChange={(e) => {
+                          const newTiers = [...pricingTiers];
+                          newTiers[index].maxQty = e.target.value ? parseInt(e.target.value) : null;
+                          setPricingTiers(newTiers);
+                        }} />
+                      </div>
+                      <div className="col-span-4">
+                        <Input type="number" value={tier.price} onChange={(e) => {
+                          const newTiers = [...pricingTiers];
+                          newTiers[index].price = parseFloat(e.target.value) || 0;
+                          setPricingTiers(newTiers);
+                        }} />
+                        <div className="text-xs mt-1 text-slate-500">
+                          Margin vs Base Cost: <span className={tier.price - parseFloat(formData.product_cost || '0') > 0 ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}>
+                            ₦{((tier.price || 0) - parseFloat(formData.product_cost || '0')).toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="col-span-2 flex justify-end">
+                        <Button type="button" variant="ghost" size="icon" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => setPricingTiers(pricingTiers.filter((_, i) => i !== index))}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-slate-500 p-4 bg-slate-50 rounded-md border text-center">
+                  No pricing tiers added. The product will use the Base Selling Price for all quantities.
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           <Card className="border-none shadow-sm">
             <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
             <CardContent className="space-y-6">

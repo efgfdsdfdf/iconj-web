@@ -41,32 +41,51 @@ export default function CartPage() {
                   <div className="w-full sm:w-48 h-48 bg-slate-100 shrink-0 border-r">
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div className="flex justify-between items-start gap-4">
-                      <div>
-                        <h3 className="font-bold text-lg text-slate-900 mb-1">{item.name}</h3>
-                        {item.configuration && (
-                          <div className="text-sm text-slate-500 space-y-0.5">
-                            <p>Size: {item.configuration.width}x{item.configuration.height} cm</p>
-                            <p>Motor: {item.configuration.motor}</p>
-                            <p>Fabric: {item.configuration.fabric}</p>
+                    <div className="flex-1 flex flex-col justify-between ml-4 p-6">
+                      <div className="flex justify-between items-start gap-4">
+                        <div>
+                          <Link href={`/shop/${item.id}`} className="font-bold text-lg text-slate-900 hover:text-blue-600 transition-colors line-clamp-2">
+                            {item.name}
+                          </Link>
+                          {item.configuration && (
+                            <div className="text-sm text-slate-500 mt-1 space-y-0.5">
+                              {Object.entries(item.configuration).map(([key, val]) => (
+                                <p key={key}><span className="font-medium capitalize">{key}:</span> {val as string}</p>
+                              ))}
+                            </div>
+                          )}
+                          <div className="text-sm text-emerald-600 mt-2 font-medium bg-emerald-50 px-2 py-1 rounded-md inline-block">
+                            Wholesale Unit Price: ₦{item.price.toLocaleString()}
                           </div>
-                        )}
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-xl text-slate-900 whitespace-nowrap">₦{(item.price * item.quantity).toLocaleString()}</p>
+                          <p className="text-xs text-slate-500 mt-1">Total Subtotal</p>
+                        </div>
                       </div>
-                      <p className="font-bold text-lg text-slate-900 whitespace-nowrap">₦{(item.price * item.quantity).toLocaleString()}</p>
-                    </div>
 
-                    <div className="flex items-center justify-between mt-6 pt-4 border-t">
-                      <div className="flex items-center border rounded-md">
-                        <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="px-3 py-1 hover:bg-slate-100 text-slate-600 transition-colors">-</button>
-                        <span className="px-4 py-1 border-l border-r text-sm font-medium">{item.quantity}</span>
-                        <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-3 py-1 hover:bg-slate-100 text-slate-600 transition-colors">+</button>
+                      <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center border rounded-md">
+                            <button 
+                              onClick={() => updateQuantity(item.id, item.quantity - 1)} 
+                              disabled={item.quantity <= (item.moq || 1)}
+                              className={`px-3 py-1 transition-colors ${item.quantity <= (item.moq || 1) ? 'bg-slate-50 text-slate-300 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`}
+                            >
+                              -
+                            </button>
+                            <span className="px-4 py-1 border-l border-r text-sm font-medium bg-slate-50">{item.quantity}</span>
+                            <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-3 py-1 hover:bg-slate-100 text-slate-600 transition-colors">+</button>
+                          </div>
+                          {item.moq && item.moq > 1 && (
+                            <span className="text-xs text-slate-500 font-medium">MOQ: {item.moq} units</span>
+                          )}
+                        </div>
+                        <button onClick={() => removeItem(item.id)} className="text-sm font-medium text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors">
+                          <Trash2 className="w-4 h-4" /> Remove
+                        </button>
                       </div>
-                      <button onClick={() => removeItem(item.id)} className="text-sm font-medium text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors">
-                        <Trash2 className="w-4 h-4" /> Remove
-                      </button>
                     </div>
-                  </div>
                 </CardContent>
               </Card>
             ))}

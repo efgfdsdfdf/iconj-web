@@ -12,8 +12,25 @@ export function ProductDetailsClient({ product, images }: { product: any, images
   const addItem = useCartStore((state) => state.addItem);
 
   const [activeImage, setActiveImage] = useState(images[0]);
-  const [qty, setQty] = useState(1);
+  const moq = product.moq || 1;
+  const pricingTiers = product.pricing_tiers || [];
+  const [qty, setQty] = useState(moq);
   const [adding, setAdding] = useState(false);
+
+  const getCurrentPrice = () => {
+    const basePrice = Number(product.base_selling_price) || 0;
+    if (!pricingTiers || pricingTiers.length === 0) return basePrice;
+    
+    const sortedTiers = [...pricingTiers].sort((a: any, b: any) => b.minQty - a.minQty);
+    for (const tier of sortedTiers) {
+      if (qty >= tier.minQty) {
+        return tier.price;
+      }
+    }
+    return basePrice;
+  };
+  
+  const currentPrice = getCurrentPrice();
 
   // Parse variants or use fallbacks
   const variants = product.variants || {};
@@ -31,8 +48,11 @@ export function ProductDetailsClient({ product, images }: { product: any, images
     addItem({
       id: product.id,
       name: product.name,
-      price: product.base_selling_price,
+      basePrice: Number(product.base_selling_price) || 0,
+      price: currentPrice,
       quantity: qty,
+      moq: moq,
+      pricingTiers: pricingTiers,
       width: selectedSize || "Standard",
       height: selectedSize || "Standard",
       motorType: selectedMotor || "Manual",
@@ -89,12 +109,38 @@ export function ProductDetailsClient({ product, images }: { product: any, images
         </div>
 
         <div className="mb-6 pb-6 border-b">
-          <div className="flex items-end gap-3">
-            <span className="text-3xl md:text-4xl font-black text-slate-900">₦{Number(product.base_selling_price).toLocaleString()}</span>
-            <span className="text-lg text-slate-400 line-through mb-1">₦{(Number(product.base_selling_price) * 1.15).toLocaleString()}</span>
-            <span className="bg-orange-100 text-orange-600 text-sm font-bold px-2 py-1 rounded mb-1.5 ml-2">-15%</span>
+          <div className="flex flex-col gap-2">
+            <div className="flex items-end gap-3">
+              <span className="text-3xl md:text-4xl font-black text-slate-900">₦{currentPrice.toLocaleString()}</span>
+              <span className="text-sm font-semibold text-slate-500 mb-1.5">/ unit</span>
+            </div>
+            
+            {pricingTiers.length > 0 && (
+              <div className="mt-4 bg-blue-50/50 rounded-lg p-4 border border-blue-100">
+                <p className="text-sm font-bold text-blue-900 mb-3 flex items-center gap-2">
+                  Wholesale Pricing Tiers
+                </p>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {pricingTiers.map((tier: any, idx: number) => {
+                    const isActive = qty >= tier.minQty && (!tier.maxQty || qty <= tier.maxQty);
+                    return (
+                      <div key={idx} className={`p-2 rounded border text-center ${isActive ? 'bg-white border-blue-500 shadow-sm ring-1 ring-blue-500' : 'bg-white/60 border-slate-200'}`}>
+                        <div className="text-xs font-semibold text-slate-600 mb-1">
+                          {tier.minQty} {tier.maxQty ? `- ${tier.maxQty}` : '+'} units
+                        </div>
+                        <div className={`font-bold ${isActive ? 'text-blue-700' : 'text-slate-900'}`}>
+                          ₦{tier.price.toLocaleString()}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+            {moq > 1 && (
+              <p className="text-sm font-medium text-orange-600 mt-2">Minimum Order Quantity: {moq} units</p>
+            )}
           </div>
-          <p className="text-xs text-slate-500 mt-2">+ delivery charges depending on location</p>
         </div>
 
         {/* Dynamic Configurator */}
@@ -153,10 +199,26 @@ export function ProductDetailsClient({ product, images }: { product: any, images
 
           <div className="space-y-3">
             <Label className="text-base font-bold text-slate-900">Quantity</Label>
-            <div className="flex items-center w-32 h-10 border rounded-md overflow-hidden">
-              <button onClick={() => setQty(Math.max(1, qty - 1))} className="w-10 h-full bg-slate-50 flex items-center justify-center hover:bg-slate-100 text-slate-600 border-r"><Minus className="w-4 h-4"/></button>
-              <div className="flex-1 h-full flex items-center justify-center font-bold text-slate-900">{qty}</div>
-              <button onClick={() => setQty(qty + 1)} className="w-10 h-full bg-slate-50 flex items-center justify-center hover:bg-slate-100 text-slate-600 border-l"><Plus className="w-4 h-4"/></button>
+            <div className="flex flex-col gap-1 w-1/3">
+              <div className="flex items-center border rounded-md h-12 bg-white">
+                <button 
+                  onClick={() => setQty(Math.max(moq, qty - 1))} 
+                  disabled={qty <= moq}
+                  className={`p-2 transition-colors ${qty <= moq ? 'text-slate-300 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`}
+                >
+                  <Minus className="w-5 h-5" />
+                </button>
+                <input 
+                  type="number"
+                  min={moq}
+                  value={qty}
+                  onChange={(e) => setQty(Math.max(moq, parseInt(e.target.value) || moq))}
+                  className="w-full text-center py-2 font-medium bg-slate-50 border-x focus:outline-none" 
+                />
+                <button onClick={() => setQty(qty + 1)} className="p-2 hover:bg-slate-100 text-slate-600 transition-colors">
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
