@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ShoppingCart, Menu, User, Search, Package, X, Phone, HelpCircle, ChevronDown, Heart, LogOut } from "lucide-react";
+import { SearchBar } from "@/components/SearchBar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCartStore } from "@/store/cartStore";
@@ -170,13 +171,7 @@ export function Navbar() {
 
           {/* Huge Search Bar (Jumia Style) */}
           <div className="flex-1 hidden md:flex items-center max-w-3xl">
-            <div className="relative w-full flex">
-              <Input type="search" placeholder="Search products, brands and categories..." className="w-full pl-10 pr-4 py-6 border-2 border-slate-200 rounded-l-md rounded-r-none focus-visible:ring-0 focus-visible:border-blue-600 text-base" />
-              <Search className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
-              <Button className="rounded-l-none rounded-r-md px-8 py-6 bg-blue-600 hover:bg-blue-700 shadow-none text-base uppercase font-bold tracking-wider">
-                Search
-              </Button>
-            </div>
+            <SearchBar />
           </div>
 
           {/* Actions */}
@@ -226,11 +221,8 @@ export function Navbar() {
 
         {/* Mobile Search Bar (Only visible on small screens) */}
         <div className="md:hidden px-4 pb-3">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
-            <Input type="search" placeholder="Search products..." className="w-full pl-10 border-slate-200" />
+            <SearchBar isMobile={true} />
           </div>
-        </div>
       </header>
 
       {/* Category Navigation Bar (Desktop) */}

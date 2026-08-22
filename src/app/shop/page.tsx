@@ -7,9 +7,16 @@ import { ProductCard } from "@/components/product/ProductCard";
 
 export const revalidate = 0;
 
-export default async function ShopPage() {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
   const supabase = await createClient();
-  const { data: products } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+  const params = await searchParams;
+  const q = params.q;
+
+  let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+  if (q) {
+    query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%`);
+  }
+  const { data: products } = await query;
 
   const getProductImage = (category: string) => {
     if (category?.includes("Motorized")) return "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80";
@@ -25,7 +32,7 @@ export default async function ShopPage() {
         <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500">
           <Link href="/" className="hover:text-blue-600">Home</Link>
           <ChevronRight className="w-3 h-3 mx-2" />
-          <span className="text-slate-900">All Products</span>
+          <span className="text-slate-900">{q ? `Search Results for "${q}"` : "All Products"}</span>
         </div>
       </div>
 
