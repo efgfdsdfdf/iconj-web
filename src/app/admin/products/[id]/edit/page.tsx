@@ -32,7 +32,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
   }, [supabase]);
 
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
-  const [moq, setMoq] = useState(1);
+  const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
     name: "", sku: "", category: "",
     base_supplier_cost: "", base_selling_price: "",
@@ -79,7 +79,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
         category: formData.category,
         base_supplier_cost: parseFloat(formData.base_supplier_cost),
         base_selling_price: parseFloat(formData.base_selling_price),
-        moq: moq,
+        moq: moq === "" ? 1 : moq,
         pricing_tiers: pricingTiers,
         description: formData.description,
         stock_status: formData.stock_status,
@@ -140,7 +140,7 @@ export default function EditProductPage({ params }: { params: Promise<{ id: stri
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Minimum Order Quantity (MOQ)</Label>
-                  <Input type="number" min="1" value={moq} onChange={e => setMoq(parseInt(e.target.value) || 1)} />
+                  <Input type="number" min="1" value={moq} onChange={e => setMoq(e.target.value === "" ? "" : parseInt(e.target.value))} />
                   <p className="text-xs text-slate-500">Customers cannot order less than this amount.</p>
                 </div>
               </div>

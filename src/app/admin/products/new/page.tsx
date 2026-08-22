@@ -32,7 +32,7 @@ export default function AddProductPage() {
 
   // 1. Basic Info
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
-  const [moq, setMoq] = useState(1);
+  const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
     name: "", sku: "", category: "Newborn Essentials",
     product_cost: "", shipping_cost: "", selling_price: "",
@@ -108,7 +108,7 @@ export default function AddProductPage() {
         category: formData.category,
         base_supplier_cost: finalCost,
         base_selling_price: parseFloat(formData.selling_price),
-        moq: moq,
+        moq: moq === "" ? 1 : moq,
         pricing_tiers: pricingTiers,
         is_configurable: false,
         requires_quote: false,
@@ -186,7 +186,7 @@ export default function AddProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label>Minimum Order Quantity (MOQ)</Label>
-                  <Input type="number" min="1" value={moq} onChange={e => setMoq(parseInt(e.target.value) || 1)} />
+                  <Input type="number" min="1" value={moq} onChange={e => setMoq(e.target.value === "" ? "" : parseInt(e.target.value))} />
                   <p className="text-xs text-slate-500">Customers cannot order less than this amount.</p>
                 </div>
               </div>
