@@ -13,13 +13,18 @@ export default async function SupportPage() {
 
   if (!user) redirect("/login");
 
-  // Load chat history
-  const { data: messages } = await supabase
-    .from("support_messages")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: true })
-    .catch(() => ({ data: [] })); // Fails safely if table doesn't exist yet
+  // Load chat history (wrap in try-catch in case table doesn't exist)
+  let messages = [];
+  try {
+    const res = await supabase
+      .from("support_messages")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: true });
+    if (res.data) messages = res.data;
+  } catch (e) {
+    console.error("Support messages table not found");
+  }
 
   return (
     <div className="bg-slate-50 min-h-screen pb-12">
