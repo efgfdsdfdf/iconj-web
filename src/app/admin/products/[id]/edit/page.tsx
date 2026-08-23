@@ -38,7 +38,7 @@ export default function EditProductPage() {
     name: "", sku: "", category: "",
     base_supplier_cost: "", base_selling_price: "",
     description: "", stock_status: "", is_featured: false, requires_quote: false,
-    supplier_id: ""
+    supplier_id: "", supplier_sku: "", supplier_product_url: ""
   });
 
   const [suppliersList, setSuppliersList] = useState<any[]>([]);
@@ -66,7 +66,9 @@ export default function EditProductPage() {
           stock_status: data.stock_status || "In Stock",
           is_featured: data.is_featured || false,
           requires_quote: data.requires_quote || false,
-          supplier_id: data.supplier_id || ""
+          supplier_id: data.supplier_id || "",
+          supplier_sku: data.supplier_sku || "",
+          supplier_product_url: data.variants?.supplier_product_url || ""
         });
         setVariants(data.variants || { sizes: [], motors: [], fabrics: [] });
         setMoq(data.moq || 1);
@@ -95,8 +97,12 @@ export default function EditProductPage() {
         stock_status: formData.stock_status,
         is_featured: formData.is_featured,
         requires_quote: formData.requires_quote,
-        variants: variants,
-        supplier_id: formData.supplier_id || null
+        variants: {
+          ...variants,
+          supplier_product_url: formData.supplier_product_url || null
+        },
+        supplier_id: formData.supplier_id || null,
+        supplier_sku: formData.supplier_sku || null
       });
 
       if (result?.error) throw new Error(result.error);
@@ -228,21 +234,29 @@ export default function EditProductPage() {
                   </select>
                 </div>
               </div>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Primary Supplier</Label>
-                  <select 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
-                    value={formData.supplier_id || ""} 
-                    onChange={e => setFormData({...formData, supplier_id: e.target.value})}
-                  >
-                    <option value="">No Supplier Assigned</option>
-                    {suppliersList.map(sup => (
-                      <option key={sup.id} value={sup.id}>{sup.name}</option>
-                    ))}
-                  </select>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Primary Supplier</Label>
+                    <select 
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
+                      value={formData.supplier_id || ""} 
+                      onChange={e => setFormData({...formData, supplier_id: e.target.value})}
+                    >
+                      <option value="">No Supplier Assigned</option>
+                      {suppliersList.map(sup => (
+                        <option key={sup.id} value={sup.id}>{sup.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Supplier SKU</Label>
+                    <Input placeholder="e.g. BBY-SWAD-01" value={formData.supplier_sku} onChange={e => setFormData({...formData, supplier_sku: e.target.value})} />
+                  </div>
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label>Supplier Product URL</Label>
+                    <Input placeholder="e.g. https://alibaba.com/..." value={formData.supplier_product_url} onChange={e => setFormData({...formData, supplier_product_url: e.target.value})} />
+                  </div>
                 </div>
-              </div>
             </CardContent>
           </Card>
 

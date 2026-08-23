@@ -75,12 +75,32 @@ export async function POST(request: Request) {
     if (orderError) throw new Error("Failed to create order: " + orderError.message);
 
     // 3. Save Order Items
-    const orderItems = items.map((item: any) => ({
-      order_id: orderData.id,
-      product_id: item.id,
-      quantity: item.quantity,
-      unit_price: item.price
-    }));
+    const orderItems = items.map((item: any) => {
+      const dbProduct = dbProducts?.find((p: any) => p.id === item.id);
+      
+      const variantParts = [];
+      if (item.width && item.width !== "Standard") variantParts.push(item.width);
+      if (item.height && item.height !== "Standard") variantParts.push(item.height);
+      if (item.motorType && item.motorType !== "Manual") variantParts.push(item.motorType);
+      
+      return {
+        order_id: orderData.id,
+        product_id: item.id,
+        quantity: item.quantity,
+        unit_price: item.price,
+        configuration_details: {
+          product_name: dbProduct?.name || item.name,
+          store_sku: dbProduct?.sku,
+          supplier_id: dbProduct?.supplier_id,
+          supplier_sku: dbProduct?.supplier_sku,
+          supplier_product_url: dbProduct?.variants?.supplier_product_url,
+          width: item.width,
+          height: item.height,
+          motorType: item.motorType,
+          variant_string: variantParts.join(" / ") || "Standard"
+        }
+      };
+    });
     const { error: itemsError } = await supabaseAdmin.from("order_items").insert(orderItems);
     if (itemsError) {
       console.error("Order items insert error:", itemsError);

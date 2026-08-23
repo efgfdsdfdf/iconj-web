@@ -42,7 +42,7 @@ export default function AddProductPage() {
     name: "", sku: "", category: "Newborn Essentials",
     product_cost: "", shipping_cost: "", selling_price: "",
     stock_status: "In Stock", description: "",
-    supplier_id: "", supplier_sku: "",
+    supplier_id: "", supplier_sku: "", supplier_product_url: "",
     brand: "", age_range: "", safety_info: "",
     is_featured: false, is_bundle: false
   });
@@ -118,7 +118,9 @@ export default function AddProductPage() {
         is_configurable: false,
         requires_quote: false,
         images: uploadedUrls,
-        variants: {},
+        variants: {
+          supplier_product_url: formData.supplier_product_url || null
+        },
         description: formData.description,
         supplier_id: formData.supplier_id || null,
         supplier_sku: formData.supplier_sku || null,
@@ -310,6 +312,10 @@ export default function AddProductPage() {
                 <div className="space-y-2">
                   <Label>Supplier SKU</Label>
                   <Input placeholder="e.g. BBY-SWAD-01" value={formData.supplier_sku} onChange={e => setFormData({...formData, supplier_sku: e.target.value})} />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Supplier Product URL</Label>
+                  <Input placeholder="e.g. https://alibaba.com/..." value={formData.supplier_product_url} onChange={e => setFormData({...formData, supplier_product_url: e.target.value})} />
                 </div>
               </div>
             </CardContent>

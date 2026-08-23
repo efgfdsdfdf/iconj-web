@@ -17,7 +17,7 @@ export async function sendOrderToSupplier(orderId: string, overrideEmail?: strin
 
   // 1. Fetch order & items & supplier
   const { data: order } = await supabaseAdmin.from("orders").select("*, supplier:suppliers(email)").eq("id", orderId).single();
-  const { data: items } = await supabaseAdmin.from("order_items").select("*, product:products(name, sku)").eq("order_id", orderId);
+  const { data: items } = await supabaseAdmin.from("order_items").select("*, product:products(name, sku, supplier_sku, variants)").eq("order_id", orderId);
   
   if (order?.supplier_sent) {
     throw new Error("Order has already been sent to supplier.");
@@ -27,28 +27,35 @@ export async function sendOrderToSupplier(orderId: string, overrideEmail?: strin
   const supplierEmail = overrideEmail || order.supplier?.email;
   if (supplierEmail) {
     const address = order.delivery_address || {};
-    const shortId = order.id.split("-")[0].toUpperCase();
+    const shortId = `ICONJ-${order.id.split("-")[0].toUpperCase()}`;
     
-    let body = `Hello Supplier Team,\n\n`;
-    body += `Please process the following new order (ID: #${shortId}).\n\n`;
+    let body = `STORE ORDER: ${shortId}\n\n`;
     
-    body += `--- ORDER ITEMS ---\n`;
     (items || []).forEach((item: any, index: number) => {
-      body += `${index + 1}. ${item.product?.name || "Unknown Product"} (SKU: ${item.product?.sku || "N/A"})\n`;
-      body += `   Quantity: ${item.quantity}\n\n`;
+      const config = item.configuration_details || {};
+      const storeSku = config.store_sku || item.product?.sku || "N/A";
+      const supplierSku = config.supplier_sku || item.product?.supplier_sku || "N/A";
+      const productName = config.product_name || item.product?.name || "Unknown Product";
+      const variant = config.variant_string || "Standard";
+      const supplierUrl = config.supplier_product_url || item.product?.variants?.supplier_product_url || "N/A";
+
+      body += `PRODUCT ID: ${storeSku}\n`;
+      body += `SUPPLIER SKU: ${supplierSku}\n`;
+      body += `PRODUCT: ${productName}\n`;
+      body += `VARIANT: ${variant}\n`;
+      body += `QUANTITY: ${item.quantity}\n`;
+      body += `SUPPLIER PRODUCT URL: ${supplierUrl}\n\n`;
     });
     
-    body += `--- SHIPPING ADDRESS ---\n`;
-    body += `${address.name || "N/A"}\n`;
-    body += `${address.street || "N/A"}\n`;
-    body += `${address.city || "N/A"}\n`;
-    body += `${address.state || "N/A"}\n`;
-    body += `${address.phone || "N/A"}\n\n`;
+    body += `CUSTOMER:\n`;
+    body += `Name: ${address.name || "N/A"}\n`;
+    body += `Phone: ${address.phone || "N/A"}\n`;
+    body += `Address: ${address.street || "N/A"}\n`;
+    body += `City: ${address.city || "N/A"}\n`;
+    body += `State: ${address.state || "N/A"}\n`;
+    body += `Country: ${address.country || "Nigeria"}\n\n`;
     
-    body += `Please confirm receipt of this order and provide tracking information when dispatched.\n\n`;
-    body += `Thank you,\nICONJ Team`;
-    
-    await sendEmailTo(supplierEmail, `New Order Request - ICONJ #${shortId}`, body);
+    await sendEmailTo(supplierEmail, `New Order Request - ${shortId}`, body);
   }
 
   // 3. Mark as sent
