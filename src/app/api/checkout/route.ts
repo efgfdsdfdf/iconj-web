@@ -78,10 +78,22 @@ export async function POST(request: Request) {
     const orderItems = items.map((item: any) => {
       const dbProduct = dbProducts?.find((p: any) => p.id === item.id);
       
+      // Build variant string from cart item configuration
       const variantParts = [];
+      if (item.selectedVariant) variantParts.push(item.selectedVariant);
       if (item.width && item.width !== "Standard") variantParts.push(item.width);
       if (item.height && item.height !== "Standard") variantParts.push(item.height);
       if (item.motorType && item.motorType !== "Manual") variantParts.push(item.motorType);
+      
+      // Look up the exact variant from variant_list for supplier SKU mapping
+      let matchedVariantSku = "";
+      const variantList = dbProduct?.variants?.variant_list;
+      if (variantList && Array.isArray(variantList) && item.selectedVariant) {
+        const match = variantList.find((v: any) => v.name === item.selectedVariant);
+        if (match) {
+          matchedVariantSku = match.supplier_sku || "";
+        }
+      }
       
       return {
         order_id: orderData.id,
@@ -92,11 +104,12 @@ export async function POST(request: Request) {
           product_name: dbProduct?.name || item.name,
           store_sku: dbProduct?.sku,
           supplier_id: dbProduct?.supplier_id,
-          supplier_sku: dbProduct?.supplier_sku,
+          supplier_sku: matchedVariantSku || dbProduct?.supplier_sku,
           supplier_product_url: dbProduct?.variants?.supplier_product_url,
           width: item.width,
           height: item.height,
           motorType: item.motorType,
+          selected_variant: item.selectedVariant || null,
           variant_string: variantParts.join(" / ") || "Standard"
         }
       };

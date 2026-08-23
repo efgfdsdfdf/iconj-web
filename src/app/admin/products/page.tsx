@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteProductButton } from "./DeleteProductButton";
-import { Edit } from "lucide-react";
+import { Edit, Download } from "lucide-react";
 
 export const revalidate = 0;
 
@@ -19,9 +19,16 @@ export default async function AdminProductsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Products</h1>
           <p className="text-sm text-slate-500">Manage your catalog directly from the database.</p>
         </div>
-        <Link href="/admin/products/new" className="self-start md:self-auto">
-          <Button className="bg-blue-600 hover:bg-blue-700">Add New Product</Button>
-        </Link>
+        <div className="flex gap-3 self-start md:self-auto">
+          <Link href="/admin/products/import">
+            <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50 font-bold">
+              <Download className="w-4 h-4 mr-2" /> Import from Alibaba
+            </Button>
+          </Link>
+          <Link href="/admin/products/new">
+            <Button className="bg-blue-600 hover:bg-blue-700">Add New Product</Button>
+          </Link>
+        </div>
       </div>
       <Card>
         <CardContent className="p-0">
