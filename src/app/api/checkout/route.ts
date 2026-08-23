@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const productIds = items.map((i: any) => i.id);
     const { data: dbProducts } = await supabaseAdmin
       .from("products")
-      .select("id, base_supplier_cost, metadata")
+      .select("id, name, sku, base_supplier_cost, supplier_id, supplier_sku, variants")
       .in("id", productIds);
       
     let actualSupplierCost = 0;
@@ -34,8 +34,8 @@ export async function POST(request: Request) {
       actualSupplierCost += (unitCost * item.quantity);
       
       // Assign the order to the supplier of the first product in the cart
-      if (index === 0 && dbProduct?.metadata?.supplier_id) {
-        mainSupplierId = dbProduct.metadata.supplier_id;
+      if (index === 0 && dbProduct?.supplier_id) {
+        mainSupplierId = dbProduct.supplier_id;
       }
     });
     
