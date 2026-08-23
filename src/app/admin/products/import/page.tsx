@@ -52,22 +52,96 @@ export default function ImportAlibabaPage() {
       });
       const resData = await response.json();
       
-      if (!response.ok) throw new Error(resData.error || "Failed to fetch from API");
+      // If the API succeeded and actually extracted data (name is not just fallback "Alibaba Product")
+      if (response.ok && resData.data?.name && resData.data.name !== "Alibaba Product") {
+        setParsedData(resData.data);
+        setFormData({
+          name: resData.data.name,
+          category: resData.data.category_suggestion,
+          supplier_id: "",
+          supplier_sku: resData.data.supplier_sku,
+          base_supplier_cost: resData.data.supplier_price || 0,
+          markup_percentage: defaultMarkup,
+          base_selling_price: Math.round((resData.data.supplier_price || 0) * (1 + defaultMarkup / 100)),
+          moq: resData.data.moq || 1,
+          description: resData.data.description,
+          variants: resData.data.variants || [],
+          images: resData.data.images || []
+        });
+        setIsImporting(false);
+        return;
+      }
 
-      setParsedData(resData.data);
-      setFormData({
-        name: resData.data.name,
-        category: resData.data.category_suggestion,
-        supplier_id: "",
-        supplier_sku: resData.data.supplier_sku,
-        base_supplier_cost: resData.data.supplier_price || 0,
-        markup_percentage: defaultMarkup,
-        base_selling_price: Math.round((resData.data.supplier_price || 0) * (1 + defaultMarkup / 100)),
-        moq: resData.data.moq || 1,
-        description: resData.data.description,
-        variants: resData.data.variants || [],
-        images: resData.data.images || []
-      });
+      // If we reach here, RapidAPI failed AND Vercel's fallback got blocked by Alibaba anti-bot.
+      // We will now try a Client-Side Proxy Fallback using the user's local browser IP!
+      console.log("Server extraction blocked. Attempting Client-Side Proxy Fallback...");
+      
+      try {
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+        const proxyRes = await fetch(proxyUrl);
+        const proxyData = await proxyRes.json();
+        const html = proxyData.contents;
+
+        if (html) {
+          // 1. Extract Title
+          const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
+          let name = titleMatch ? titleMatch[1].replace("- Buy  Product on Alibaba.com", "").trim() : "Alibaba Product";
+          if (name.length > 200) name = name.substring(0, 200);
+
+          // 2. Extract Images (s.alicdn.com)
+          const imgRegex = /(https:\/\/s\.alicdn\.com\/@sc04\/kf\/[^"'\s\\]+\.(?:jpg|png|jpeg))/gi;
+          const allImgs = Array.from(html.matchAll(imgRegex)).map((m: any) => m[1]);
+          let images = [...new Set(allImgs)]
+            .filter((img: any) => typeof img === 'string' && !img.includes('100x100') && !img.includes('300x300'))
+            .map((img: any) => img.split('_')[0])
+            .slice(0, 8);
+
+          // 3. Extract Price
+          let supplier_price = 0;
+          const priceRegex = /"price":"?([0-9.]+)"?/i;
+          const priceMatch = html.match(priceRegex);
+          if (priceMatch) {
+             supplier_price = parseFloat(priceMatch[1]) * 1500; // rough USD to NGN
+          }
+
+          if (name && name !== "Alibaba Product") {
+             const fallbackData = {
+               name,
+               description: "Imported directly from Alibaba URL.",
+               supplier_price: supplier_price || 0,
+               moq: 1,
+               supplier_name: "Alibaba Supplier",
+               supplier_sku: "",
+               images: images,
+               variants: [],
+               category_suggestion: "Imported",
+               supplier_product_url: url
+             };
+             setParsedData(fallbackData);
+             setFormData({
+                name: fallbackData.name,
+                category: fallbackData.category_suggestion,
+                supplier_id: "",
+                supplier_sku: fallbackData.supplier_sku,
+                base_supplier_cost: fallbackData.supplier_price || 0,
+                markup_percentage: defaultMarkup,
+                base_selling_price: Math.round((fallbackData.supplier_price || 0) * (1 + defaultMarkup / 100)),
+                moq: fallbackData.moq || 1,
+                description: fallbackData.description,
+                variants: [],
+                images: fallbackData.images || []
+             });
+             setIsImporting(false);
+             return;
+          }
+        }
+      } catch (proxyError) {
+        console.error("Client Proxy failed:", proxyError);
+      }
+
+      // If all fails, throw original error
+      throw new Error(resData.error || "RapidAPI is down, and Alibaba blocked our proxy. Please use the Paste Page Text backup.");
+
     } catch (err: any) {
       setImportError(err.message || "Failed to import. Check the URL and try again.");
     } finally {
