@@ -231,10 +231,14 @@ export function ProductDetailsClient({ product, images }: { product: any, images
           <Button 
             size="lg" 
             onClick={handleAddToCart} 
-            disabled={adding}
-            className="w-full h-14 text-lg font-bold bg-orange-500 hover:bg-orange-600 shadow-xl rounded-md shadow-orange-500/20 uppercase tracking-wider"
+            disabled={adding || product.stock_status === "Out of Stock"}
+            className={`w-full h-14 text-lg font-bold shadow-xl rounded-md uppercase tracking-wider ${
+              product.stock_status === "Out of Stock" 
+                ? "bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200" 
+                : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
+            }`}
           >
-            {adding ? "Adding to Cart..." : "Add to Cart"}
+            {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding to Cart..." : "Add to Cart"}
           </Button>
         )}
       </div>

@@ -28,12 +28,13 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
   };
 
   const isFeatured = product.metadata?.is_featured || product.is_featured;
-  const isBundle = product.metadata?.is_bundle;
-  const ageRange = product.metadata?.age_range;
+  const isBundle = product.metadata?.is_bundle || product.is_bundle;
+  const ageRange = product.metadata?.age_range || product.age_range;
+  const isOutOfStock = product.stock_status === "Out of Stock";
 
   return (
     <div 
-      className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''}`}
+      className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''} ${isOutOfStock ? 'opacity-75 grayscale-[0.2]' : ''}`}
     >
       <Link href={`/shop/${product.id}`} className="block relative aspect-[4/5] bg-slate-100 rounded mb-3 overflow-hidden">
         <img 
@@ -44,12 +45,17 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
         
         {/* Badges */}
         <div className="absolute top-2 left-2 flex flex-col gap-1">
-          {isFeatured && (
+          {isOutOfStock && (
+            <span className="bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wide">
+              Out of Stock
+            </span>
+          )}
+          {!isOutOfStock && isFeatured && (
             <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1">
               <Heart className="w-2.5 h-2.5" /> Mother's Pick
             </span>
           )}
-          {isBundle && (
+          {!isOutOfStock && isBundle && (
             <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
               Bundle
             </span>
@@ -67,11 +73,15 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
         <div className="mt-auto pt-2 flex flex-col gap-2">
           <p className="font-black text-rose-600 text-sm md:text-base">₦{product.base_selling_price?.toLocaleString() || "0"}</p>
           <Button 
-            className={`w-full text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5 ${added ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'bg-slate-900 hover:bg-slate-800'}`} 
+            disabled={isOutOfStock}
+            className={`w-full text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5 
+              ${isOutOfStock ? 'bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200' 
+              : added ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
+              : 'bg-slate-900 hover:bg-slate-800 text-white'}`} 
             onClick={handleAddToCart}
           >
-            {added ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />}
-            {added ? 'Added!' : 'Add to Cart'}
+            {!isOutOfStock && (added ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />)}
+            {isOutOfStock ? 'Out of Stock' : added ? 'Added!' : 'Add to Cart'}
           </Button>
         </div>
       </div>
