@@ -9,6 +9,7 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { RecordPaymentDialog } from "./RecordPaymentDialog";
 import { AddFundsDialog } from "./AddFundsDialog";
 import { DeleteSupplierButton } from "./DeleteSupplierButton";
+import { AdjustmentDialog } from "./AdjustmentDialog";
 
 export const revalidate = 0;
 
@@ -77,6 +78,7 @@ export default async function SupplierLedgerPage({ params }: { params: Promise<{
             <p className="text-sm text-slate-500">Immutable Financial Transaction Ledger</p>
           </div>
           <div className="flex gap-2">
+            <AdjustmentDialog supplier={supplier} />
             <AddFundsDialog supplier={supplier} />
             <RecordPaymentDialog supplier={supplier} currentBalance={currentBalance} pendingOrders={pendingOrders || []} />
           </div>

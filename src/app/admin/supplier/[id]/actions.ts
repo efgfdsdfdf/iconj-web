@@ -88,3 +88,21 @@ export async function deleteSupplier(supplierId: string) {
   // revalidatePath('/admin/supplier');
   return { success: true };
 }
+
+export async function recordAdjustment(supplierId: string, amount: number, creditDebit: "CREDIT" | "DEBIT", description: string) {
+  const adminId = await requireAdmin();
+  const supabaseAdmin = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { cookies: { get() { return undefined; } } });
+
+  const { error } = await supabaseAdmin.from("supplier_transactions").insert({
+    supplier_id: supplierId,
+    transaction_type: "ADJUSTMENT",
+    credit_debit: creditDebit,
+    amount: amount,
+    reference: "ADJ-" + Math.random().toString(36).substring(2, 8).toUpperCase(),
+    description: description,
+    admin_id: adminId
+  });
+
+  if (error) return { success: false, error: error.message };
+  return { success: true };
+}
