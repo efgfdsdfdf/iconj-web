@@ -57,7 +57,7 @@ export async function POST(request: Request) {
     });
 
     if (!response.ok) {
-      throw new Error(\API returned \\);
+      throw new Error("API returned " + response.status);
     }
 
     const rawData = await response.json();
