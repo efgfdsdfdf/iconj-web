@@ -35,8 +35,8 @@ export function AdjustmentDialog({ supplier }: { supplier: any }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="bg-white border-amber-200 text-amber-700 hover:bg-amber-50 hover:text-amber-800">
+      <DialogTrigger>
+        <Button variant="outline" className="bg-white border-amber-200 text-amber-700 hover:bg-amber-50 hover:text-amber-800" type="button">
           <Wrench className="w-4 h-4 mr-2" /> Adjust Balance
         </Button>
       </DialogTrigger>
