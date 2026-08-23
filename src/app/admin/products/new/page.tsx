@@ -260,6 +260,11 @@ export default function AddProductPage() {
                   <Input placeholder="e.g. ICONJ Baby" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
                 </div>
                 <div className="space-y-2">
+                  <Label>Product ID (SKU)</Label>
+                  <Input readOnly value="Will be auto-generated" className="bg-slate-50 text-slate-500 cursor-not-allowed" />
+                  <p className="text-[10px] text-slate-400">Unique ID generated on save (e.g. ICONJ-BABY-001)</p>
+                </div>
+                <div className="space-y-2">
                   <Label>Category</Label>
                   <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                     <option value="">Select Category...</option>

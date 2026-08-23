@@ -223,7 +223,10 @@ export default function EditProductPage() {
               <div className="space-y-2"><Label>Product Name</Label><Input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
               <div className="space-y-2"><Label>Full Description</Label><Textarea className="h-32" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2"><Label>SKU Code</Label><Input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} /></div>
+                <div className="space-y-2">
+                  <Label>Product ID (SKU)</Label>
+                  <Input readOnly value={formData.sku} className="bg-slate-50 text-slate-700 cursor-text select-all font-mono" title="Product IDs are immutable and auto-generated." />
+                </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
                   <select required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>

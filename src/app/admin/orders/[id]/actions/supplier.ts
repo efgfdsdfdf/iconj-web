@@ -27,9 +27,10 @@ export async function sendOrderToSupplier(orderId: string, overrideEmail?: strin
   const supplierEmail = overrideEmail || order.supplier?.email;
   if (supplierEmail) {
     const address = order.delivery_address || {};
-    const shortId = `ICONJ-${order.id.split("-")[0].toUpperCase()}`;
+    const shortId = `ICONJ-ORD-${order.id.split("-")[0].toUpperCase()}`;
+    const supplierName = order.supplier?.name || "Supplier";
     
-    let body = `STORE ORDER: ${shortId}\n\n`;
+    let body = `ICONJ ORDER: ${shortId}\n\n`;
     
     (items || []).forEach((item: any, index: number) => {
       const config = item.configuration_details || {};
@@ -40,14 +41,16 @@ export async function sendOrderToSupplier(orderId: string, overrideEmail?: strin
       const supplierUrl = config.supplier_product_url || item.product?.variants?.supplier_product_url || "N/A";
 
       body += `PRODUCT ID: ${storeSku}\n`;
-      body += `SUPPLIER SKU: ${supplierSku}\n`;
       body += `PRODUCT: ${productName}\n`;
       body += `VARIANT: ${variant}\n`;
-      body += `QUANTITY: ${item.quantity}\n`;
+      body += `QUANTITY: ${item.quantity}\n\n`;
+      
+      body += `SUPPLIER: ${supplierName}\n`;
+      body += `SUPPLIER SKU: ${supplierSku}\n`;
       body += `SUPPLIER PRODUCT URL: ${supplierUrl}\n\n`;
     });
     
-    body += `CUSTOMER:\n`;
+    body += `CUSTOMER SHIPPING:\n`;
     body += `Name: ${address.name || "N/A"}\n`;
     body += `Phone: ${address.phone || "N/A"}\n`;
     body += `Address: ${address.street || "N/A"}\n`;

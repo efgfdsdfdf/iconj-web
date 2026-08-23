@@ -27,8 +27,32 @@ export async function updateProduct(productId: string, data: any) {
 
 export async function createProduct(data: any) {
   try {
+    // Auto-generate unique sequential Product ID
+    const category = data.category || "PROD";
+    const firstWord = category.split(/[^a-zA-Z]/).find((w: string) => w.length > 0) || "PROD";
+    let prefix = firstWord.toUpperCase().substring(0, 6);
+    if (prefix === "MATERN") prefix = "MOM"; // map Maternity to MOM for clean IDs
+
+    const { data: existing } = await supabaseAdmin
+      .from("products")
+      .select("sku")
+      .like("sku", `ICONJ-${prefix}-%`);
+
+    let maxNum = 0;
+    if (existing) {
+      existing.forEach((p: any) => {
+        const match = p.sku?.match(/(\d+)$/);
+        if (match) {
+          const num = parseInt(match[1], 10);
+          if (num > maxNum) maxNum = num;
+        }
+      });
+    }
+    
+    data.sku = `ICONJ-${prefix}-${String(maxNum + 1).padStart(3, '0')}`;
+
     const { error } = await supabaseAdmin.from("products").insert([data]);
-    if (error) throw new Error(error.message);
+    if (error) return { success: false, error: error.message };
     revalidatePath("/admin/products");
     revalidatePath("/shop");
     return { success: true };
