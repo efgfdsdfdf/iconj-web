@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     }
 
     // ----------------------------------------------------
-    // TEST MODE (Does not use RapidAPI Quota)
+    // TEST MODE (Does not use API Quota)
     // ----------------------------------------------------
     if (testMode) {
       await new Promise(resolve => setTimeout(resolve, 1500));
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         success: true,
         data: {
           name: "Test Product: Premium Silicone Baby Feeding Set (Test Mode)",
-          description: "This is a simulated product import to test the system without using your 30 free monthly RapidAPI requests. Turn off Test Mode to import real products.",
+          description: "This is a simulated product import to test the system without using your ScraperAPI requests. Turn off Test Mode to import real products.",
           supplier_price: 4500,
           moq: 50,
           supplier_name: "Guangzhou Baby Products Co., Ltd",
@@ -60,138 +60,92 @@ export async function POST(request: Request) {
     }
 
     // ----------------------------------------------------
-    // LIVE MODE (Uses RapidAPI)
+    // LIVE MODE (Uses ScraperAPI)
     // ----------------------------------------------------
-    const apiKey = 'fe92b9bf9bmsh77dacb45b60bfdbp16265ajsn4667758d25b3';
-    const apiUrl = `https://alibaba3.p.rapidapi.com/getProductByURL?url=${encodeURIComponent(url)}`;
+    const SCRAPER_API_KEY = '63d43462abd76bdd1664c3f9c87100df';
+    // premium=true guarantees bypass of Alibaba firewall
+    const proxyUrl = `http://api.scraperapi.com?api_key=${SCRAPER_API_KEY}&url=${encodeURIComponent(url)}&premium=true`;
     
-    let response;
-    let rapidApiFailed = false;
-
+    let html = "";
     try {
-      response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-rapidapi-host': 'alibaba3.p.rapidapi.com',
-          'x-rapidapi-key': apiKey
-        }
-      });
+      const response = await fetch(proxyUrl, { method: 'GET' });
       if (!response.ok) {
-        rapidApiFailed = true;
+        throw new Error("ScraperAPI returned " + response.status);
       }
+      html = await response.text();
     } catch (e: any) {
-      rapidApiFailed = true;
+      console.error("ScraperAPI Error:", e);
+      return NextResponse.json({ error: "Failed to connect to ScraperAPI. " + e.message }, { status: 500 });
     }
 
-    // If RapidAPI succeeds, use its data
-    if (!rapidApiFailed && response) {
-      const rawData = await response.json();
-      const item = rawData.data || rawData.result || rawData.item || rawData;
+    // ----------------------------------------------------
+    // PARSE HTML RESPONSE
+    // ----------------------------------------------------
+    
+    // 1. Extract Title
+    const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
+    let name = titleMatch ? titleMatch[1].replace("- Buy  Product on Alibaba.com", "").trim() : "Alibaba Product";
+    if (name.length > 200) name = name.substring(0, 200);
+    
+    // 2. Extract Images (s.alicdn.com)
+    const imgRegex = /(https:\/\/s\.alicdn\.com\/@sc04\/kf\/[^"'\s\\]+\.(?:jpg|png|jpeg))/gi;
+    const allImgs = Array.from(html.matchAll(imgRegex)).map((m: any) => m[1]);
+    let images = [...new Set(allImgs)]
+      .filter((img: any) => typeof img === 'string' && !img.includes('100x100') && !img.includes('300x300')) 
+      .map((img: any) => img.split('_')[0]) 
+      .slice(0, 10); 
 
-      const name = item.title || item.name || item.subject || "Imported Product";
-      const price = item.price || item.minPrice || item.salePrice || 0;
+    // 3. Extract Price
+    let supplier_price = 0;
+    const priceRegex = /"price":"?([0-9.]+)"?/i;
+    const priceMatch = html.match(priceRegex);
+    if (priceMatch) {
+       supplier_price = parseFloat(priceMatch[1]) * 1500; // rough USD to NGN
+    }
+
+    // 4. Try full text parser as a backup to catch variants and supplier names
+    let parsedVariants: any[] = [];
+    let parsedSupplier = "Alibaba Supplier";
+    
+    try {
+      const strippedText = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
+                               .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ')
+                               .replace(/<[^>]+>/g, ' ')
+                               .replace(/\s+/g, ' ');
       
-      let images: string[] = [];
-      if (Array.isArray(item.images)) images = item.images;
-      else if (Array.isArray(item.pictures)) images = item.pictures;
-      else if (item.mainImage) images = [item.mainImage];
-
-      let variants: any[] = [];
-      if (Array.isArray(item.variants)) {
-         variants = item.variants.map((v: any) => ({
-           name: v.name || v.title || "Variant",
-           color: v.color || "",
-           size: v.size || "",
-           supplier_sku: v.sku || v.id || ""
-         }));
-      } else if (Array.isArray(item.skuList)) {
-         variants = item.skuList.map((s: any) => ({
-           name: s.names || s.skuName || "Variant",
-           supplier_sku: s.skuId || ""
-         }));
+      const parsedData = parseRawText(strippedText, url);
+      
+      if (parsedData.variants && parsedData.variants.length > 0) {
+        parsedVariants = parsedData.variants;
       }
+      if (parsedData.supplier_name) {
+        parsedSupplier = parsedData.supplier_name;
+      }
+      if (supplier_price === 0 && parsedData.supplier_price) {
+        supplier_price = parsedData.supplier_price;
+      }
+    } catch(e) {
+      console.error("Text parsing failed, using regex fallbacks", e);
+    }
 
-      const parsedData = {
+    return NextResponse.json({
+      success: true,
+      data: {
         name,
-        description: item.description || item.detail || "Description imported from Alibaba",
-        supplier_price: parseFloat(price) || 0,
-        moq: parseInt(item.moq || item.minOrderQuantity || 1),
-        supplier_name: item.storeName || item.supplierName || item.companyName || "",
-        supplier_sku: item.productId || item.id || "",
-        images: images.slice(0, 10),
-        variants: variants,
+        description: `Imported seamlessly via ScraperAPI.\nOriginal URL: ${url}`,
+        supplier_price: supplier_price || 0,
+        moq: 1,
+        supplier_name: parsedSupplier,
+        supplier_sku: "", 
+        images: images,
+        variants: parsedVariants,
         category_suggestion: suggestCategory(name),
         supplier_product_url: url
-      };
-
-      return NextResponse.json({ success: true, data: parsedData });
-    }
-
-    // ----------------------------------------------------
-    // AUTOMATIC URL FALLBACK (If RapidAPI is down)
-    // ----------------------------------------------------
-    // The user hates copy/pasting. If the API is down (502), we will fetch the HTML ourselves and parse it!
-    console.log("RapidAPI failed, falling back to internal HTML scraper...");
-    
-    try {
-      // Fetch the Alibaba page directly
-      const htmlRes = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-          'Accept-Language': 'en-US,en;q=0.5'
-        }
-      });
-      
-      const html = await htmlRes.text();
-      
-      // Extract Title
-      const titleMatch = html.match(/<meta\s+property="og:title"\s+content="([^"]+)"/i) || html.match(/<title>([^<]+)<\/title>/i);
-      let name = titleMatch ? titleMatch[1].replace("- Buy  Product on Alibaba.com", "").trim() : "Alibaba Product";
-      if (name.length > 200) name = name.substring(0, 200);
-      
-      // Extract Images
-      const imgRegex = /(https:\/\/s\.alicdn\.com\/@sc04\/kf\/[^"'\s\\]+\.(?:jpg|png|jpeg))/gi;
-      const allImgs = Array.from(html.matchAll(imgRegex)).map(m => m[1]);
-      let images = [...new Set(allImgs)]
-        .filter(img => !img.includes('100x100') && !img.includes('300x300')) // prefer high-res
-        .map(img => img.split('_')[0]) // remove size suffixes if possible
-        .slice(0, 8); // get top 8 images
-
-      // Extract price approximation
-      let supplier_price = 0;
-      const priceRegex = /"price":"?([0-9.]+)"?/i;
-      const priceMatch = html.match(priceRegex);
-      if (priceMatch) {
-         supplier_price = parseFloat(priceMatch[1]) * 1500; // rough USD to NGN
       }
-
-      return NextResponse.json({
-        success: true,
-        data: {
-          name,
-          description: "Imported directly from Alibaba URL.",
-          supplier_price: supplier_price || 0,
-          moq: 1,
-          supplier_name: "Alibaba Supplier",
-          supplier_sku: "",
-          images: images,
-          variants: [],
-          category_suggestion: suggestCategory(name),
-          supplier_product_url: url
-        }
-      });
-
-    } catch (fallbackError) {
-       console.error("Internal fallback failed:", fallbackError);
-       return NextResponse.json({ 
-         error: "RapidAPI is down and internal extraction failed. Please try again later or use the Paste Page Text backup." 
-       }, { status: 500 });
-    }
+    });
     
   } catch (error: any) {
-    console.error('RapidAPI Import Error:', error);
+    console.error('ScraperAPI Route Error:', error);
     return NextResponse.json({ error: error.message || 'Failed to import product' }, { status: 500 });
   }
 }
