@@ -24,14 +24,8 @@ export function RecordPaymentDialog({ supplier, currentBalance, pendingOrders }:
     const reference = formData.get("reference") as string;
     const amount = Number(selectedOrderData.supplier_cost);
 
-    if (amount > currentBalance) {
-      toast.error("Insufficient supplier balance. Add funds first.");
-      setLoading(false);
-      return;
-    }
-
     try {
-      await recordSupplierPayment(supplier.id, selectedOrderData.id, amount, reference);
+      await recordSupplierPayment(supplier.id, selectedOrderData.id, amount, reference, currentBalance);
       toast.success("Payment recorded & deducted from balance!");
       setOpen(false);
       setSelectedOrder("");

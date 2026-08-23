@@ -30,7 +30,7 @@ export async function addSupplierFunds(supplierId: string, amount: number, refer
   // revalidatePath("/admin/supplier");
 }
 
-export async function recordSupplierPayment(supplierId: string, orderId: string, amount: number, reference: string) {
+export async function recordSupplierPayment(supplierId: string, orderId: string, amount: number, reference: string, currentBalance: number = 0) {
   const adminId = await requireAdmin();
   if (amount <= 0) throw new Error("Amount must be greater than 0");
 
@@ -40,7 +40,22 @@ export async function recordSupplierPayment(supplierId: string, orderId: string,
     { cookies: { get() { return undefined; } } }
   );
 
-  // Note: the Postgres trigger will reject this if balance < amount.
+  // Auto-fund if the balance is insufficient
+  if (currentBalance < amount) {
+    const deficit = amount - currentBalance;
+    const { error: fundError } = await supabaseAdmin.from("supplier_transactions").insert({
+      supplier_id: supplierId,
+      transaction_type: "FUNDS_ADDED",
+      credit_debit: "CREDIT",
+      amount: deficit,
+      reference: "AUTO-FUND-" + orderId.split("-")[0].toUpperCase(),
+      description: `Auto-funding for order #${orderId.split("-")[0].toUpperCase()}`,
+      admin_id: adminId
+    });
+    if (fundError) throw new Error("Failed to auto-fund balance: " + fundError.message);
+  }
+
+  // Note: the Postgres trigger will reject this if balance < amount, but we just auto-funded.
   const { error } = await supabaseAdmin.from("supplier_transactions").insert({
     supplier_id: supplierId,
     order_id: orderId,
