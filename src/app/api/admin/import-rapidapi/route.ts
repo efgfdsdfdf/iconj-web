@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     const apiKey = 'fe92b9bf9bmsh77dacb45b60bfdbp16265ajsn4667758d25b3';
     
     // Most rapid APIs expect the url parameter as a query string
-    const apiUrl = \https://alibaba3.p.rapidapi.com/getProductByURL?url=\\;
+    const apiUrl = `https://alibaba3.p.rapidapi.com/getProductByURL?url=${encodeURIComponent(url)}`;
     
     const response = await fetch(apiUrl, {
       method: 'GET',

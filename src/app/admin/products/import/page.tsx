@@ -7,8 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ArrowLeft, Download, Loader2, Save, Store, Info } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -145,7 +143,7 @@ export default function ImportAlibabaPage() {
                 <h4 className="font-semibold text-blue-900">Test Mode is {isTestMode ? "ON" : "OFF"}</h4>
                 <p className="text-sm text-blue-800 mt-1">{isTestMode ? "Test Mode simulates a successful import without using any of your 30 free monthly API requests. Turn this off when you want to import a real product to your store." : "Live Mode will fetch real data from Alibaba and use 1 request from your free RapidAPI monthly limit."}</p>
                 <div className="mt-3 flex items-center gap-2">
-                  <Switch checked={isTestMode} onCheckedChange={setIsTestMode} id="test-mode-toggle" />
+                  <input type="checkbox" checked={isTestMode} onChange={(e) => setIsTestMode(e.target.checked)} id="test-mode-toggle" className="w-5 h-5 cursor-pointer accent-blue-600" />
                   <Label htmlFor="test-mode-toggle" className="font-bold cursor-pointer">Enable Test Mode (Free Unlimited Testing)</Label>
                 </div>
               </div>
@@ -211,12 +209,14 @@ export default function ImportAlibabaPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label>Link to ICONJ Supplier</Label>
-                <Select value={formData.supplier_id} onValueChange={(val) => setFormData({...formData, supplier_id: val})}>
-                  <SelectTrigger><SelectValue placeholder="Select supplier..." /></SelectTrigger>
-                  <SelectContent>
-                    {suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <select 
+                  value={formData.supplier_id} 
+                  onChange={(e) => setFormData({...formData, supplier_id: e.target.value})}
+                  className="flex h-10 w-full items-center justify-between rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-950 focus:ring-offset-2"
+                >
+                  <option value="">Select supplier...</option>
+                  {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
               </div>
               <div className="space-y-2"><Label>Supplier Product ID / SKU</Label><Input value={formData.supplier_sku} onChange={(e) => setFormData({...formData, supplier_sku: e.target.value})} className="font-mono text-sm" /></div>
               <div className="p-3 bg-slate-50 rounded-md border text-sm"><p className="font-medium text-slate-700 mb-1">Extracted Supplier Info:</p><p className="text-slate-600 line-clamp-1">{parsedData.supplier_name || "None detected"}</p></div>
