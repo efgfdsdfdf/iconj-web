@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { suggestCategory, parseAlibabaProduct } from '@/lib/alibaba-parser';
+import { suggestCategory, parseRawText } from '@/lib/alibaba-parser';
 
 export async function POST(request: Request) {
   try {
@@ -41,12 +41,12 @@ export async function POST(request: Request) {
     // FALLBACK: Raw Text Parsing
     // ----------------------------------------------------
     if (rawText) {
-      const result = parseAlibabaProduct(url || "", rawText);
+      const result = parseRawText(rawText, url || "");
       return NextResponse.json({
         success: true,
         data: {
           name: result.name || "",
-          description: `Imported from Alibaba.\nSupplier: ${result.supplier_name || 'Unknown'}\n\nFeatures:\n${result.variants.map(v => `- ${v.name}`).join('\n')}`,
+          description: `Imported from Alibaba.\nSupplier: ${result.supplier_name || 'Unknown'}\n\nFeatures:\n${(result.variants || []).map(v => `- ${v.name}`).join('\n')}`,
           supplier_price: result.supplier_price_usd ? (result.supplier_price_usd * 1500) : 0,
           moq: result.moq || 1,
           supplier_name: result.supplier_name || "",
