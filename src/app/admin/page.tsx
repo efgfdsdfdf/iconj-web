@@ -4,6 +4,7 @@ import { WalletCards, ShoppingBag, Users, Truck, TrendingUp, AlertTriangle, Pack
 import Link from "next/link";
 import { createClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/admin";
+import { ResetDataButton } from "./ResetDataButton";
 
 export const revalidate = 0;
 
@@ -225,6 +226,15 @@ export default async function AdminDashboardPage() {
             </div>
           </CardContent>
         </Card>
+      </div>
+
+      {/* Danger Zone */}
+      <div className="mt-12 pt-8 border-t border-red-100">
+        <h2 className="text-lg font-bold text-red-600 mb-2">System Danger Zone</h2>
+        <p className="text-sm text-slate-500 mb-4 max-w-3xl">
+          Use the button below to completely wipe all test orders, notifications, and reset all supplier ledgers to zero. This allows you to launch the store with a completely clean slate. <strong>This action cannot be undone.</strong>
+        </p>
+        <ResetDataButton />
       </div>
     </main>
   );
