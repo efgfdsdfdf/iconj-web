@@ -12,6 +12,9 @@ export function CartClearer() {
   useEffect(() => {
     if (searchParams.get("clear_cart") === "true") {
       clearCart();
+      try {
+        localStorage.removeItem('iconj-cart');
+      } catch (e) {}
       // Optionally remove the clear_cart parameter from the URL to clean it up
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
