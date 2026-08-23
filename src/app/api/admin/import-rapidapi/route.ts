@@ -1,21 +1,19 @@
 import { NextResponse } from 'next/server';
-import { suggestCategory } from '@/lib/alibaba-parser';
+import { suggestCategory, parseAlibabaProduct } from '@/lib/alibaba-parser';
 
 export async function POST(request: Request) {
   try {
-    const { url, testMode } = await request.json();
+    const { url, testMode, rawText } = await request.json();
 
-    if (!url) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+    if (!url && !rawText) {
+      return NextResponse.json({ error: 'URL or Page Text is required' }, { status: 400 });
     }
 
     // ----------------------------------------------------
     // TEST MODE (Does not use RapidAPI Quota)
     // ----------------------------------------------------
     if (testMode) {
-      // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1500));
-      
       return NextResponse.json({
         success: true,
         data: {
@@ -40,24 +38,49 @@ export async function POST(request: Request) {
     }
 
     // ----------------------------------------------------
+    // FALLBACK: Raw Text Parsing
+    // ----------------------------------------------------
+    if (rawText) {
+      const result = parseAlibabaProduct(url || "", rawText);
+      return NextResponse.json({
+        success: true,
+        data: {
+          name: result.name || "",
+          description: `Imported from Alibaba.\nSupplier: ${result.supplier_name || 'Unknown'}\n\nFeatures:\n${result.variants.map(v => `- ${v.name}`).join('\n')}`,
+          supplier_price: result.supplier_price_usd ? (result.supplier_price_usd * 1500) : 0,
+          moq: result.moq || 1,
+          supplier_name: result.supplier_name || "",
+          supplier_sku: result.supplier_sku || "",
+          images: result.images || [],
+          variants: result.variants || [],
+          category_suggestion: result.category_suggestion || "",
+          supplier_product_url: url
+        }
+      });
+    }
+
+    // ----------------------------------------------------
     // LIVE MODE (Uses RapidAPI)
     // ----------------------------------------------------
     const apiKey = 'fe92b9bf9bmsh77dacb45b60bfdbp16265ajsn4667758d25b3';
-    
-    // Most rapid APIs expect the url parameter as a query string
     const apiUrl = `https://alibaba3.p.rapidapi.com/getProductByURL?url=${encodeURIComponent(url)}`;
     
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-rapidapi-host': 'alibaba3.p.rapidapi.com',
-        'x-rapidapi-key': apiKey
-      }
-    });
+    let response;
+    try {
+      response = await fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-rapidapi-host': 'alibaba3.p.rapidapi.com',
+          'x-rapidapi-key': apiKey
+        }
+      });
+    } catch (e: any) {
+      throw new Error("Failed to connect to RapidAPI. The provider might be down.");
+    }
 
     if (!response.ok) {
-      throw new Error("API returned " + response.status);
+      throw new Error("RapidAPI returned " + response.status + ". This usually means the API provider (alibaba3) is currently down or blocked by Alibaba.");
     }
 
     const rawData = await response.json();

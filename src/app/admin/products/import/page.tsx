@@ -15,6 +15,7 @@ export default function ImportAlibabaPage() {
   const supabase = createClient();
   
   const [url, setUrl] = useState("");
+  const [rawText, setRawText] = useState("");
   const [isTestMode, setIsTestMode] = useState(true);
   const [isImporting, setIsImporting] = useState(false);
   const [importError, setImportError] = useState("");
@@ -36,8 +37,8 @@ export default function ImportAlibabaPage() {
   }, [supabase]);
 
   const handleImport = async () => {
-    if (!url) {
-      setImportError("Please paste an Alibaba product URL");
+    if (!url && !rawText) {
+      setImportError("Please provide an Alibaba URL or Page Text");
       return;
     }
     setIsImporting(true);
@@ -47,7 +48,7 @@ export default function ImportAlibabaPage() {
       const response = await fetch('/api/admin/import-rapidapi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url, testMode: isTestMode })
+        body: JSON.stringify({ url, testMode: isTestMode, rawText: !isTestMode ? rawText : "" })
       });
       const resData = await response.json();
       
@@ -153,6 +154,23 @@ export default function ImportAlibabaPage() {
               <Input id="url" placeholder="https://www.alibaba.com/product-detail/..." value={url} onChange={(e) => setUrl(e.target.value)} className="font-mono text-sm" />
               <p className="text-xs text-slate-500">Paste the exact URL of the product page.</p>
             </div>
+            
+            {!isTestMode && (
+              <div className="space-y-2 pt-4 border-t border-slate-100">
+                <div className="flex justify-between items-end">
+                  <Label htmlFor="rawText" className="text-base font-semibold">Backup Method: Paste Page Text</Label>
+                  <span className="text-xs text-orange-600 font-medium">Use only if API returns 502/Error</span>
+                </div>
+                <Textarea 
+                  id="rawText"
+                  placeholder="If the API is down, go to the Alibaba page, press Ctrl+A, then Ctrl+C, and paste here..."
+                  value={rawText}
+                  onChange={(e) => setRawText(e.target.value)}
+                  className="min-h-[100px] font-mono text-xs leading-relaxed border-orange-200"
+                />
+              </div>
+            )}
+
             {importError && <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm font-medium border border-red-100">{importError}</div>}
             <Button onClick={handleImport} className="w-full bg-orange-600 hover:bg-orange-700 text-white h-12 text-lg font-bold" disabled={isImporting}>
               {isImporting ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Fetching Product Data...</> : <><Download className="w-5 h-5 mr-2" /> Import Product</>}
