@@ -2,621 +2,239 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ChevronLeft, Download, Copy, Check, Trash2, Plus, GripVertical, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
-import { parseRawText, suggestCategory } from "@/lib/alibaba-parser";
-import type { ParsedVariant } from "@/lib/alibaba-parser";
-import { createProduct, getSuppliers } from "../../actions";
-import { createClient } from "@supabase/supabase-js";
-import toast from "react-hot-toast";
-
-type ImportStep = "input" | "review";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft, Download, Loader2, Save, Store, Info } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 export default function ImportAlibabaPage() {
   const router = useRouter();
-  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+  const supabase = createClient();
+  
+  const [url, setUrl] = useState("");
+  const [isTestMode, setIsTestMode] = useState(true);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState("");
 
-  // Step state
-  const [step, setStep] = useState<ImportStep>("input");
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Input state
-  const [alibabaUrl, setAlibabaUrl] = useState("");
-  const [rawText, setRawText] = useState("");
-
-  // Review state (parsed product data)
-  const [productName, setProductName] = useState("");
-  const [description, setDescription] = useState("");
-  const [images, setImages] = useState<string[]>([]);
-  const [variants, setVariants] = useState<ParsedVariant[]>([]);
-  const [supplierName, setSupplierName] = useState("");
-  const [supplierSku, setSupplierSku] = useState("");
-  const [supplierUrl, setSupplierUrl] = useState("");
-  const [supplierCost, setSupplierCost] = useState("");
-  const [markupPercent, setMarkupPercent] = useState("30");
-  const [moq, setMoq] = useState("1");
-  const [category, setCategory] = useState("");
-  const [brand, setBrand] = useState("");
-  const [stockStatus, setStockStatus] = useState("In Stock");
-  const [selectedSupplier, setSelectedSupplier] = useState("");
-
-  // Config
-  const [categoriesList, setCategoriesList] = useState<string[]>([]);
-  const [suppliersList, setSuppliersList] = useState<any[]>([]);
+  const [parsedData, setParsedData] = useState<any>(null);
   const [defaultMarkup, setDefaultMarkup] = useState(30);
-
-  // Warnings for missing info
-  const [warnings, setWarnings] = useState<string[]>([]);
+  const [suppliers, setSuppliers] = useState<any[]>([]);
+  const [formData, setFormData] = useState<any>({});
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      const { data: catData } = await supabase
-        .from("store_settings")
-        .select("value")
-        .eq("id", "homepage_categories")
-        .single();
-      if (catData?.value && Array.isArray(catData.value)) {
-        setCategoriesList(catData.value.map((c: any) => c.name));
-      } else {
-        setCategoriesList([
-          "Nursery & Furniture", "Baby Feeding & Nursing", "Baby Care & Bath",
-          "Baby Clothing & Accessories", "Baby Travel", "Toys & Development",
-          "Maternity & Mother Care", "Gifts & Bundles"
-        ]);
-      }
-
-      // Fetch default markup from store_settings
-      const { data: markupData } = await supabase
-        .from("store_settings")
-        .select("value")
-        .eq("id", "default_markup")
-        .single();
-      if (markupData?.value) {
-        setDefaultMarkup(Number(markupData.value) || 30);
-        setMarkupPercent(String(Number(markupData.value) || 30));
-      }
-
-      const sups = await getSuppliers();
-      setSuppliersList(sups);
-    };
+    async function fetchSettings() {
+      const { data: sups } = await supabase.from("suppliers").select("id, name").order("name");
+      if (sups) setSuppliers(sups);
+      const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "default_markup").single();
+      if (settings?.value) setDefaultMarkup(parseInt(settings.value));
+    }
     fetchSettings();
-  }, []);
-
-  // Calculated selling price
-  const costNum = parseFloat(supplierCost) || 0;
-  const markupNum = parseFloat(markupPercent) || 0;
-  const sellingPrice = Math.round(costNum * (1 + markupNum / 100));
+  }, [supabase]);
 
   const handleImport = async () => {
-    setError(null);
-    setWarnings([]);
-
-    if (!alibabaUrl.trim()) {
-      setError("Please enter the Alibaba product URL.");
+    if (!url) {
+      setImportError("Please paste an Alibaba product URL");
       return;
     }
-
-    // Validate URL format
-    if (!alibabaUrl.includes("alibaba.com") && !alibabaUrl.includes("aliexpress.com")) {
-      setError("Please enter a valid Alibaba or AliExpress URL.");
-      return;
-    }
-
-    setLoading(true);
-
+    setIsImporting(true);
+    setImportError("");
+    
     try {
-      const parsed = parseRawText(rawText, alibabaUrl.trim());
-      const w: string[] = [];
+      const response = await fetch('/api/admin/import-rapidapi', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, testMode: isTestMode })
+      });
+      const resData = await response.json();
+      
+      if (!response.ok) throw new Error(resData.error || "Failed to fetch from API");
 
-      // Populate fields from parsed data
-      setProductName(parsed.name || "");
-      setDescription(parsed.description || "");
-      setImages(parsed.images || []);
-      setVariants(parsed.variants || []);
-      setSupplierName(parsed.supplier_name || "");
-      setSupplierSku(parsed.supplier_sku || "");
-      setSupplierUrl(alibabaUrl.trim());
-      setSupplierCost(parsed.supplier_price ? String(parsed.supplier_price) : "");
-      setMoq(String(parsed.moq || 1));
-      setCategory(parsed.category_suggestion || "");
-
-      // Generate warnings
-      if (!parsed.name) w.push("Product name could not be detected. Please enter it manually.");
-      if (!parsed.supplier_price) w.push("Supplier price could not be detected. Please enter it manually.");
-      if (!parsed.images || parsed.images.length === 0) w.push("No product images found. You can add images manually.");
-      if (!parsed.variants || parsed.variants.length === 0) w.push("No variants detected. You can add variants manually.");
-      if (!parsed.supplier_name) w.push("Supplier name not found. Please enter it manually.");
-
-      setWarnings(w);
-      setStep("review");
+      setParsedData(resData.data);
+      setFormData({
+        name: resData.data.name,
+        category: resData.data.category_suggestion,
+        supplier_id: "",
+        supplier_sku: resData.data.supplier_sku,
+        base_supplier_cost: resData.data.supplier_price || 0,
+        markup_percentage: defaultMarkup,
+        base_selling_price: Math.round((resData.data.supplier_price || 0) * (1 + defaultMarkup / 100)),
+        moq: resData.data.moq || 1,
+        description: resData.data.description,
+        variants: resData.data.variants || [],
+        images: resData.data.images || []
+      });
     } catch (err: any) {
-      setError("Failed to parse product data: " + (err.message || "Unknown error"));
+      setImportError(err.message || "Failed to import. Check the URL and try again.");
     } finally {
-      setLoading(false);
+      setIsImporting(false);
     }
   };
 
-  const handleCopyId = () => {
-    // The ID will be auto-generated on save, show placeholder
-    setCopied(true);
-    navigator.clipboard.writeText("ID will be generated on save");
-    setTimeout(() => setCopied(false), 2000);
+  const handleRecalculatePrice = (cost: number, markup: number) => {
+    setFormData((prev: any) => ({
+      ...prev, base_supplier_cost: cost, markup_percentage: markup, base_selling_price: Math.round(cost * (1 + markup / 100))
+    }));
   };
 
-  const removeImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
-
-  const addVariant = () => {
-    setVariants([...variants, { name: "", color: "", size: "", supplier_sku: "" }]);
-  };
-
-  const updateVariant = (index: number, field: keyof ParsedVariant, value: string) => {
-    const updated = [...variants];
-    (updated[index] as any)[field] = value;
-    // Auto-build name from color + size
-    if (field === "color" || field === "size") {
-      const parts = [updated[index].color, updated[index].size].filter(Boolean);
-      updated[index].name = parts.join(" / ") || "";
-    }
-    setVariants(updated);
-  };
-
-  const removeVariant = (index: number) => {
-    setVariants(variants.filter((_, i) => i !== index));
-  };
-
-  const handleSave = async (publish: boolean) => {
-    if (!productName.trim()) {
-      toast.error("Product name is required.");
-      return;
-    }
-    if (!supplierCost || costNum <= 0) {
-      toast.error("Supplier cost is required.");
-      return;
-    }
-    if (sellingPrice <= 0) {
-      toast.error("Selling price must be greater than 0.");
-      return;
-    }
-
-    setSaving(true);
-
+  const handleSaveProduct = async (status: 'DRAFT' | 'ACTIVE') => {
+    setIsSaving(true);
     try {
-      // Build variant_list for the variants JSONB column
-      const variantList = variants.map(v => ({
-        name: v.name,
-        color: v.color || "",
-        size: v.size || "",
-        model: v.model || "",
-        supplier_sku: v.supplier_sku || "",
-        price: v.price || costNum,
-        image: v.image || "",
-      }));
-
-      // Download images to Supabase Storage
-      let storedImages: string[] = [];
-      if (images.length > 0) {
-        toast.loading("Downloading images to your storage...", { id: "img-download" });
-        try {
-          const imgRes = await fetch("/api/admin/import-alibaba", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ imageUrls: images }),
-          });
-          const imgData = await imgRes.json();
-          if (imgData.urls) {
-            storedImages = imgData.urls;
-          }
-        } catch (e) {
-          console.warn("Image download failed, using original URLs as fallback:", e);
-          storedImages = images; // fallback to original URLs
-        }
-        toast.dismiss("img-download");
+      let finalImageUrls = formData.images;
+      if (formData.images.length > 0) {
+        const imgRes = await fetch('/api/admin/import-alibaba', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ images: formData.images })
+        });
+        const imgData = await imgRes.json();
+        if (imgData.success && imgData.urls) finalImageUrls = imgData.urls;
       }
 
-      const productData = {
-        name: productName.trim(),
-        category: category,
-        base_supplier_cost: costNum,
-        base_selling_price: sellingPrice,
-        moq: parseInt(moq) || 1,
-        pricing_tiers: [],
-        is_configurable: false,
-        requires_quote: false,
-        images: storedImages,
-        variants: {
-          supplier_product_url: supplierUrl,
-          variant_list: variantList,
-        },
-        description: description,
-        supplier_id: selectedSupplier || null,
-        supplier_sku: supplierSku || null,
-        brand: brand || null,
-        age_range: null,
-        safety_info: null,
-        is_bundle: false,
-        stock_status: publish ? "In Stock" : "Out of Stock",
-        features: [],
-        specifications: [],
+      const formattedVariants = {
+        supplier_product_url: url,
+        variant_list: formData.variants,
+        colors: formData.variants.map((v: any) => v.color).filter(Boolean),
+        sizes: formData.variants.map((v: any) => v.size).filter(Boolean)
       };
 
-      const result = await createProduct(productData);
+      const payload = {
+        name: formData.name, category: formData.category, supplier_id: formData.supplier_id || null, supplier_sku: formData.supplier_sku,
+        base_supplier_cost: formData.base_supplier_cost, base_selling_price: formData.base_selling_price, moq: formData.moq,
+        description: formData.description, images: finalImageUrls, variants: formattedVariants,
+        stock_status: status === 'ACTIVE' ? 'IN_STOCK' : 'OUT_OF_STOCK', pricing_tiers: [], features: [],
+        specifications: { "Imported From": "Alibaba", "Original URL": url }
+      };
 
-      if (!result.success) {
-        throw new Error(result.error || "Failed to create product");
-      }
-
-      toast.success(publish ? "Product published!" : "Product saved as draft (Out of Stock)!");
-      router.push("/admin/products");
-      router.refresh();
+      const { createProduct } = await import("../../actions");
+      const result = await createProduct(payload);
+      
+      if (result.success) router.push("/admin/products");
+      else throw new Error(result.error);
     } catch (err: any) {
-      toast.error(err.message || "Failed to save product.");
+      alert("Error saving product: " + (err.message || "Unknown error"));
     } finally {
-      setSaving(false);
+      setIsSaving(false);
     }
   };
 
-  // ============== RENDER ==============
-
-  if (step === "input") {
+  if (!parsedData) {
     return (
-      <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
-        <div className="max-w-2xl mx-auto">
-          <Link href="/admin/products" className="text-sm font-medium text-blue-600 flex items-center mb-6 hover:underline">
-            <ChevronLeft className="w-4 h-4 mr-1" /> Back to Products
-          </Link>
-
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-              <Download className="w-8 h-8 text-orange-500" />
-              Import from Alibaba
-            </h1>
-            <p className="text-slate-500 mt-2">
-              Paste the Alibaba product URL and optionally paste the product page text to auto-extract details.
-            </p>
-          </div>
-
-          <Card className="border-none shadow-md">
-            <CardContent className="p-6 space-y-6">
-              {/* URL Input */}
-              <div className="space-y-2">
-                <Label className="text-base font-semibold">Alibaba Product URL *</Label>
-                <Input
-                  placeholder="https://www.alibaba.com/product-detail/..."
-                  value={alibabaUrl}
-                  onChange={e => setAlibabaUrl(e.target.value)}
-                  className="h-12 text-base"
-                />
-                <p className="text-xs text-slate-400">
-                  Paste the exact Alibaba or AliExpress product listing URL.
-                </p>
-              </div>
-
-              {/* Raw Text Input */}
-              <div className="space-y-2">
-                <Label className="text-base font-semibold">Product Page Text (Optional)</Label>
-                <Textarea
-                  placeholder="Copy and paste the product title, description, price, variants, supplier name, etc. from the Alibaba page here. The system will try to automatically extract the details."
-                  value={rawText}
-                  onChange={e => setRawText(e.target.value)}
-                  className="h-48 text-sm"
-                />
-                <p className="text-xs text-slate-400">
-                  Tip: Select all text on the Alibaba product page (Ctrl+A), copy (Ctrl+C), and paste here. The more text you provide, the more the system can auto-fill for you.
-                </p>
-              </div>
-
-              {error && (
-                <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                  <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
-                  {error}
-                </div>
-              )}
-
-              <Button
-                onClick={handleImport}
-                disabled={loading}
-                className="w-full h-12 bg-orange-500 hover:bg-orange-600 text-white font-bold text-base"
-              >
-                {loading ? (
-                  <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Parsing Product...</>
-                ) : (
-                  <><Download className="w-5 h-5 mr-2" /> Import Product</>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
+      <main className="flex-1 p-4 md:p-8 min-h-[calc(100vh-130px)] max-w-4xl mx-auto">
+        <Button variant="ghost" className="mb-4" onClick={() => router.back()}><ArrowLeft className="w-4 h-4 mr-2" /> Back to Products</Button>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-slate-900">Import from Alibaba</h1>
+          <p className="text-sm text-slate-500">Automatically pull product details, variants, and images directly from Alibaba.</p>
         </div>
+        <Card className="border-orange-200 shadow-md">
+          <CardHeader className="bg-orange-50/50 border-b border-orange-100">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center"><Store className="w-5 h-5 text-orange-600" /></div>
+              <div><CardTitle className="text-orange-900">Alibaba Product Importer</CardTitle><CardDescription>Powered by RapidAPI</CardDescription></div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-6">
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex gap-3 items-start">
+              <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+              <div>
+                <h4 className="font-semibold text-blue-900">Test Mode is {isTestMode ? "ON" : "OFF"}</h4>
+                <p className="text-sm text-blue-800 mt-1">{isTestMode ? "Test Mode simulates a successful import without using any of your 30 free monthly API requests. Turn this off when you want to import a real product to your store." : "Live Mode will fetch real data from Alibaba and use 1 request from your free RapidAPI monthly limit."}</p>
+                <div className="mt-3 flex items-center gap-2">
+                  <Switch checked={isTestMode} onCheckedChange={setIsTestMode} id="test-mode-toggle" />
+                  <Label htmlFor="test-mode-toggle" className="font-bold cursor-pointer">Enable Test Mode (Free Unlimited Testing)</Label>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="url" className="text-base font-semibold">Alibaba Product URL</Label>
+              <Input id="url" placeholder="https://www.alibaba.com/product-detail/..." value={url} onChange={(e) => setUrl(e.target.value)} className="font-mono text-sm" />
+              <p className="text-xs text-slate-500">Paste the exact URL of the product page.</p>
+            </div>
+            {importError && <div className="p-3 bg-red-50 text-red-600 rounded-md text-sm font-medium border border-red-100">{importError}</div>}
+            <Button onClick={handleImport} className="w-full bg-orange-600 hover:bg-orange-700 text-white h-12 text-lg font-bold" disabled={isImporting}>
+              {isImporting ? <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Fetching Product Data...</> : <><Download className="w-5 h-5 mr-2" /> Import Product</>}
+            </Button>
+          </CardContent>
+        </Card>
       </main>
     );
   }
 
-  // ============== REVIEW STEP ==============
   return (
-    <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <button onClick={() => setStep("input")} className="text-sm font-medium text-blue-600 flex items-center mb-6 hover:underline">
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Import
-        </button>
-
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-2">
-            <CheckCircle2 className="w-8 h-8 text-emerald-500" />
-            <h1 className="text-3xl font-bold text-slate-900">Product Imported</h1>
-          </div>
-          <p className="text-slate-500">Review the extracted information and edit before saving.</p>
+    <main className="flex-1 p-4 md:p-8 min-h-[calc(100vh-130px)]">
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" size="icon" onClick={() => setParsedData(null)}><ArrowLeft className="w-4 h-4" /></Button>
+          <div><h1 className="text-2xl font-bold text-slate-900">Review Imported Product</h1><p className="text-sm text-slate-500">Edit details before saving to your catalog.</p></div>
         </div>
-
-        {/* Warnings */}
-        {warnings.length > 0 && (
-          <Card className="border-orange-200 bg-orange-50 mb-6">
-            <CardContent className="p-4">
-              <p className="font-semibold text-orange-800 mb-2 flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4" />
-                Product imported with some information missing
-              </p>
-              <ul className="text-sm text-orange-700 list-disc list-inside space-y-1">
-                {warnings.map((w, i) => <li key={i}>{w}</li>)}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="space-y-6">
-          {/* === Basic Info === */}
-          <Card className="border-none shadow-sm">
-            <CardHeader><CardTitle>Product Information</CardTitle></CardHeader>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => handleSaveProduct('DRAFT')} disabled={isSaving}>Save as Draft</Button>
+          <Button onClick={() => handleSaveProduct('ACTIVE')} className="bg-blue-600 hover:bg-blue-700" disabled={isSaving}>
+            {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />} Publish Product
+          </Button>
+        </div>
+      </div>
+      {isTestMode && (
+         <div className="mb-6 bg-blue-100 border border-blue-200 text-blue-800 p-4 rounded-lg flex items-center gap-3">
+           <Info className="w-5 h-5 shrink-0" /><p className="text-sm font-medium">You are viewing a Mock Product generated in Test Mode. No API requests were consumed.</p>
+         </div>
+      )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Product Name *</Label>
-                <Input value={productName} onChange={e => setProductName(e.target.value)} className="text-lg font-medium" />
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Product ID (SKU)</Label>
-                  <div className="flex gap-2">
-                    <Input readOnly value="Auto-generated on save" className="bg-slate-50 text-slate-500 cursor-not-allowed font-mono" />
-                    <Button type="button" variant="outline" size="icon" onClick={handleCopyId} title="Copy">
-                      {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
-                    </Button>
-                  </div>
-                  <p className="text-[10px] text-slate-400">e.g. ICONJ-BABY-001 — generated automatically</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Category *</Label>
-                  <select
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    value={category}
-                    onChange={e => setCategory(e.target.value)}
-                  >
-                    <option value="">Select Category...</option>
-                    {categoriesList.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Brand</Label>
-                  <Input value={brand} onChange={e => setBrand(e.target.value)} placeholder="e.g. ICONJ Baby" />
-                </div>
-                <div className="space-y-2">
-                  <Label>Stock Status</Label>
-                  <select
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    value={stockStatus}
-                    onChange={e => setStockStatus(e.target.value)}
-                  >
-                    <option value="In Stock">In Stock</option>
-                    <option value="Out of Stock">Out of Stock (Draft)</option>
-                    <option value="Pre-Order">Pre-Order</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Description</Label>
-                <Textarea value={description} onChange={e => setDescription(e.target.value)} className="h-32" />
-              </div>
+              <div className="space-y-2"><Label>Product Name</Label><Input value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="font-medium" /></div>
+              <div className="space-y-2"><Label>Category</Label><Input value={formData.category} onChange={(e) => setFormData({...formData, category: e.target.value})} /></div>
+              <div className="space-y-2"><Label>Description</Label><Textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} rows={4} /></div>
             </CardContent>
           </Card>
-
-          {/* === Supplier Info === */}
-          <Card className="border-none shadow-sm">
-            <CardHeader><CardTitle>Supplier Information</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Linked Supplier (from your supplier list)</Label>
-                  <select
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                    value={selectedSupplier}
-                    onChange={e => setSelectedSupplier(e.target.value)}
-                  >
-                    <option value="">— None —</option>
-                    {suppliersList.map(s => (
-                      <option key={s.id} value={s.id}>{s.name}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <Label>Supplier / Store Name</Label>
-                  <Input value={supplierName} onChange={e => setSupplierName(e.target.value)} placeholder="e.g. Guangzhou Baby Co." />
-                </div>
-              </div>
-
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Supplier SKU / Model Number</Label>
-                  <Input value={supplierSku} onChange={e => setSupplierSku(e.target.value)} placeholder="e.g. BB240-BLUE (leave empty if none)" />
-                </div>
-                <div className="space-y-2">
-                  <Label>MOQ</Label>
-                  <Input type="number" value={moq} onChange={e => setMoq(e.target.value)} min="1" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Alibaba Product URL</Label>
-                <Input value={supplierUrl} onChange={e => setSupplierUrl(e.target.value)} className="text-xs font-mono" />
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* === Pricing === */}
-          <Card className="border-none shadow-sm ring-1 ring-emerald-100">
-            <CardHeader className="bg-emerald-50/50">
-              <CardTitle className="text-emerald-900">Pricing & Markup</CardTitle>
-            </CardHeader>
-            <CardContent className="p-6 space-y-4">
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>Supplier Cost (₦) *</Label>
-                  <Input
-                    type="number"
-                    value={supplierCost}
-                    onChange={e => setSupplierCost(e.target.value)}
-                    placeholder="e.g. 8500"
-                    className="text-lg font-bold"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Markup %</Label>
-                  <Input
-                    type="number"
-                    value={markupPercent}
-                    onChange={e => setMarkupPercent(e.target.value)}
-                    min="0"
-                    className="text-lg"
-                  />
-                  <p className="text-[10px] text-slate-400">Default: {defaultMarkup}%</p>
-                </div>
-                <div className="space-y-2">
-                  <Label>Selling Price (₦)</Label>
-                  <div className="h-10 flex items-center px-3 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-lg font-bold">
-                    ₦{sellingPrice.toLocaleString()}
-                  </div>
-                </div>
-              </div>
-
-              <div className="text-xs text-slate-500 bg-slate-50 p-3 rounded-lg">
-                <strong>Profit per unit:</strong> ₦{(sellingPrice - costNum).toLocaleString()} &nbsp;|&nbsp;
-                <strong>Margin:</strong> {costNum > 0 ? Math.round(((sellingPrice - costNum) / sellingPrice) * 100) : 0}%
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* === Variants === */}
-          <Card className="border-none shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Variants</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-                <Plus className="w-4 h-4 mr-2" /> Add Variant
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {variants.length === 0 ? (
-                <p className="text-sm text-slate-400 py-4 text-center">No variants. Click "Add Variant" or this product has no variant options.</p>
-              ) : (
-                <>
-                  <div className="grid grid-cols-12 gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider px-2">
-                    <div className="col-span-3">Color</div>
-                    <div className="col-span-3">Size / Model</div>
-                    <div className="col-span-3">Supplier SKU</div>
-                    <div className="col-span-2">Display Name</div>
-                    <div className="col-span-1"></div>
-                  </div>
-                  {variants.map((v, i) => (
-                    <div key={i} className="grid grid-cols-12 gap-2 items-center bg-slate-50 p-2 rounded-md">
-                      <div className="col-span-3">
-                        <Input placeholder="e.g. Blue" value={v.color || ""} onChange={e => updateVariant(i, "color", e.target.value)} />
-                      </div>
-                      <div className="col-span-3">
-                        <Input placeholder="e.g. 240ml" value={v.size || ""} onChange={e => updateVariant(i, "size", e.target.value)} />
-                      </div>
-                      <div className="col-span-3">
-                        <Input placeholder="Supplier SKU" value={v.supplier_sku || ""} onChange={e => updateVariant(i, "supplier_sku", e.target.value)} />
-                      </div>
-                      <div className="col-span-2">
-                        <span className="text-xs text-slate-600 font-mono">{v.name || "—"}</span>
-                      </div>
-                      <div className="col-span-1 flex justify-end">
-                        <Button type="button" variant="ghost" size="icon" className="text-red-500 h-8 w-8" onClick={() => removeVariant(i)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* === Images === */}
-          <Card className="border-none shadow-sm">
-            <CardHeader>
-              <CardTitle>Images ({images.length})</CardTitle>
-            </CardHeader>
+          <Card>
+            <CardHeader><CardTitle>Pricing & Margins</CardTitle></CardHeader>
             <CardContent>
-              {images.length === 0 ? (
-                <p className="text-sm text-slate-400 py-4 text-center">No images imported. You can add images after saving.</p>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {images.map((url, i) => (
-                    <div key={i} className="relative group rounded-lg overflow-hidden border bg-white aspect-square">
-                      <img src={url} alt={`Product ${i + 1}`} className="w-full h-full object-cover" />
-                      {i === 0 && (
-                        <span className="absolute top-1 left-1 bg-blue-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
-                          PRIMARY
-                        </span>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => removeImage(i)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2"><Label>Supplier Cost (₦)</Label><Input type="number" value={formData.base_supplier_cost} onChange={(e) => handleRecalculatePrice(Number(e.target.value), formData.markup_percentage)} /></div>
+                <div className="space-y-2"><Label>Markup (%)</Label><Input type="number" value={formData.markup_percentage} onChange={(e) => handleRecalculatePrice(formData.base_supplier_cost, Number(e.target.value))} /></div>
+                <div className="space-y-2"><Label>Selling Price (₦)</Label><Input type="number" value={formData.base_selling_price} onChange={(e) => setFormData({...formData, base_selling_price: Number(e.target.value)})} className="font-bold text-green-700 bg-green-50 border-green-200" /></div>
+              </div>
             </CardContent>
           </Card>
-
-          {/* === Action Buttons === */}
-          <div className="flex flex-col sm:flex-row gap-3 pb-12">
-            <Button
-              onClick={() => handleSave(false)}
-              disabled={saving}
-              variant="outline"
-              className="flex-1 h-12 text-base font-bold"
-            >
-              {saving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : null}
-              Save as Draft
-            </Button>
-            <Button
-              onClick={() => handleSave(true)}
-              disabled={saving}
-              className="flex-1 h-12 text-base font-bold bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              {saving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
-              Publish Product
-            </Button>
-          </div>
+        </div>
+        <div className="space-y-6">
+          <Card>
+            <CardHeader><CardTitle>Supplier Mapping</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Link to ICONJ Supplier</Label>
+                <Select value={formData.supplier_id} onValueChange={(val) => setFormData({...formData, supplier_id: val})}>
+                  <SelectTrigger><SelectValue placeholder="Select supplier..." /></SelectTrigger>
+                  <SelectContent>
+                    {suppliers.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2"><Label>Supplier Product ID / SKU</Label><Input value={formData.supplier_sku} onChange={(e) => setFormData({...formData, supplier_sku: e.target.value})} className="font-mono text-sm" /></div>
+              <div className="p-3 bg-slate-50 rounded-md border text-sm"><p className="font-medium text-slate-700 mb-1">Extracted Supplier Info:</p><p className="text-slate-600 line-clamp-1">{parsedData.supplier_name || "None detected"}</p></div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Images</CardTitle></CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-2">
+                {formData.images?.map((img: string, i: number) => (
+                  <div key={i} className="relative aspect-square rounded overflow-hidden border">
+                    <img src={img} alt="Product" className="object-cover w-full h-full" />
+                    <button onClick={() => setFormData({...formData, images: formData.images.filter((_:any, idx:number) => idx !== i)})} className="absolute top-1 right-1 bg-white/80 hover:bg-red-100 text-red-600 rounded-full w-6 h-6 flex items-center justify-center text-xs shadow-sm">×</button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </main>
