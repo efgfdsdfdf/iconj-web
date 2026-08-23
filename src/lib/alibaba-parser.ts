@@ -1,4 +1,4 @@
-"use server";
+// Alibaba Product Parser - shared utility module
 
 /**
  * Alibaba Product Parser
