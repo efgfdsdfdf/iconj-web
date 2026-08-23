@@ -1,8 +1,8 @@
 const fs = require('fs');
 let html = fs.readFileSync('alibaba_test.html', 'utf8');
+
 html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ');
 html = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ');
 let text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
 
-console.log('Price match:', text.match(/[$€£]\s*([0-9,]+\.[0-9]{2})/));
-console.log('MOQ:', text.match(/([0-9,]+)\s*(?:pieces?|sets?|pairs?)\s*\(MOQ\)/i));
+fs.writeFileSync('stripped_test.txt', text);
