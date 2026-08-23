@@ -9,7 +9,7 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 export async function deleteProduct(productId: string) {
   const { error } = await supabaseAdmin.from("products").delete().eq("id", productId);
-  if (error) throw new Error(error.message);
+  if (error) return { success: false, error: error.message };
   revalidatePath("/admin/products");
   revalidatePath("/shop");
   return { success: true };
