@@ -50,7 +50,8 @@ export default function SellerOnboardingPage() {
     // Step 4: Documents (Simulated file names for this iteration)
     taxId: "",
     cacDocumentName: "",
-    idDocumentName: ""
+    idDocumentName: "",
+    agreedToTerms: false
   });
 
   const updateForm = (updates: Partial<typeof formData>) => {
@@ -87,6 +88,11 @@ export default function SellerOnboardingPage() {
     
     if (!formData.cacDocumentName || !formData.idDocumentName) {
       setError("Please upload all required KYC documents.");
+      return;
+    }
+
+    if (!formData.agreedToTerms) {
+      setError("You must agree to the Terms and Conditions to proceed.");
       return;
     }
 
@@ -308,6 +314,19 @@ export default function SellerOnboardingPage() {
                         </>
                       )}
                     </div>
+                  </div>
+                  
+                  <div className="pt-4 border-t flex items-start gap-3 mt-4">
+                    <input 
+                      type="checkbox" 
+                      id="terms" 
+                      className="w-5 h-5 rounded border-slate-300 text-blue-600 mt-0.5" 
+                      checked={formData.agreedToTerms}
+                      onChange={(e) => updateForm({ agreedToTerms: e.target.checked })}
+                    />
+                    <Label htmlFor="terms" className="text-sm text-slate-700 leading-tight">
+                      I have read and agree to the <a href="/terms-and-conditions" target="_blank" className="text-blue-600 hover:underline">Terms & Conditions</a>, including the marketplace commission structure, custom measurement liability, and payout schedule.
+                    </Label>
                   </div>
                 </div>
               </div>

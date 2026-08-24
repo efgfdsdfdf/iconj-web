@@ -12,58 +12,60 @@ export default function TermsPage() {
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="mb-8">
           <div className="flex items-center gap-3 text-slate-800 mb-4">
-            <Scale className="w-8 h-8" />
+            <Scale className="w-8 h-8 text-blue-600" />
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Terms & Conditions</h1>
           </div>
-          <p className="text-slate-500">Last Updated: [DATE]</p>
+          <p className="text-slate-500 font-medium">Last Updated: August 24, 2026</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm border p-6 md:p-10 text-slate-700 space-y-8 leading-relaxed">
-          <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">1. Introduction</h2>
-            <p>These Terms and Conditions govern your use of the ICONJ website and the purchase of any products from it. By accessing our website or placing an order, you agree to be bound by these terms.</p>
-          </section>
+        <div className="bg-white rounded-xl shadow-sm border p-6 md:p-10 prose prose-slate max-w-none text-slate-700">
+          <p>
+            Welcome to ICONJ. These Terms and Conditions govern your use of the ICONJ marketplace platform, operated by <strong>ICONJ Global Services</strong>. By accessing our platform, registering as a buyer, seller, or supplier, or making a purchase, you agree to be bound by these terms.
+          </p>
 
-          <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">2. Products & Pricing</h2>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Product Information:</strong> We strive to display product colors and configurations accurately, but we cannot guarantee that your device's display will accurately reflect the real color of the products.</li>
-              <li><strong>Custom Configurations:</strong> Many of our products (such as nursery bundles\) are custom-made to your specific dimensions. It is your responsibility to ensure all sizes and options selected during checkout are accurate.</li>
-              <li><strong>Pricing:</strong> All prices are in Naira (?) unless stated otherwise. Product availability and final pricing for "Request a Quote" items are subject to supplier confirmation.</li>
-            </ul>
-          </section>
+          <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">1. Introduction</h2>
+          <p>
+            ICONJ Global Services operates a multi-vendor marketplace specializing in Blinds, Curtains, and Window Treatments. We connect customers with manufacturers, wholesalers, installers, and independent sellers.
+          </p>
 
-          <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">3. Orders & Fulfillment</h2>
-            <p className="mb-2">ICONJ operates by partnering directly with global manufacturers and suppliers.</p>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Order Acceptance:</strong> Your order constitutes an offer to us to buy a product. All orders are subject to acceptance by us and availability from our suppliers.</li>
-              <li><strong>Supplier Fulfillment:</strong> Because products are shipped directly from our manufacturing partners, delivery times may vary based on your location in Nigeria and the supplier's processing time.</li>
-            </ul>
-          </section>
+          <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">2. Seller & Supplier Agreements</h2>
+          <p>
+            By registering as a Seller, Manufacturer, or Supplier on ICONJ, you agree to:
+          </p>
+          <ul className="list-disc pl-6 space-y-2 marker:text-blue-500">
+            <li>Provide accurate representations, custom measurement rules, and pricing for your products.</li>
+            <li>Fulfill accepted dropshipping or wholesale orders within the agreed lead times.</li>
+            <li>Allow ICONJ to process payments on your behalf and deduct the agreed marketplace commission prior to payout.</li>
+            <li>Maintain the quality and safety standards expected of premium window treatments.</li>
+          </ul>
 
-          <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">4. Shipping & Delivery</h2>
-            <p>We aim to deliver products within the estimated timeframes provided at checkout. However, delays can occasionally occur due to unforeseen circumstances (e.g., customs clearance, courier delays). ICONJ is not liable for any delay in delivery.</p>
-          </section>
+          <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">3. Customer Measurements & Custom Orders</h2>
+          <p>
+            Because blinds and curtains are often made-to-measure:
+          </p>
+          <ul className="list-disc pl-6 space-y-2 marker:text-blue-500">
+            <li>Customers are responsible for providing accurate width and height measurements unless they book an official ICONJ Measurement Service.</li>
+            <li>Custom-cut or specially manufactured items cannot be returned or refunded unless there is a verifiable manufacturing defect.</li>
+          </ul>
 
-          <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">5. Returns & Replacements</h2>
-            <p>Our return and replacement policies are strictly governed by our <Link href="/returns" className="text-blue-600 hover:underline">Returns & Replacement Policy</Link>. Because many items are custom-configured, automatic refunds are not guaranteed for customer measurement errors.</p>
-          </section>
+          <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">4. Installation Services</h2>
+          <p>
+            Where a customer selects "Delivery + Installation," ICONJ acts as an intermediary connecting the customer with an approved independent installer. ICONJ Global Services is not directly liable for damages incurred during independent installation, though we strictly vet our professionals and enforce a dispute resolution policy.
+          </p>
 
-          <section>
-            <h2 className="text-xl font-bold text-slate-900 mb-4">6. Contact Us</h2>
-            <p>For any legal or terms-related inquiries, please contact:</p>
-            <div className="bg-slate-50 p-4 rounded-lg mt-4 border">
-              <p><strong>Email:</strong> [ICONJ SUPPORT EMAIL]</p>
-              <p><strong>Business Name:</strong> [ICONJ LEGAL BUSINESS NAME]</p>
-            </div>
-          </section>
+          <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">5. Payments and Payouts</h2>
+          <p>
+            All payments are securely processed through Paystack. Sellers and Suppliers will receive their payouts to their verified bank accounts on the designated settlement days, minus platform commissions and delivery fees.
+          </p>
+
+          <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">6. Contact Information</h2>
+          <p>
+            If you have any questions or concerns regarding these terms, please contact us at:<br/>
+            <strong>Email:</strong> <a href="mailto:ezeilodavid292@gmail.com" className="text-blue-600 font-medium hover:underline">ezeilodavid292@gmail.com</a><br/>
+            <strong>Legal Entity:</strong> ICONJ Global Services
+          </p>
         </div>
       </div>
     </div>
   );
 }
-
-
