@@ -44,8 +44,8 @@ export default function SellerOnboardingPage() {
         throw new Error(result.error || "Failed to submit seller application");
       }
 
-      // Redirect to seller dashboard pending page or account
-      router.push("/account");
+      // Redirect to seller dashboard
+      router.push("/seller");
       
     } catch (err: any) {
       console.error(err);
