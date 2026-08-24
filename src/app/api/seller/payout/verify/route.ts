@@ -36,7 +36,8 @@ export async function POST(request: Request) {
     }
 
     // Determine business name or fallback to account name
-    const businessName = seller.businesses?.[0]?.business_name || seller.businesses?.business_name || account_name;
+    const businesses = seller.businesses as any;
+    const businessName = (Array.isArray(businesses) ? businesses[0]?.business_name : businesses?.business_name) || account_name;
 
     // Create Paystack Subaccount
     const paystackRes = await fetch("https://api.paystack.co/subaccount", {
