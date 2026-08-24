@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       total_amount: totalAmount,
       shipping_cost: shippingFee,
       payment_status: "PENDING",
-      order_status: "pending_payment",
+      order_status: "PENDING_PAYMENT",
       delivery_address: { ...body.address, name: body.name, phone: body.phone, email: email },
     }]).select().single();
 
@@ -138,6 +138,7 @@ export async function POST(request: Request) {
           width: item.width,
           height: item.height,
           motorType: item.motorType,
+          requiresInstall: item.requiresInstall,
           selected_variant: item.selectedVariant
         }
       }));
