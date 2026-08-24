@@ -15,6 +15,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [sellerStatus, setSellerStatus] = useState<string | null>(null);
   const tapCountRef = useRef({ count: 0, lastTap: 0 });
   
   const items = useCartStore((state) => state.items);
