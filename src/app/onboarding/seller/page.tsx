@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
@@ -325,7 +326,38 @@ export default function SellerOnboardingPage() {
                       onChange={(e) => updateForm({ agreedToTerms: e.target.checked })}
                     />
                     <Label htmlFor="terms" className="text-sm text-slate-700 leading-tight">
-                      I have read and agree to the <a href="/terms-and-conditions" target="_blank" className="text-blue-600 hover:underline">Terms & Conditions</a>, including the marketplace commission structure, custom measurement liability, and payout schedule.
+                      I have read and agree to the{" "}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button type="button" className="text-blue-600 hover:underline font-medium">Terms & Conditions</button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="text-2xl font-bold">Terms and Conditions</DialogTitle>
+                          </DialogHeader>
+                          <div className="prose prose-sm text-slate-700 mt-4 space-y-4">
+                            <p><strong>Last Updated: August 24, 2026</strong></p>
+                            <p>Welcome to ICONJ. These Terms and Conditions govern your use of the ICONJ marketplace platform, operated by <strong>ICONJ Global Services</strong>. By accessing our platform, registering as a buyer, seller, or supplier, or making a purchase, you agree to be bound by these terms.</p>
+                            
+                            <h3 className="font-bold text-slate-900 border-b pb-1 mt-4">1. Seller & Supplier Agreements</h3>
+                            <ul className="list-disc pl-5">
+                              <li>Provide accurate representations, custom measurement rules, and pricing for your products.</li>
+                              <li>Fulfill accepted dropshipping or wholesale orders within the agreed lead times.</li>
+                              <li>Allow ICONJ to process payments on your behalf and deduct the agreed marketplace commission prior to payout.</li>
+                            </ul>
+
+                            <h3 className="font-bold text-slate-900 border-b pb-1 mt-4">2. Customer Measurements & Custom Orders</h3>
+                            <ul className="list-disc pl-5">
+                              <li>Customers are responsible for providing accurate width and height measurements.</li>
+                              <li>Custom-cut or specially manufactured items cannot be returned or refunded unless there is a verifiable manufacturing defect.</li>
+                            </ul>
+
+                            <h3 className="font-bold text-slate-900 border-b pb-1 mt-4">3. Payments and Payouts</h3>
+                            <p>All payments are securely processed through Paystack. Sellers and Suppliers will receive their payouts to their verified bank accounts on the designated settlement days, minus platform commissions and delivery fees.</p>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                      , including the marketplace commission structure, custom measurement liability, and payout schedule.
                     </Label>
                   </div>
                 </div>
