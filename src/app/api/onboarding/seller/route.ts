@@ -31,8 +31,7 @@ export async function POST(request: Request) {
       business_name: businessName,
       business_type: businessType || 'retail',
       tax_id: taxId || null,
-      address: { street, city, state },
-      phone: phone
+      address: { street, city, state, phone }
     }).select().single();
 
     if (businessError) throw businessError;
