@@ -47,7 +47,10 @@ export async function POST(request: Request) {
     if (sellerError) throw sellerError;
 
     // 3. Create Store
-    const storeSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const baseSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    const storeSlug = `${baseSlug}-${randomSuffix}`;
+    
     const { error: storeError } = await supabaseAdmin.from('stores').insert({
       seller_id: sellerData.id,
       store_name: storeName,
