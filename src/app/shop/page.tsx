@@ -48,7 +48,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             <span className="bg-amber-500 text-amber-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4">B2B Marketplace</span>
             <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">ICONJ Wholesale Center</h1>
             <p className="text-blue-100 max-w-2xl text-lg mb-6">
-              Source premium mother & baby products directly from manufacturers and official distributors. 
+              Source premium custom blinds, curtains & window treatments directly from manufacturers and official distributors. 
               Enjoy massive bulk discounts, verified sellers, and secure escrow payments.
             </p>
             <div className="flex gap-4 items-center text-sm font-medium text-sky-200">

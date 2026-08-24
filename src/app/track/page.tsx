@@ -252,7 +252,7 @@ export default function TrackOrderPage() {
                         )}
                       </div>
                       <div className="flex-1">
-                        <p className="font-bold text-sm text-slate-900">{item.products?.name || "Premium Baby Product"}</p>
+                        <p className="font-bold text-sm text-slate-900">{item.products?.name || "Premium Window Blinds"}</p>
                         <p className="text-xs text-slate-500 mt-1">Qty: {item.quantity}</p>
                       </div>
                       <div className="text-right">

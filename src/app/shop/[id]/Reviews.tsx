@@ -18,7 +18,7 @@ export function Reviews({ productId, initialReviews = [] }: { productId: string,
   const [comment, setComment] = useState("");
 
   const defaultReviews = [
-    { name: "Chinedu O.", date: "2 days ago", rating: 5, comment: "Excellent quality! The baby carrier is so comfortable for me and my newborn. Delivery to Abuja was faster than expected.", verified: true },
+    { name: "Chinedu O.", date: "2 days ago", rating: 5, comment: "Excellent quality! The motorized zebra blinds fit my window perfectly and the installation was very professional. Delivery to Abuja was faster than expected.", verified: true },
     { name: "Sarah M.", date: "1 week ago", rating: 5, comment: "Direct factory pricing is real. Saved a lot compared to buying locally in Lagos. Will definitely order again for my new apartment.", verified: true },
   ];
 

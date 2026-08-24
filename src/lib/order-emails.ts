@@ -116,7 +116,7 @@ function generateHeader() {
   return `
     <div style="background-color: ${BRAND.primary}; padding: 24px; text-align: center;">
       <h1 style="color: white; margin: 0; font-size: 28px; font-family: Arial, sans-serif; letter-spacing: 3px; font-weight: 800;">ICONJ</h1>
-      <p style="color: rgba(255,255,255,0.7); margin: 4px 0 0; font-size: 11px; font-family: Arial, sans-serif; letter-spacing: 1px;">PREMIUM MOTHER &amp; BABY ESSENTIALS</p>
+      <p style="color: rgba(255,255,255,0.7); margin: 4px 0 0; font-size: 11px; font-family: Arial, sans-serif; letter-spacing: 1px;">PREMIUM WINDOW TREATMENTS</p>
     </div>
   `;
 }

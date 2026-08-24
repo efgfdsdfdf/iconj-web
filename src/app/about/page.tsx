@@ -8,7 +8,7 @@ export default function AboutPage() {
       <section className="bg-slate-900 text-white py-20 text-center px-4">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">About ICONJ</h1>
         <p className="text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-          We are Nigeria&apos;s premier platform for premium prefabricated container solutions, connecting you directly with top-tier suppliers for seamless delivery.
+          We are Nigeria&apos;s premier marketplace for custom blinds, curtains, and window treatments, connecting you directly with top-tier manufacturers and professional installers.
         </p>
       </section>
 
@@ -18,7 +18,7 @@ export default function AboutPage() {
           <div>
             <h2 className="text-3xl font-bold text-slate-900 mb-4">Our Mission</h2>
             <p className="text-slate-600 leading-relaxed text-lg">
-              At ICONJ, we recognized the growing demand for premium, safe, and modern mother and baby essentials in Nigeria. Our mission is to eliminate the complexity of sourcing high-quality newborn essentials, maternity care, and baby safety products by providing a streamlined, secure e-commerce dropshipping platform connected directly to top manufacturers.
+              At ICONJ, we recognized the growing demand for premium, custom-fitted window treatments in Nigeria. Our mission is to eliminate the complexity of sourcing high-quality blinds and curtains by providing a streamlined, secure marketplace connected directly to top manufacturers. From precise measurements to flawless installation, we handle the entire window treatment lifecycle.
             </p>
           </div>
 
