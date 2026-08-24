@@ -92,11 +92,15 @@ export async function POST(request: Request) {
       if (verifyError) throw verifyError;
     }
 
-    // 6. Update user_roles
-    await supabaseAdmin.from('user_roles').insert({
+    // 6. Update user_roles (ignore duplicate key error if they already have the role)
+    const { error: roleError } = await supabaseAdmin.from('user_roles').insert({
       user_id: user.id,
       role: 'seller'
     });
+    // Ignore error 23505 (unique violation)
+    if (roleError && roleError.code !== '23505') {
+      throw roleError;
+    }
 
     // 7. Notify Admin (Email placeholder)
     console.log(`[EMAIL DISPATCH] Sending email to Admin...`);

@@ -15,7 +15,7 @@ export default async function AdminDashboardPage() {
   const { count: pendingSellers } = await supabaseAdmin
     .from("sellers")
     .select("*", { count: "exact", head: true })
-    .eq("status", "pending_review");
+    .eq("status", "pending_verification");
 
   // 2. Disputed/Issue Orders
   const { count: disputedOrders } = await supabaseAdmin
