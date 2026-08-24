@@ -58,22 +58,27 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
   };
 
   const handleConfirm = async () => {
-    if (!resolvedAccount) return;
+    // If we are retrying an existing account, use that data instead of the state
+    const isRetry = !!existingAccount;
+    const finalBankCode = isRetry ? existingAccount.bank_code : bankCode;
+    const finalAccountNumber = isRetry ? existingAccount.account_number : accountNumber;
+    const finalAccountName = isRetry ? existingAccount.verified_name : resolvedAccount?.account_name;
+    const finalBankName = isRetry ? existingAccount.bank_name : commonBanks.find(b => b.code === bankCode)?.name || bankCode;
+
+    if (!finalBankCode || !finalAccountNumber || !finalAccountName) return;
     
     setVerifying(true);
     setError(null);
 
     try {
-      const selectedBank = commonBanks.find(b => b.code === bankCode);
-      
       const res = await fetch("/api/seller/payout/verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          bank_code: bankCode,
-          account_number: accountNumber,
-          bank_name: selectedBank?.name || bankCode,
-          account_name: resolvedAccount.account_name
+          bank_code: finalBankCode,
+          account_number: finalAccountNumber,
+          bank_name: finalBankName,
+          account_name: finalAccountName
         })
       });
 
@@ -125,7 +130,20 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
           {!isReady && (
             <div className="bg-amber-50 text-amber-800 p-4 rounded-lg text-sm border border-amber-200">
               <p className="font-bold mb-1">Marketplace Payouts Pending</p>
-              <p>Your bank details are saved, but the marketplace payout automation is awaiting platform upgrade (Starter Business limitation). Your funds will accumulate securely in the ledger in the meantime.</p>
+              <p className="mb-4">Your bank details are saved, but the marketplace payout automation is awaiting platform upgrade (Starter Business limitation). Your funds will accumulate securely in the ledger in the meantime.</p>
+              <Button 
+                variant="outline" 
+                className="bg-white border-amber-300 text-amber-900 hover:bg-amber-100"
+                onClick={async () => {
+                  if (confirm("Re-attempt Paystack Subaccount creation?")) {
+                    handleConfirm();
+                  }
+                }}
+                disabled={verifying}
+              >
+                {verifying ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Retry Paystack Connection
+              </Button>
             </div>
           )}
         </CardContent>
