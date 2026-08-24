@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,21 @@ export default function SellerOnboardingPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
+  // Check Auth before allowing them to fill out the form
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Not logged in -> send to login page
+        router.push("/login");
+      } else {
+        setIsAuthChecking(false);
+      }
+    };
+    checkUser();
+  }, [supabase, router]);
 
   // Comprehensive Form State
   const [formData, setFormData] = useState({
@@ -109,6 +124,14 @@ export default function SellerOnboardingPage() {
     { id: 3, title: "Financials", icon: Wallet },
     { id: 4, title: "KYC Docs", icon: FileText },
   ];
+
+  if (isAuthChecking) {
+    return (
+      <div className="container flex min-h-[calc(100vh-100px)] w-full items-center justify-center py-12 bg-slate-50">
+        <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="container flex min-h-[calc(100vh-100px)] w-full flex-col items-center justify-center py-12 bg-slate-50">
