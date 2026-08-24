@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
+import { sendAdminNotification } from "@/lib/email";
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +25,22 @@ export async function POST(request: Request) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    // Prevent duplicate submissions
+    const { data: existingSeller } = await supabaseAdmin
+      .from('sellers')
+      .select('status')
+      .eq('profile_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (existingSeller && existingSeller.status !== 'rejected') {
+      return NextResponse.json(
+        { error: "You already have an active or pending seller application." }, 
+        { status: 400 }
+      );
+    }
 
     // 1. Create Business
     const { data: businessData, error: businessError } = await supabaseAdmin.from('businesses').insert({
@@ -102,10 +119,21 @@ export async function POST(request: Request) {
       throw roleError;
     }
 
-    // 7. Notify Admin (Email placeholder)
-    console.log(`[EMAIL DISPATCH] Sending email to Admin...`);
-    console.log(`[EMAIL DISPATCH] Subject: New Seller Application: ${businessName}`);
-    console.log(`[EMAIL DISPATCH] Body: A new seller has applied and is pending review. Store Name: ${storeName}`);
+    // 7. Notify Admin via nodemailer
+    const adminEmailSubject = `New Seller Application: ${businessName}`;
+    const adminEmailHtml = `
+      <h2>New Seller Application</h2>
+      <p>A new seller has just applied to join ICONJ.</p>
+      <ul>
+        <li><strong>Business Name:</strong> ${businessName}</li>
+        <li><strong>Store Name:</strong> ${storeName}</li>
+        <li><strong>Business Type:</strong> ${businessType || 'retail'}</li>
+        <li><strong>Email:</strong> ${user.email}</li>
+        <li><strong>Phone:</strong> ${phone}</li>
+      </ul>
+      <p>Log in to your admin dashboard to review and approve their KYC documents.</p>
+    `;
+    await sendAdminNotification(adminEmailSubject, adminEmailHtml);
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

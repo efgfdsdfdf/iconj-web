@@ -19,16 +19,32 @@ export default function SellerOnboardingPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
-  // Check Auth before allowing them to fill out the form
+  // Check Auth and Existing Application before allowing them to fill out the form
   useEffect(() => {
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         // Not logged in -> send to login page
         router.push("/login");
-      } else {
-        setIsAuthChecking(false);
+        return;
       }
+      
+      // Check if they already have an active or pending application
+      const { data: existingSeller } = await supabase
+        .from('sellers')
+        .select('status')
+        .eq('profile_id', session.user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (existingSeller && existingSeller.status !== 'rejected') {
+        // If they are pending, approved, or suspended, send them to the dashboard to see their status
+        router.push('/seller');
+        return;
+      }
+      
+      setIsAuthChecking(false);
     };
     checkUser();
   }, [supabase, router]);
