@@ -13,16 +13,24 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const { data: { user } } = await supabase.auth.getUser();
   const isAdmin = user?.email === "ezeilodavid292@gmail.com";
   
-  const { data: productRaw, error } = await supabase
+  // Use admin client to bypass the known Supabase RLS infinite recursion bug on profiles
+  const { createClient: createAdminClient } = require('@supabase/supabase-js');
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+  
+  const { data: productRaw, error } = await supabaseAdmin
     .from("products")
     .select("*, stores(store_name, slug), inventory(available_quantity), wholesale_pricing(*)")
     .eq("id", id)
     .single();
 
-  const { data: recommended } = await supabase
+  const { data: recommended } = await supabaseAdmin
     .from("products")
     .select("*, stores(store_name, slug)")
     .neq("id", id)
+    .eq("is_active", true)
     .limit(5);
 
   let product = productRaw;
@@ -42,8 +50,24 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       product.stock_status = totalInventory > 0 ? "In Stock" : "Out of Stock";
     }
   }
+  
+  // Protect non-approved products from public viewing
+  if (product && !isAdmin) {
+    if (product.approval_status !== 'approved' || !product.is_active) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
+          <div className="text-center p-8 bg-white rounded-xl shadow-sm border max-w-md mx-4">
+            <h1 className="text-2xl font-bold text-slate-900 mb-2">Product Unavailable</h1>
+            <p className="text-slate-500 mb-6">This product is currently pending review or has been deactivated by the seller.</p>
+            <Link href="/shop" className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-blue-700">Return to Shop</Link>
+          </div>
+        </div>
+      );
+    }
+  }
 
   if (error || !product) {
+    console.error("Product fetch error:", error);
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50">
         <div className="text-center">
