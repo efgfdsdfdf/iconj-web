@@ -12,7 +12,12 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { businessName, storeName, bankName, accountNumber, accountName } = body;
+    const { 
+      businessName, storeName, businessType, 
+      bankName, accountNumber, accountName,
+      phone, street, city, state, taxId,
+      cacDocumentName, idDocumentName 
+    } = body;
 
     // Use service role to bypass RLS for onboarding
     const supabaseAdmin = createClient(
@@ -24,7 +29,10 @@ export async function POST(request: Request) {
     const { data: businessData, error: businessError } = await supabaseAdmin.from('businesses').insert({
       owner_id: user.id,
       business_name: businessName,
-      business_type: 'retail'
+      business_type: businessType || 'retail',
+      tax_id: taxId || null,
+      address: { street, city, state },
+      phone: phone
     }).select().single();
 
     if (businessError) throw businessError;
@@ -33,7 +41,7 @@ export async function POST(request: Request) {
     const { data: sellerData, error: sellerError } = await supabaseAdmin.from('sellers').insert({
       profile_id: user.id,
       business_id: businessData.id,
-      status: 'pending_verification'
+      status: 'pending_review'
     }).select().single();
 
     if (sellerError) throw sellerError;
@@ -58,7 +66,31 @@ export async function POST(request: Request) {
 
     if (payoutError) throw payoutError;
 
-    // 5. Update user_roles
+    // 5. Add KYC Documents (Verifications)
+    const verificationInserts = [];
+    if (cacDocumentName) {
+      verificationInserts.push({
+        seller_id: sellerData.id,
+        document_type: 'CAC_CERTIFICATE',
+        document_url: cacDocumentName, // Mock URL for now
+        status: 'pending'
+      });
+    }
+    if (idDocumentName) {
+      verificationInserts.push({
+        seller_id: sellerData.id,
+        document_type: 'GOVERNMENT_ID',
+        document_url: idDocumentName, // Mock URL for now
+        status: 'pending'
+      });
+    }
+
+    if (verificationInserts.length > 0) {
+      const { error: verifyError } = await supabaseAdmin.from('seller_verifications').insert(verificationInserts);
+      if (verifyError) throw verifyError;
+    }
+
+    // 6. Update user_roles
     await supabaseAdmin.from('user_roles').insert({
       user_id: user.id,
       role: 'seller'
