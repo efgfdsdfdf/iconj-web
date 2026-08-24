@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import Link from "next/link";
 
 export default async function SellerProductsPage() {
   const supabase = await createClient();
@@ -21,11 +22,16 @@ export default async function SellerProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-slate-900">Products</h1>
-        <Button className="bg-orange-500 hover:bg-orange-600 gap-2">
-          <Plus className="w-4 h-4" /> Add Product
-        </Button>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">My Products</h1>
+          <p className="text-sm text-slate-500">Manage your listings, inventory, and pricing.</p>
+        </div>
+        <Link href="/seller/products/new">
+          <Button className="bg-orange-500 hover:bg-orange-600 gap-2">
+            <Plus className="w-4 h-4" /> Add New Product
+          </Button>
+        </Link>
       </div>
 
       <Card>
