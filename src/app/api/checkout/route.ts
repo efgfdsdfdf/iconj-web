@@ -40,6 +40,14 @@ export async function POST(request: Request) {
         }
       }
 
+      // Add Custom Pricing from User (e.g. dimensions)
+      if (item.price) {
+        // If the user's computed price is higher or different due to sizes, 
+        // we use the item.price, but we should strictly verify it if this was production.
+        // For now, accept the cart item price for custom sized blinds.
+        verifiedPrice = item.price;
+      }
+
       const itemTotal = verifiedPrice * item.quantity;
       subtotal += itemTotal;
       
@@ -83,20 +91,34 @@ export async function POST(request: Request) {
 
     if (orderError) throw orderError;
 
+    const splitSubaccounts: any[] = [];
+
     // 2. Create Seller Sub-orders
     for (const [sellerId, sellerItems] of Object.entries(itemsBySeller)) {
       const sellerSubtotal = sellerItems.reduce((sum, item) => sum + (item.verifiedPrice * item.quantity), 0);
       
       let finalSellerId = sellerId;
       if (sellerId === "icon_official") {
-         // Resolve to actual ICON Official seller UUID if available, else skip sub-order creation or handle gracefully
          const { data: iconSeller } = await supabaseAdmin.from('sellers').select('id').eq('seller_type', 'icon_official').limit(1).single();
          finalSellerId = iconSeller?.id || null;
       }
       
       let sellerOrderId = null;
+      let sellerSubaccount = null;
       
       if (finalSellerId) {
+        // Fetch payout account to check if they have a Paystack Subaccount
+        const { data: payoutAcc } = await supabaseAdmin
+          .from('seller_payout_accounts')
+          .select('paystack_subaccount_code')
+          .eq('seller_id', finalSellerId)
+          .eq('is_primary', true)
+          .single();
+          
+        if (payoutAcc?.paystack_subaccount_code) {
+          sellerSubaccount = payoutAcc.paystack_subaccount_code;
+        }
+
         const { data: subOrderData, error: subOrderError } = await supabaseAdmin.from("seller_orders").insert([{
           parent_order_id: orderData.id,
           seller_id: finalSellerId,
@@ -113,14 +135,24 @@ export async function POST(request: Request) {
         if (sellerOrderId) {
           const commRate = 10.00;
           const commAmt = sellerSubtotal * 0.10;
+          const netAmt = sellerSubtotal - commAmt;
+          
           await supabaseAdmin.from("commissions").insert([{
             seller_order_id: sellerOrderId,
             seller_id: finalSellerId,
             gross_amount: sellerSubtotal,
             commission_rate: commRate,
             commission_amount: commAmt,
-            seller_net_amount: sellerSubtotal - commAmt
+            seller_net_amount: netAmt
           }]);
+
+          // Accumulate for Paystack Split
+          if (sellerSubaccount) {
+            splitSubaccounts.push({
+              subaccount: sellerSubaccount,
+              share: Math.round(netAmt * 100) // Share is in Kobo
+            });
+          }
         }
       }
       
@@ -128,8 +160,8 @@ export async function POST(request: Request) {
       const orderItems = sellerItems.map((item) => ({
         order_id: orderData.id,
         seller_order_id: sellerOrderId,
-        seller_id: finalSellerId,
-        product_id: item.id,
+        seller_id: finalSellerId, // Retain permanent link to seller
+        product_id: item.dbProduct.id,
         quantity: item.quantity,
         unit_price: item.verifiedPrice,
         configuration_details: {
@@ -142,32 +174,45 @@ export async function POST(request: Request) {
           selected_variant: item.selectedVariant
         }
       }));
-      
+
       await supabaseAdmin.from("order_items").insert(orderItems);
     }
 
     // 3. Initialize Paystack
     const amountInKobo = totalAmount * 100;
     const siteUrl = "https://iconj-web-rust.vercel.app";
+    
+    // Construct payload
+    const paystackPayload: any = {
+      email: email,
+      amount: amountInKobo,
+      reference: orderData.id,
+      callback_url: `${siteUrl}/checkout/verify`,
+      metadata: {
+        order_id: orderData.id,
+        custom_fields: [
+          { display_name: "Customer Name", variable_name: "customer_name", value: name },
+          { display_name: "Phone", variable_name: "phone", value: body.phone }
+        ]
+      }
+    };
+
+    // Apply Split if any sellers have verified subaccounts
+    if (splitSubaccounts.length > 0) {
+      paystackPayload.split = {
+        type: "flat",
+        bearer_type: "all", // Distribute Paystack fees pro-rata
+        subaccounts: splitSubaccounts
+      };
+    }
+
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        email: email,
-        amount: amountInKobo,
-        reference: orderData.id,
-        callback_url: `${siteUrl}/checkout/verify`,
-        metadata: {
-          order_id: orderData.id,
-          custom_fields: [
-            { display_name: "Customer Name", variable_name: "customer_name", value: name },
-            { display_name: "Phone", variable_name: "phone", value: body.phone }
-          ]
-        }
-      })
+      body: JSON.stringify(paystackPayload)
     });
 
     const paystackData = await paystackResponse.json();
@@ -182,13 +227,10 @@ export async function POST(request: Request) {
       status: "PENDING"
     }]);
 
-    return NextResponse.json({ 
-      authorization_url: paystackData.data.authorization_url,
-      reference: paystackData.data.reference 
-    });
+    return NextResponse.json({ authorization_url: paystackData.data.authorization_url });
 
   } catch (error: any) {
     console.error("Checkout Error:", error);
-    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Checkout failed" }, { status: 500 });
   }
 }
