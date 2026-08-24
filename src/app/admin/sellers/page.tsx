@@ -1,47 +1,114 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/admin";
-import { FileText, CheckCircle, XCircle } from "lucide-react";
+import { FileText, CheckCircle, XCircle, Store, DollarSign, Users, AlertTriangle } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import Link from "next/link";
 
 export const revalidate = 0;
 
-export default async function AdminSellersPage() {
+export default async function AdminSellersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   await requireAdmin();
+
+  const params = await searchParams;
+  const activeTab = params.tab || "pending";
   
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Fetch pending sellers with business info, store info, and KYC documents
-  const { data: pendingSellers } = await supabaseAdmin
+  // Status mapping per tab
+  const statusMap: Record<string, string> = {
+    pending: "pending_verification",
+    approved: "approved",
+    rejected: "rejected",
+    suspended: "suspended"
+  };
+
+  const status = statusMap[activeTab] || "pending_verification";
+
+  // Fetch sellers with related data
+  const { data: sellers } = await supabaseAdmin
     .from("sellers")
     .select(`
-      id, status, created_at,
+      id, status, created_at, profile_id,
       profiles ( email ),
       businesses ( business_name, business_type, address, tax_id ),
       stores ( store_name, slug ),
-      seller_verifications ( document_type, document_url )
+      seller_verifications ( document_type, document_url ),
+      seller_payout_accounts ( bank_name, account_number, verified_name, paystack_subaccount_code, status )
     `)
-    .eq("status", "pending_verification")
+    .eq("status", status)
     .order("created_at", { ascending: false });
+
+  // Fetch counts for all tabs
+  const [pending, approved, rejected, suspended] = await Promise.all([
+    supabaseAdmin.from("sellers").select("id", { count: "exact", head: true }).eq("status", "pending_verification"),
+    supabaseAdmin.from("sellers").select("id", { count: "exact", head: true }).eq("status", "approved"),
+    supabaseAdmin.from("sellers").select("id", { count: "exact", head: true }).eq("status", "rejected"),
+    supabaseAdmin.from("sellers").select("id", { count: "exact", head: true }).eq("status", "suspended"),
+  ]);
+
+  const counts = {
+    pending: pending.count || 0,
+    approved: approved.count || 0,
+    rejected: rejected.count || 0,
+    suspended: suspended.count || 0,
+  };
+
+  // For approved sellers, also fetch their financial summaries from the ledger
+  let sellerFinancials: Record<string, any> = {};
+  if (activeTab === "approved" && sellers && sellers.length > 0) {
+    const sellerIds = sellers.map(s => s.id);
+    const { data: ledger } = await supabaseAdmin
+      .from("financial_ledger")
+      .select("seller_id, transaction_type, amount")
+      .in("seller_id", sellerIds);
+
+    if (ledger) {
+      for (const entry of ledger) {
+        if (!sellerFinancials[entry.seller_id]) {
+          sellerFinancials[entry.seller_id] = { gross: 0, commission: 0, earnings: 0, pendingSettlement: 0, settled: 0 };
+        }
+        const f = sellerFinancials[entry.seller_id];
+        const amt = Number(entry.amount);
+        switch (entry.transaction_type) {
+          case 'SALE_GROSS': f.gross += amt; break;
+          case 'ICONJ_COMMISSION': f.commission += Math.abs(amt); break;
+          case 'SELLER_EARNING': f.earnings += amt; break;
+          case 'SETTLEMENT_PENDING': f.pendingSettlement += amt; break;
+          case 'SETTLEMENT_SUCCESSFUL': f.settled += amt; f.pendingSettlement -= amt; break;
+        }
+      }
+    }
+
+    // Also fetch product counts and order counts
+    const { data: products } = await supabaseAdmin
+      .from("products")
+      .select("seller_id")
+      .in("seller_id", sellerIds);
+    const { data: orders } = await supabaseAdmin
+      .from("seller_orders")
+      .select("seller_id")
+      .in("seller_id", sellerIds);
+
+    for (const sid of sellerIds) {
+      if (!sellerFinancials[sid]) sellerFinancials[sid] = { gross: 0, commission: 0, earnings: 0, pendingSettlement: 0, settled: 0 };
+      sellerFinancials[sid].productCount = products?.filter(p => p.seller_id === sid).length || 0;
+      sellerFinancials[sid].orderCount = orders?.filter(o => o.seller_id === sid).length || 0;
+    }
+  }
 
   async function approveSeller(formData: FormData) {
     "use server";
     const sellerId = formData.get("seller_id") as string;
-    
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     await supabaseAdmin.from("sellers").update({ status: "approved" }).eq("id", sellerId);
     await supabaseAdmin.from("stores").update({ is_active: true }).eq("seller_id", sellerId);
     await supabaseAdmin.from("seller_verifications").update({ status: "approved" }).eq("seller_id", sellerId);
-    
     revalidatePath("/admin/sellers");
     revalidatePath("/seller");
   }
@@ -49,115 +116,277 @@ export default async function AdminSellersPage() {
   async function rejectSeller(formData: FormData) {
     "use server";
     const sellerId = formData.get("seller_id") as string;
-    
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
-    
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
     await supabaseAdmin.from("sellers").update({ status: "rejected" }).eq("id", sellerId);
     await supabaseAdmin.from("seller_verifications").update({ status: "rejected" }).eq("seller_id", sellerId);
-    
     revalidatePath("/admin/sellers");
     revalidatePath("/seller");
   }
 
+  async function suspendSeller(formData: FormData) {
+    "use server";
+    const sellerId = formData.get("seller_id") as string;
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    await supabaseAdmin.from("sellers").update({ status: "suspended" }).eq("id", sellerId);
+    await supabaseAdmin.from("stores").update({ is_active: false }).eq("seller_id", sellerId);
+    revalidatePath("/admin/sellers");
+  }
+
+  async function reactivateSeller(formData: FormData) {
+    "use server";
+    const sellerId = formData.get("seller_id") as string;
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    await supabaseAdmin.from("sellers").update({ status: "approved" }).eq("id", sellerId);
+    await supabaseAdmin.from("stores").update({ is_active: true }).eq("seller_id", sellerId);
+    revalidatePath("/admin/sellers");
+  }
+
+  const formatCurrency = (val: number) => `₦${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const tabs = [
+    { key: "pending", label: "Pending", count: counts.pending, color: "bg-amber-500" },
+    { key: "approved", label: "Approved", count: counts.approved, color: "bg-emerald-500" },
+    { key: "rejected", label: "Rejected", count: counts.rejected, color: "bg-red-500" },
+    { key: "suspended", label: "Suspended", count: counts.suspended, color: "bg-slate-500" },
+  ];
+
   return (
     <main className="flex-1 p-4 md:p-8 overflow-auto bg-slate-50 min-h-[calc(100vh-130px)]">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Seller Approvals</h1>
-        <p className="text-sm text-slate-500">Review KYC documents and approve new sellers to join the marketplace.</p>
+        <h1 className="text-2xl font-bold text-slate-900">Sellers</h1>
+        <p className="text-sm text-slate-500">Manage all marketplace sellers — approvals, finances, and Paystack connections.</p>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex gap-2 mb-8 border-b border-slate-200 pb-0">
+        {tabs.map(tab => (
+          <Link
+            key={tab.key}
+            href={`/admin/sellers?tab=${tab.key}`}
+            className={`px-4 py-2.5 text-sm font-medium rounded-t-lg border border-b-0 transition-colors ${
+              activeTab === tab.key
+                ? "bg-white text-slate-900 border-slate-200"
+                : "bg-transparent text-slate-500 border-transparent hover:text-slate-700"
+            }`}
+          >
+            {tab.label}
+            <span className={`ml-2 text-xs px-1.5 py-0.5 rounded-full text-white ${tab.color}`}>
+              {tab.count}
+            </span>
+          </Link>
+        ))}
       </div>
 
       <div className="space-y-6">
-        {pendingSellers && pendingSellers.length > 0 ? (
-          pendingSellers.map((seller: any) => (
-            <Card key={seller.id} className="border-amber-200 shadow-sm overflow-hidden">
-              <div className="bg-amber-50 px-6 py-3 border-b border-amber-200 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300">PENDING VERIFICATION</Badge>
-                  <span className="text-xs text-slate-500">Applied on {new Date(seller.created_at).toLocaleDateString()}</span>
+        {sellers && sellers.length > 0 ? (
+          sellers.map((seller: any) => {
+            const payout = seller.seller_payout_accounts?.[0];
+            const fin = sellerFinancials[seller.id];
+            const hasPaystack = !!payout?.paystack_subaccount_code;
+
+            return (
+              <Card key={seller.id} className={`shadow-sm overflow-hidden ${
+                activeTab === "pending" ? "border-amber-200" :
+                activeTab === "approved" ? "border-emerald-200" :
+                activeTab === "rejected" ? "border-red-200" : "border-slate-300"
+              }`}>
+                {/* Header Bar */}
+                <div className={`px-6 py-3 border-b flex justify-between items-center ${
+                  activeTab === "pending" ? "bg-amber-50 border-amber-200" :
+                  activeTab === "approved" ? "bg-emerald-50 border-emerald-200" :
+                  activeTab === "rejected" ? "bg-red-50 border-red-200" : "bg-slate-100 border-slate-200"
+                }`}>
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className={`text-xs ${
+                      activeTab === "pending" ? "bg-amber-100 text-amber-800 border-amber-300" :
+                      activeTab === "approved" ? "bg-emerald-100 text-emerald-800 border-emerald-300" :
+                      activeTab === "rejected" ? "bg-red-100 text-red-800 border-red-300" : "bg-slate-200 text-slate-700 border-slate-300"
+                    }`}>
+                      {seller.status?.toUpperCase().replace("_", " ")}
+                    </Badge>
+                    <span className="text-xs text-slate-500">Since {new Date(seller.created_at).toLocaleDateString()}</span>
+                  </div>
+                  <span className="text-sm font-medium text-slate-700">{seller.profiles?.email}</span>
                 </div>
-                <span className="text-sm font-medium text-slate-700">{seller.profiles?.email}</span>
-              </div>
-              <CardContent className="p-6">
-                <div className="grid md:grid-cols-3 gap-8">
-                  {/* Business Details */}
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-slate-900 border-b pb-2">Business Profile</h3>
-                    <div>
-                      <p className="text-xs text-slate-500">Legal Name</p>
-                      <p className="font-medium">{seller.businesses?.business_name}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">Store Name</p>
-                      <p className="font-medium">{seller.stores?.[0]?.store_name} <span className="text-xs text-slate-400">({seller.stores?.[0]?.slug})</span></p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">Business Type</p>
-                      <p className="font-medium capitalize">{seller.businesses?.business_type}</p>
-                    </div>
-                  </div>
 
-                  {/* Contact Details */}
-                  <div className="space-y-4">
-                    <h3 className="font-bold text-slate-900 border-b pb-2">Contact & Location</h3>
-                    <div>
-                      <p className="text-xs text-slate-500">Phone Number</p>
-                      <p className="font-medium">{seller.businesses?.address?.phone || seller.businesses?.phone || 'N/A'}</p>
+                <CardContent className="p-6">
+                  <div className="grid md:grid-cols-3 gap-8">
+                    {/* Business Details */}
+                    <div className="space-y-4">
+                      <h3 className="font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                        <Store className="w-4 h-4 text-slate-400" /> Business Profile
+                      </h3>
+                      <div>
+                        <p className="text-xs text-slate-500">Legal Name</p>
+                        <p className="font-medium">{seller.businesses?.business_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Store Name</p>
+                        <p className="font-medium">{seller.stores?.[0]?.store_name} <span className="text-xs text-slate-400">({seller.stores?.[0]?.slug})</span></p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Business Type</p>
+                        <p className="font-medium capitalize">{seller.businesses?.business_type}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Phone Number</p>
+                        <p className="font-medium">{seller.businesses?.address?.phone || 'N/A'}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500">Address</p>
+                        <p className="font-medium">{seller.businesses?.address?.street}, {seller.businesses?.address?.city}, {seller.businesses?.address?.state}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-xs text-slate-500">Address</p>
-                      <p className="font-medium">{seller.businesses?.address?.street}, {seller.businesses?.address?.city}, {seller.businesses?.address?.state}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-500">Tax ID (TIN / BVN)</p>
-                      <p className="font-medium">{seller.businesses?.tax_id || 'Not provided'}</p>
-                    </div>
-                  </div>
 
-                  {/* KYC Documents & Actions */}
-                  <div className="space-y-4 flex flex-col h-full">
-                    <h3 className="font-bold text-slate-900 border-b pb-2">KYC Documents</h3>
-                    <div className="space-y-2 flex-1">
-                      {seller.seller_verifications?.map((doc: any, i: number) => (
-                        <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 border rounded-md text-sm">
-                          <FileText className="w-4 h-4 text-blue-600" />
-                          <div className="flex-1 truncate">
-                            <span className="font-semibold text-slate-700">{doc.document_type}:</span> {doc.document_url}
+                    {/* Payout & Paystack (for approved sellers) OR KYC (for pending) */}
+                    {activeTab === "approved" ? (
+                      <div className="space-y-4">
+                        <h3 className="font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                          <DollarSign className="w-4 h-4 text-slate-400" /> Payout & Paystack
+                        </h3>
+                        {payout ? (
+                          <>
+                            <div>
+                              <p className="text-xs text-slate-500">Bank</p>
+                              <p className="font-medium">{payout.bank_name}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500">Account</p>
+                              <p className="font-medium font-mono">••••{payout.account_number?.slice(-4)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500">Account Name</p>
+                              <p className="font-medium">{payout.verified_name}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-slate-500">Paystack Status</p>
+                              {hasPaystack ? (
+                                <Badge className="bg-emerald-100 text-emerald-800 border-emerald-300">🟢 Connected</Badge>
+                              ) : (
+                                <Badge className="bg-amber-100 text-amber-800 border-amber-300">🟡 Pending Platform Upgrade</Badge>
+                              )}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="bg-slate-100 p-4 rounded-lg text-sm text-slate-500 italic">
+                            <AlertTriangle className="w-4 h-4 inline mr-1 text-amber-500" />
+                            Seller has not yet linked a payout account.
                           </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        <h3 className="font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                          <FileText className="w-4 h-4 text-slate-400" /> KYC Documents
+                        </h3>
+                        <div className="space-y-2">
+                          {seller.seller_verifications?.map((doc: any, i: number) => (
+                            <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 border rounded-md text-sm">
+                              <FileText className="w-4 h-4 text-blue-600" />
+                              <div className="flex-1 truncate">
+                                <span className="font-semibold text-slate-700">{doc.document_type}:</span> {doc.document_url}
+                              </div>
+                            </div>
+                          ))}
+                          {(!seller.seller_verifications || seller.seller_verifications.length === 0) && (
+                            <p className="text-sm text-slate-500 italic">No documents uploaded.</p>
+                          )}
                         </div>
-                      ))}
-                      {(!seller.seller_verifications || seller.seller_verifications.length === 0) && (
-                        <p className="text-sm text-slate-500 italic">No documents uploaded.</p>
+                      </div>
+                    )}
+
+                    {/* Finance OR Actions */}
+                    <div className="space-y-4 flex flex-col h-full">
+                      {activeTab === "approved" && fin ? (
+                        <>
+                          <h3 className="font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-slate-400" /> Financials
+                          </h3>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <p className="text-xs text-blue-600 font-medium">Products</p>
+                              <p className="text-lg font-bold text-blue-900">{fin.productCount}</p>
+                            </div>
+                            <div className="bg-blue-50 p-3 rounded-lg">
+                              <p className="text-xs text-blue-600 font-medium">Orders</p>
+                              <p className="text-lg font-bold text-blue-900">{fin.orderCount}</p>
+                            </div>
+                            <div className="bg-slate-50 p-3 rounded-lg">
+                              <p className="text-xs text-slate-500">Gross Sales</p>
+                              <p className="font-bold text-slate-900">{formatCurrency(fin.gross)}</p>
+                            </div>
+                            <div className="bg-red-50 p-3 rounded-lg">
+                              <p className="text-xs text-red-500">ICONJ Commission</p>
+                              <p className="font-bold text-red-700">{formatCurrency(fin.commission)}</p>
+                            </div>
+                            <div className="bg-emerald-50 p-3 rounded-lg">
+                              <p className="text-xs text-emerald-600">Net Earnings</p>
+                              <p className="font-bold text-emerald-800">{formatCurrency(fin.earnings)}</p>
+                            </div>
+                            <div className="bg-amber-50 p-3 rounded-lg">
+                              <p className="text-xs text-amber-600">Pending Payout</p>
+                              <p className="font-bold text-amber-800">{formatCurrency(fin.pendingSettlement)}</p>
+                            </div>
+                          </div>
+                          <div className="pt-4 border-t mt-auto">
+                            <form action={suspendSeller}>
+                              <input type="hidden" name="seller_id" value={seller.id} />
+                              <Button type="submit" variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-50" size="sm">
+                                Suspend Seller
+                              </Button>
+                            </form>
+                          </div>
+                        </>
+                      ) : activeTab === "pending" ? (
+                        <>
+                          <h3 className="font-bold text-slate-900 border-b pb-2">Actions</h3>
+                          <div className="flex-1" />
+                          <div className="flex gap-3 pt-4 border-t mt-auto">
+                            <form action={rejectSeller} className="flex-1">
+                              <input type="hidden" name="seller_id" value={seller.id} />
+                              <Button type="submit" variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-50">
+                                <XCircle className="w-4 h-4 mr-2" /> Reject
+                              </Button>
+                            </form>
+                            <form action={approveSeller} className="flex-1">
+                              <input type="hidden" name="seller_id" value={seller.id} />
+                              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                                <CheckCircle className="w-4 h-4 mr-2" /> Approve
+                              </Button>
+                            </form>
+                          </div>
+                        </>
+                      ) : activeTab === "suspended" ? (
+                        <>
+                          <h3 className="font-bold text-slate-900 border-b pb-2">Actions</h3>
+                          <div className="flex-1" />
+                          <div className="pt-4 border-t mt-auto">
+                            <form action={reactivateSeller}>
+                              <input type="hidden" name="seller_id" value={seller.id} />
+                              <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
+                                <CheckCircle className="w-4 h-4 mr-2" /> Reactivate Seller
+                              </Button>
+                            </form>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="space-y-4">
+                          <h3 className="font-bold text-slate-900 border-b pb-2">Info</h3>
+                          <p className="text-sm text-slate-500 italic">This application was rejected. The seller may reapply.</p>
+                        </div>
                       )}
                     </div>
-                    
-                    <div className="flex gap-3 pt-4 border-t mt-auto">
-                      <form action={rejectSeller} className="flex-1">
-                        <input type="hidden" name="seller_id" value={seller.id} />
-                        <Button type="submit" variant="outline" className="w-full border-red-200 text-red-600 hover:bg-red-50">
-                          <XCircle className="w-4 h-4 mr-2" /> Reject
-                        </Button>
-                      </form>
-                      <form action={approveSeller} className="flex-1">
-                        <input type="hidden" name="seller_id" value={seller.id} />
-                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700">
-                          <CheckCircle className="w-4 h-4 mr-2" /> Approve
-                        </Button>
-                      </form>
-                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
+                </CardContent>
+              </Card>
+            );
+          })
         ) : (
           <Card className="border-dashed border-2 shadow-none bg-slate-50">
             <CardContent className="flex flex-col items-center justify-center py-16 text-slate-500">
-              <CheckCircle className="w-12 h-12 text-slate-300 mb-4" />
-              <h3 className="text-lg font-bold text-slate-700">All caught up!</h3>
-              <p>There are no pending seller applications to review.</p>
+              <Users className="w-12 h-12 text-slate-300 mb-4" />
+              <h3 className="text-lg font-bold text-slate-700">No {activeTab} sellers</h3>
+              <p>There are no sellers in the &quot;{activeTab}&quot; category right now.</p>
             </CardContent>
           </Card>
         )}
