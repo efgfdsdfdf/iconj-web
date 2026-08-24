@@ -328,8 +328,8 @@ export default function SellerOnboardingPage() {
                     <Label htmlFor="terms" className="text-sm text-slate-700 leading-tight">
                       I have read and agree to the{" "}
                       <Dialog>
-                        <DialogTrigger asChild>
-                          <button type="button" className="text-blue-600 hover:underline font-medium">Terms & Conditions</button>
+                        <DialogTrigger className="text-blue-600 hover:underline font-medium focus:outline-none">
+                          Terms & Conditions
                         </DialogTrigger>
                         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                           <DialogHeader>

@@ -16,6 +16,7 @@ export interface CartItem {
   fabric?: string;
   configuration?: any;
   storeName?: string;
+  requiresInstall?: boolean;
 }
 
 interface CartState {
