@@ -44,7 +44,8 @@ export default function AddProductPage() {
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
     brand: "", age_range: "", safety_info: "",
-    is_featured: false, is_bundle: false
+    is_featured: false, is_bundle: false,
+    is_retail_enabled: true, is_wholesale_enabled: false
   });
 
   // 2. Images (Files to upload)
