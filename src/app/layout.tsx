@@ -25,6 +25,8 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+import { PwaInstallBanner } from "@/components/layout/PwaInstallBanner";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,6 +35,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
+        <PwaInstallBanner />
         <Navbar />
         <main className="flex-1">
           {children}
