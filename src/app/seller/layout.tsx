@@ -12,19 +12,6 @@ export default async function SellerLayout({ children }: { children: React.React
     redirect("/login");
   }
 
-  // Verify they have the seller role
-  const { data: userRole } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", user.id)
-    .eq("role", "seller")
-    .single();
-
-  // If not seller, redirect to their account page
-  if (!userRole) {
-    redirect("/account");
-  }
-
   // Get their seller profile
   const { data: seller } = await supabase
     .from("sellers")
@@ -33,6 +20,11 @@ export default async function SellerLayout({ children }: { children: React.React
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
+
+  // If not a seller, redirect to their account page
+  if (!seller) {
+    redirect("/account");
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">
