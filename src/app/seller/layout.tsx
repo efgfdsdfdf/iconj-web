@@ -23,7 +23,13 @@ export default async function SellerLayout({ children }: { children: React.React
 
   // If not a seller, redirect to their account page
   if (!seller) {
-    redirect("/account");
+    return (
+      <div className="p-8">
+        <h1 className="text-2xl font-bold text-red-600">Debug: Seller Not Found in Layout</h1>
+        <p>User ID: {user.id}</p>
+        <p>This means the layout query failed or returned null.</p>
+      </div>
+    );
   }
 
   return (
