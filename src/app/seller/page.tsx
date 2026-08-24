@@ -11,6 +11,8 @@ export default async function SellerDashboard() {
     .from("sellers")
     .select("id")
     .eq("profile_id", user?.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single();
 
   if (!seller) return <div>Seller not found.</div>;

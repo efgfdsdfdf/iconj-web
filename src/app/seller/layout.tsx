@@ -30,6 +30,8 @@ export default async function SellerLayout({ children }: { children: React.React
     .from("sellers")
     .select("*, stores(store_name)")
     .eq("profile_id", user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single();
 
   return (

@@ -12,6 +12,8 @@ export default async function SellerProductsPage() {
     .from("sellers")
     .select("id")
     .eq("profile_id", user?.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
     .single();
 
   const { data: products } = await supabase

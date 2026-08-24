@@ -22,7 +22,7 @@ export default async function AdminSellersPage() {
     .select(`
       id, status, created_at,
       profiles ( email ),
-      businesses ( business_name, business_type, address, phone, tax_id ),
+      businesses ( business_name, business_type, address, tax_id ),
       stores ( store_name, slug ),
       seller_verifications ( document_type, document_url )
     `)
