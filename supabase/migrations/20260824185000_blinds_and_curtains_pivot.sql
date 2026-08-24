@@ -112,9 +112,9 @@ CREATE POLICY "Admins manage installation_jobs" ON public.installation_jobs FOR 
 
 -- 9. DUMMY PRODUCT SEED
 INSERT INTO public.products (id, name, sku, category_id, base_supplier_cost, base_selling_price, is_active, is_retail_enabled, is_wholesale_enabled) VALUES 
-('p1111111-1111-1111-1111-111111111111', 'Premium Motorized Zebra Blinds', 'ICON-ZEB-001', 'c2222222-2222-2222-2222-222222222222', 25000, 35000, TRUE, TRUE, TRUE),
-('p2222222-2222-2222-2222-222222222222', '100% Blackout Roller Blinds', 'ICON-ROL-002', 'c1111111-1111-1111-1111-111111111111', 18000, 25000, TRUE, TRUE, TRUE);
+('f1111111-1111-1111-1111-111111111111', 'Premium Motorized Zebra Blinds', 'ICON-ZEB-001', 'c2222222-2222-2222-2222-222222222222', 25000, 35000, TRUE, TRUE, TRUE),
+('f2222222-2222-2222-2222-222222222222', '100% Blackout Roller Blinds', 'ICON-ROL-002', 'c1111111-1111-1111-1111-111111111111', 18000, 25000, TRUE, TRUE, TRUE);
 
 INSERT INTO public.product_configuration_rules (product_id, pricing_model, min_width_cm, max_width_cm, min_height_cm, max_height_cm, motorization_available, motorization_fee, installation_available, base_installation_fee) VALUES
-('p1111111-1111-1111-1111-111111111111', 'per_sqm', 50, 300, 50, 400, TRUE, 75000, TRUE, 10000),
-('p2222222-2222-2222-2222-222222222222', 'per_sqm', 30, 250, 30, 300, FALSE, 0, TRUE, 10000);
+('f1111111-1111-1111-1111-111111111111', 'per_sqm', 50, 300, 50, 400, TRUE, 75000, TRUE, 10000),
+('f2222222-2222-2222-2222-222222222222', 'per_sqm', 30, 250, 30, 300, FALSE, 0, TRUE, 10000);
