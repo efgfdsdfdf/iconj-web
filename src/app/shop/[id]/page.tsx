@@ -13,17 +13,35 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const { data: { user } } = await supabase.auth.getUser();
   const isAdmin = user?.email === "ezeilodavid292@gmail.com";
   
-  const { data: product, error } = await supabase
+  const { data: productRaw, error } = await supabase
     .from("products")
-    .select("*")
+    .select("*, stores(store_name, slug), inventory(available_quantity), wholesale_pricing(*)")
     .eq("id", id)
     .single();
 
   const { data: recommended } = await supabase
     .from("products")
-    .select("*")
+    .select("*, stores(store_name, slug)")
     .neq("id", id)
     .limit(5);
+
+  let product = productRaw;
+  if (product) {
+    // Format wholesale pricing for the client component
+    if (product.wholesale_pricing && product.wholesale_pricing.length > 0) {
+      product.pricing_tiers = product.wholesale_pricing.map((tier: any) => ({
+        minQty: tier.min_quantity,
+        maxQty: tier.max_quantity,
+        price: Number(tier.price_per_unit)
+      }));
+    }
+    
+    // Determine stock status based on inventory table if it exists
+    if (product.inventory && product.inventory.length > 0) {
+      const totalInventory = product.inventory.reduce((sum: number, item: any) => sum + (item.available_quantity || 0), 0);
+      product.stock_status = totalInventory > 0 ? "In Stock" : "Out of Stock";
+    }
+  }
 
   if (error || !product) {
     return (

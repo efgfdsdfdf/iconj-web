@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Star, Truck, Check, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -53,6 +54,7 @@ export function ProductDetailsClient({ product, images }: { product: any, images
       quantity: qty,
       moq: moq,
       pricingTiers: pricingTiers,
+      storeName: product.stores?.store_name || "ICON Official",
       width: selectedSize || "Standard",
       height: selectedSize || "Standard",
       motorType: selectedMotor || "Manual",
@@ -89,7 +91,13 @@ export function ProductDetailsClient({ product, images }: { product: any, images
       {/* Right: Product Info & Configurator */}
       <div className="w-full lg:w-1/2 flex flex-col">
         <div className="mb-2 flex items-center gap-2">
-          <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Official Store</span>
+          {product.stores?.store_name ? (
+            <Link href={`/store/${product.stores.slug}`} className="bg-orange-100 hover:bg-orange-200 transition-colors text-orange-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">
+              {product.stores.store_name}
+            </Link>
+          ) : (
+            <span className="bg-orange-100 text-orange-700 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">Official Store</span>
+          )}
           {product.stock_status === "In Stock" ? (
             <span className="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-1 rounded">In Stock</span>
           ) : (

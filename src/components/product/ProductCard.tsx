@@ -21,6 +21,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
       quantity: product.moq || 1,
       moq: product.moq || 1,
       pricingTiers: product.pricing_tiers || [],
+      storeName: product.stores?.store_name || "ICON Official",
       image: product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"
     });
     setAdded(true);
@@ -44,7 +45,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
         />
         
         {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
+        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
           {isOutOfStock && (
             <span className="bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wide">
               Out of Stock
@@ -53,6 +54,11 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
           {!isOutOfStock && isFeatured && (
             <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm flex items-center gap-1">
               <Heart className="w-2.5 h-2.5" /> Mother's Pick
+            </span>
+          )}
+          {!isOutOfStock && product.is_wholesale_enabled && (
+            <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+              Wholesale
             </span>
           )}
           {!isOutOfStock && isBundle && (
@@ -69,6 +75,9 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
             <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">{ageRange}</span>
           )}
           <h3 className="font-bold text-slate-900 text-sm line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{product.name}</h3>
+          {product.stores?.store_name && (
+            <p className="text-[11px] text-slate-500 mt-1">Sold by <span className="font-semibold text-slate-700">{product.stores.store_name}</span></p>
+          )}
         </Link>
         <div className="mt-auto pt-2 flex flex-col gap-2">
           <p className="font-black text-rose-600 text-sm md:text-base">₦{product.base_selling_price?.toLocaleString() || "0"}</p>

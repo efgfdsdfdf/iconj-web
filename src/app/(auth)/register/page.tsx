@@ -22,7 +22,8 @@ export default function RegisterPage() {
     firstName: "",
     lastName: "",
     email: "",
-    password: ""
+    password: "",
+    intent: "retail"
   });
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -37,7 +38,8 @@ export default function RegisterPage() {
         options: {
           emailRedirectTo: `${window.location.origin}/welcome`,
           data: {
-            full_name: `${formData.firstName} ${formData.lastName}`
+            full_name: `${formData.firstName} ${formData.lastName}`,
+            intent: formData.intent
           }
         }
       });
@@ -67,7 +69,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="container flex h-[calc(100vh-100px)] w-full flex-col items-center justify-center py-12">
+    <div className="container flex min-h-[calc(100vh-100px)] w-full flex-col items-center justify-center py-12">
       <Card className="w-full max-w-[450px]">
         <CardHeader className="space-y-1 text-center mb-2">
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
@@ -82,6 +84,45 @@ export default function RegisterPage() {
                 {error}
               </div>
             )}
+            
+            <div className="space-y-3 pb-2">
+              <Label className="text-sm font-semibold">What are you here to do?</Label>
+              <div className="flex flex-col gap-3">
+                <label className={`flex items-center space-x-3 border p-3 rounded-lg cursor-pointer transition-colors ${formData.intent === 'retail' ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                  <input type="radio" name="intent" value="retail" checked={formData.intent === 'retail'} onChange={e => setFormData({...formData, intent: e.target.value})} className="hidden" />
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.intent === 'retail' ? 'border-blue-600' : 'border-slate-300'}`}>
+                    {formData.intent === 'retail' && <div className="w-2 h-2 rounded-full bg-blue-600" />}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Shop for yourself</span>
+                    <span className="text-xs text-slate-500">Retail customer</span>
+                  </div>
+                </label>
+                
+                <label className={`flex items-center space-x-3 border p-3 rounded-lg cursor-pointer transition-colors ${formData.intent === 'wholesale' ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                  <input type="radio" name="intent" value="wholesale" checked={formData.intent === 'wholesale'} onChange={e => setFormData({...formData, intent: e.target.value})} className="hidden" />
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.intent === 'wholesale' ? 'border-blue-600' : 'border-slate-300'}`}>
+                    {formData.intent === 'wholesale' && <div className="w-2 h-2 rounded-full bg-blue-600" />}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Buy for your business</span>
+                    <span className="text-xs text-slate-500">Wholesale access & bulk pricing</span>
+                  </div>
+                </label>
+
+                <label className={`flex items-center space-x-3 border p-3 rounded-lg cursor-pointer transition-colors ${formData.intent === 'seller' ? 'border-blue-600 bg-blue-50/50' : 'border-slate-200 hover:bg-slate-50'}`}>
+                  <input type="radio" name="intent" value="seller" checked={formData.intent === 'seller'} onChange={e => setFormData({...formData, intent: e.target.value})} className="hidden" />
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${formData.intent === 'seller' ? 'border-blue-600' : 'border-slate-300'}`}>
+                    {formData.intent === 'seller' && <div className="w-2 h-2 rounded-full bg-blue-600" />}
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-sm font-medium">Sell on ICON</span>
+                    <span className="text-xs text-slate-500">Create a store and sell products</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="firstName">First name</Label>

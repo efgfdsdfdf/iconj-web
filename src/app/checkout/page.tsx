@@ -234,21 +234,33 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent className="pt-6 space-y-6">
                 
-                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 no-scrollbar">
-                  {items.map((item) => (
-                    <div key={`${item.id}-${item.width}-${item.height}-${item.motorType}`} className="flex gap-4">
-                      <div className="w-16 h-16 bg-slate-100 rounded border shrink-0 overflow-hidden">
-                        <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm text-slate-900 truncate">{item.name}</h4>
-                        <p className="text-xs text-slate-500 truncate mt-0.5">Size: {item.width}</p>
-                        <p className="text-xs text-slate-500 truncate">Motor: {item.motorType}</p>
-                        <div className="flex justify-between mt-1 items-center">
-                          <span className="text-xs font-bold text-slate-700">Qty: {item.quantity}</span>
-                          <span className="text-sm font-bold text-slate-900">₦{(item.price * item.quantity).toLocaleString()}</span>
+                <div className="space-y-6 max-h-[350px] overflow-y-auto pr-2 no-scrollbar">
+                  {Object.entries(
+                    items.reduce((acc: any, item: any) => {
+                      const store = item.storeName || "ICON Official";
+                      if (!acc[store]) acc[store] = [];
+                      acc[store].push(item);
+                      return acc;
+                    }, {})
+                  ).map(([storeName, storeItems]: [string, any]) => (
+                    <div key={storeName} className="space-y-3">
+                      <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider border-b pb-1">
+                        Sold by {storeName}
+                      </h3>
+                      {storeItems.map((item: any) => (
+                        <div key={`${item.id}-${item.width}-${item.height}-${item.motorType}`} className="flex gap-4">
+                          <div className="w-16 h-16 bg-slate-100 rounded border shrink-0 overflow-hidden">
+                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm text-slate-900 truncate">{item.name}</h4>
+                            <div className="flex justify-between mt-2 items-center">
+                              <span className="text-xs font-bold text-slate-700">Qty: {item.quantity}</span>
+                              <span className="text-sm font-bold text-slate-900">₦{(item.price * item.quantity).toLocaleString()}</span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
                   ))}
                 </div>

@@ -10,38 +10,55 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
-    // 1. Calculate Total Price securely on the server
-    const subtotal = items.reduce((sum: number, item: any) => sum + (item.price * item.quantity), 0);
-    const shippingFee = 0;
-    const totalAmount = subtotal + shippingFee;
-    
-    // Create a server Supabase client using Service Role to bypass RLS
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-    // Fetch actual supplier costs and metadata from the database securely
+    // Fetch actual products to verify prices and get seller mappings
     const productIds = items.map((i: any) => i.id);
-    const { data: dbProducts } = await supabaseAdmin
+    const { data: dbProducts, error: dbError } = await supabaseAdmin
       .from("products")
-      .select("id, name, sku, base_supplier_cost, supplier_id, supplier_sku, variants")
+      .select("id, name, sku, base_selling_price, seller_id, wholesale_pricing(*)")
       .in("id", productIds);
       
-    let actualSupplierCost = 0;
-    let mainSupplierId: string | null = null;
-    
-    items.forEach((item: any, index: number) => {
-      const dbProduct = dbProducts?.find((p: any) => p.id === item.id);
-      const unitCost = dbProduct ? Number(dbProduct.base_supplier_cost) || 0 : 0;
-      actualSupplierCost += (unitCost * item.quantity);
-      
-      // Assign the order to the supplier of the first product in the cart
-      if (index === 0 && dbProduct?.supplier_id) {
-        mainSupplierId = dbProduct.supplier_id;
-      }
-    });
-    
-    const estimatedProfit = subtotal - actualSupplierCost;
+    if (dbError || !dbProducts) throw new Error("Error verifying products.");
 
-    // If the user checked out with a new address and they are logged in, save it to their addresses table
+    let subtotal = 0;
+    const itemsBySeller: Record<string, any[]> = {};
+
+    const verifiedItems = items.map((item: any) => {
+      const dbProduct = dbProducts.find((p: any) => p.id === item.id);
+      if (!dbProduct) throw new Error(`Product ${item.id} not found.`);
+
+      // Verify Pricing
+      let verifiedPrice = Number(dbProduct.base_selling_price);
+      if (dbProduct.wholesale_pricing && dbProduct.wholesale_pricing.length > 0) {
+        const sortedTiers = [...dbProduct.wholesale_pricing].sort((a: any, b: any) => b.min_quantity - a.min_quantity);
+        for (const tier of sortedTiers) {
+          if (item.quantity >= tier.min_quantity) {
+            verifiedPrice = Number(tier.price_per_unit);
+            break;
+          }
+        }
+      }
+
+      const itemTotal = verifiedPrice * item.quantity;
+      subtotal += itemTotal;
+      
+      const sellerId = dbProduct.seller_id || "icon_official"; // Fallback identifier
+      if (!itemsBySeller[sellerId]) itemsBySeller[sellerId] = [];
+      
+      const verifiedItem = {
+        ...item,
+        verifiedPrice,
+        dbProduct
+      };
+      
+      itemsBySeller[sellerId].push(verifiedItem);
+      return verifiedItem;
+    });
+
+    const shippingFee = 0; // Configurable later
+    const totalAmount = subtotal + shippingFee;
+
     if (body.saveAddress && userId) {
       await supabaseAdmin.from('addresses').insert([{
         user_id: userId,
@@ -54,75 +71,82 @@ export async function POST(request: Request) {
       }]);
     }
 
-    // 2. Save the pending order to the database
+    // 1. Create Parent Order
     const { data: orderData, error: orderError } = await supabaseAdmin.from("orders").insert([{
-      supplier_id: mainSupplierId || null,
       user_id: userId || null,
       total_amount: totalAmount,
       shipping_cost: shippingFee,
-      supplier_cost: actualSupplierCost,
-      estimated_profit: estimatedProfit,
       payment_status: "PENDING",
-      order_status: "NEW",
-      delivery_address: {
-        ...body.address,
-        name: body.name,
-        phone: body.phone,
-        email: email
-      },
+      order_status: "PENDING_PAYMENT",
+      delivery_address: { ...body.address, name: body.name, phone: body.phone, email: email },
     }]).select().single();
 
-    if (orderError) throw new Error("Failed to create order: " + orderError.message);
+    if (orderError) throw orderError;
 
-    // 3. Save Order Items
-    const orderItems = items.map((item: any) => {
-      const dbProduct = dbProducts?.find((p: any) => p.id === item.id);
+    // 2. Create Seller Sub-orders
+    for (const [sellerId, sellerItems] of Object.entries(itemsBySeller)) {
+      const sellerSubtotal = sellerItems.reduce((sum, item) => sum + (item.verifiedPrice * item.quantity), 0);
       
-      // Build variant string from cart item configuration
-      const variantParts = [];
-      if (item.selectedVariant) variantParts.push(item.selectedVariant);
-      if (item.width && item.width !== "Standard") variantParts.push(item.width);
-      if (item.height && item.height !== "Standard") variantParts.push(item.height);
-      if (item.motorType && item.motorType !== "Manual") variantParts.push(item.motorType);
+      let finalSellerId = sellerId;
+      if (sellerId === "icon_official") {
+         // Resolve to actual ICON Official seller UUID if available, else skip sub-order creation or handle gracefully
+         const { data: iconSeller } = await supabaseAdmin.from('sellers').select('id').eq('seller_type', 'icon_official').limit(1).single();
+         finalSellerId = iconSeller?.id || null;
+      }
       
-      // Look up the exact variant from variant_list for supplier SKU mapping
-      let matchedVariantSku = "";
-      const variantList = dbProduct?.variants?.variant_list;
-      if (variantList && Array.isArray(variantList) && item.selectedVariant) {
-        const match = variantList.find((v: any) => v.name === item.selectedVariant);
-        if (match) {
-          matchedVariantSku = match.supplier_sku || "";
+      let sellerOrderId = null;
+      
+      if (finalSellerId) {
+        const { data: subOrderData, error: subOrderError } = await supabaseAdmin.from("seller_orders").insert([{
+          parent_order_id: orderData.id,
+          seller_id: finalSellerId,
+          subtotal_amount: sellerSubtotal,
+          shipping_cost: 0,
+          total_amount: sellerSubtotal,
+          status: "PENDING_PAYMENT"
+        }]).select().single();
+        
+        if (subOrderError) console.error("Suborder Error:", subOrderError);
+        else sellerOrderId = subOrderData.id;
+        
+        // Setup Commission (Default 10%)
+        if (sellerOrderId) {
+          const commRate = 10.00;
+          const commAmt = sellerSubtotal * 0.10;
+          await supabaseAdmin.from("commissions").insert([{
+            seller_order_id: sellerOrderId,
+            seller_id: finalSellerId,
+            gross_amount: sellerSubtotal,
+            commission_rate: commRate,
+            commission_amount: commAmt,
+            seller_net_amount: sellerSubtotal - commAmt
+          }]);
         }
       }
       
-      return {
+      // Insert Items
+      const orderItems = sellerItems.map((item) => ({
         order_id: orderData.id,
+        seller_order_id: sellerOrderId,
+        seller_id: finalSellerId,
         product_id: item.id,
         quantity: item.quantity,
-        unit_price: item.price,
+        unit_price: item.verifiedPrice,
         configuration_details: {
-          product_name: dbProduct?.name || item.name,
-          store_sku: dbProduct?.sku,
-          supplier_id: dbProduct?.supplier_id,
-          supplier_sku: matchedVariantSku || dbProduct?.supplier_sku,
-          supplier_product_url: dbProduct?.variants?.supplier_product_url,
+          product_name: item.dbProduct.name,
+          sku: item.dbProduct.sku,
           width: item.width,
           height: item.height,
           motorType: item.motorType,
-          selected_variant: item.selectedVariant || null,
-          variant_string: variantParts.join(" / ") || "Standard"
+          selected_variant: item.selectedVariant
         }
-      };
-    });
-    const { error: itemsError } = await supabaseAdmin.from("order_items").insert(orderItems);
-    if (itemsError) {
-      console.error("Order items insert error:", itemsError);
+      }));
+      
+      await supabaseAdmin.from("order_items").insert(orderItems);
     }
-    
-    // Paystack expects amount in kobo (multiply Naira by 100)
-    const amountInKobo = totalAmount * 100;
 
-    // 4. Initialize Paystack Transaction
+    // 3. Initialize Paystack
+    const amountInKobo = totalAmount * 100;
     const siteUrl = "https://iconj-web-rust.vercel.app";
     const paystackResponse = await fetch("https://api.paystack.co/transaction/initialize", {
       method: "POST",
@@ -134,7 +158,7 @@ export async function POST(request: Request) {
         email: email,
         amount: amountInKobo,
         reference: orderData.id,
-        callback_url: `${siteUrl}/api/callback`,
+        callback_url: `${siteUrl}/checkout/verify`,
         metadata: {
           order_id: orderData.id,
           custom_fields: [
@@ -146,10 +170,16 @@ export async function POST(request: Request) {
     });
 
     const paystackData = await paystackResponse.json();
+    if (!paystackData.status) throw new Error("Paystack initialization failed.");
 
-    if (!paystackData.status) {
-      throw new Error("Paystack initialization failed: " + paystackData.message);
-    }
+    // 4. Create Payment Record
+    await supabaseAdmin.from("payments").insert([{
+      order_id: orderData.id,
+      user_id: userId || null,
+      amount: totalAmount,
+      provider_reference: paystackData.data.reference,
+      status: "PENDING"
+    }]);
 
     return NextResponse.json({ 
       authorization_url: paystackData.data.authorization_url,

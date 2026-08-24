@@ -12,20 +12,30 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const params = await searchParams;
   const q = params.q;
   const category = params.category;
+  const filter = params.filter; // e.g. "wholesale"
 
-  let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+  // Fetch dynamic categories
+  const { data: categories } = await supabase.from("categories").select("*").eq("is_active", true).order("name");
+
+  let query = supabase
+    .from("products")
+    .select("*, stores(store_name, slug)")
+    .eq('approval_status', 'approved')
+    .eq('is_active', true)
+    .order("created_at", { ascending: false });
+
   if (category) {
-    query = query.eq('category', category);
+    query = query.eq('category_id', category);
+  }
+  if (filter === 'wholesale') {
+    query = query.eq('is_wholesale_enabled', true);
   }
   if (q) {
-    query = query.or(`name.ilike.%${q}%,category.ilike.%${q}%`);
+    query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
   }
   const { data: products } = await query;
 
-  const getProductImage = (category: string) => {
-    if (category?.includes("Motorized")) return "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80";
-    if (category?.includes("Blackout")) return "https://images.unsplash.com/photo-1615873968403-89e068629265?w=600&q=80";
-    if (category?.includes("Track") || category?.includes("Curtain")) return "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80";
+  const getProductImage = (catName: string) => {
     return "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&q=80";
   };
 
@@ -36,7 +46,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500">
           <Link href="/" className="hover:text-blue-600">Home</Link>
           <ChevronRight className="w-3 h-3 mx-2" />
-          <span className="text-slate-900">{q ? `Search Results for "${q}"` : category ? category : "All Products"}</span>
+          <span className="text-slate-900">{q ? `Search Results for "${q}"` : category ? categories?.find(c => c.id === category)?.name || "Category" : "All Products"}</span>
         </div>
       </div>
 
@@ -50,18 +60,29 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                 <div>
                   <h3 className="font-bold text-slate-900 mb-3 pb-2 border-b">Category</h3>
                   <div className="space-y-3 text-sm text-slate-600 flex flex-col">
-                    <Link href="/shop" className={`hover:text-rose-500 transition-colors ${!category ? 'font-bold text-rose-500' : ''}`}>All Categories</Link>
-                    <Link href="/shop?category=Newborn+Essentials" className={`hover:text-rose-500 transition-colors ${category === 'Newborn Essentials' ? 'font-bold text-rose-500' : ''}`}>Newborn Essentials</Link>
-                    <Link href="/shop?category=Baby+Feeding" className={`hover:text-rose-500 transition-colors ${category === 'Baby Feeding' ? 'font-bold text-rose-500' : ''}`}>Baby Feeding</Link>
-                    <Link href="/shop?category=Baby+Care+%26+Bath" className={`hover:text-rose-500 transition-colors ${category === 'Baby Care & Bath' ? 'font-bold text-rose-500' : ''}`}>Baby Care & Bath</Link>
-                    <Link href="/shop?category=Baby+Safety" className={`hover:text-rose-500 transition-colors ${category === 'Baby Safety' ? 'font-bold text-rose-500' : ''}`}>Baby Safety</Link>
-                    <Link href="/shop?category=Maternity" className={`hover:text-rose-500 transition-colors ${category === 'Maternity' ? 'font-bold text-rose-500' : ''}`}>Maternity</Link>
-                    <Link href="/shop?category=Gifts+%26+Bundles" className={`hover:text-rose-500 transition-colors ${category === 'Gifts & Bundles' ? 'font-bold text-rose-500' : ''}`}>Gifts & Bundles</Link>
+                    <Link href={`/shop${filter ? `?filter=${filter}` : ''}`} className={`hover:text-rose-500 transition-colors ${!category ? 'font-bold text-rose-500' : ''}`}>All Categories</Link>
+                    {categories?.map((c: any) => (
+                      <Link 
+                        key={c.id} 
+                        href={`/shop?category=${c.id}${filter ? `&filter=${filter}` : ''}`} 
+                        className={`hover:text-rose-500 transition-colors ${category === c.id ? 'font-bold text-rose-500' : ''}`}
+                      >
+                        {c.name}
+                      </Link>
+                    ))}
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="font-bold text-slate-900 mb-3 pb-2 border-b">Price (?)</h3>
+                  <h3 className="font-bold text-slate-900 mb-3 pb-2 border-b">Availability</h3>
+                  <div className="space-y-3 text-sm text-slate-600 flex flex-col">
+                    <Link href={`/shop${category ? `?category=${category}` : ''}`} className={`hover:text-blue-600 transition-colors ${!filter ? 'font-bold text-blue-600' : ''}`}>All Products</Link>
+                    <Link href={`/shop?filter=wholesale${category ? `&category=${category}` : ''}`} className={`hover:text-blue-600 transition-colors ${filter === 'wholesale' ? 'font-bold text-blue-600' : ''}`}>Wholesale Only</Link>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-slate-900 mb-3 pb-2 border-b">Price (₦)</h3>
                   <div className="flex items-center gap-2">
                     <input type="number" placeholder="Min" className="w-full h-8 text-sm border rounded px-2" />
                     <span className="text-slate-400">-</span>
