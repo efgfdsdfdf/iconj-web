@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, User, MapPin, Heart, Clock, ChevronRight, CheckCircle2, AlertCircle, MessageCircle } from "lucide-react";
+import { Package, User, MapPin, Heart, Clock, ChevronRight, CheckCircle2, AlertCircle, MessageCircle, Store } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -17,6 +17,17 @@ export default async function CustomerDashboard() {
   // Fetch profile to get the user's name
   const { data: profile } = await supabase.from("profiles").select("name").eq("id", user.id).single();
   const userName = profile?.name || user.user_metadata?.full_name || (user.email ? user.email.split("@")[0] : "Customer");
+
+  // Check seller status
+  const { data: sellerData } = await supabase
+    .from("sellers")
+    .select("status")
+    .eq("profile_id", user.id)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .single();
+  
+  const sellerStatus = sellerData?.status;
 
   // Fetch their most recent order
   const { data: activeOrder } = await supabase
@@ -62,6 +73,18 @@ export default async function CustomerDashboard() {
                 <Link href="/account/support" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
                   <MessageCircle className="w-5 h-5 text-slate-400" /> Contact Support
                 </Link>
+                
+                {/* Seller Portal Link */}
+                {sellerStatus === 'approved' && (
+                  <Link href="/seller" className="flex items-center gap-3 px-4 py-3 hover:bg-blue-50 border-l-4 border-transparent text-blue-700 font-bold border-t bg-blue-50/50">
+                    <Store className="w-5 h-5 text-blue-500" /> Seller Center
+                  </Link>
+                )}
+                {sellerStatus === 'pending_verification' && (
+                  <Link href="/seller" className="flex items-center gap-3 px-4 py-3 hover:bg-orange-50 border-l-4 border-transparent text-orange-700 font-bold border-t bg-orange-50/50">
+                    <Store className="w-5 h-5 text-orange-500" /> Application Pending
+                  </Link>
+                )}
                 <div className="p-4 border-t bg-slate-50">
                   <LogoutButton />
                 </div>
