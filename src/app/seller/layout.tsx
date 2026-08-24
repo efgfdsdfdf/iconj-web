@@ -55,8 +55,11 @@ export default async function SellerLayout({ children }: { children: React.React
           <Link href="/seller/products" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-800 hover:text-white transition-colors">
             <Package className="w-5 h-5 text-slate-400" /> Products
           </Link>
+          <Link href="/seller/finance" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-800 hover:text-white transition-colors">
+            <DollarSign className="w-5 h-5 text-slate-400" /> Finance Ledger
+          </Link>
           <Link href="/seller/payouts" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-800 hover:text-white transition-colors">
-            <DollarSign className="w-5 h-5 text-slate-400" /> Payouts
+            <DollarSign className="w-5 h-5 text-slate-400" /> Payout Account
           </Link>
           <Link href="/seller/store" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-800 hover:text-white transition-colors">
             <Store className="w-5 h-5 text-slate-400" /> Store Settings
