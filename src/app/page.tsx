@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Truck, ShieldCheck, Heart, Star, ChevronRight, Baby, Gift, Shield } from "lucide-react";
+import { Truck, ShieldCheck, Star, ChevronRight, Gift, Blinds, Sun, Shield } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -19,12 +19,12 @@ export default async function Home() {
 
   const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
   const categories: { name: string, icon: string }[] = settings?.value || [
-    { name: "Newborn Essentials", icon: "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=200&q=80" },
-    { name: "Baby Feeding", icon: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=200&q=80" },
-    { name: "Baby Bath & Care", icon: "https://images.unsplash.com/photo-1544640808-32cb4fbaee4d?w=200&q=80" },
-    { name: "Toys & Development", icon: "https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?w=200&q=80" },
-    { name: "Maternity", icon: "https://images.unsplash.com/photo-1517590858763-7e61a6b412ee?w=200&q=80" },
-    { name: "Gifts & Bundles", icon: "https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=200&q=80" }
+    { name: "Roller Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
+    { name: "Zebra Blinds", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80" },
+    { name: "Motorized Blinds", icon: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" },
+    { name: "Venetian Blinds", icon: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80" },
+    { name: "Roman Shades", icon: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=200&q=80" },
+    { name: "Curtains & Drapes", icon: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=200&q=80" }
   ];
 
   return (
@@ -45,46 +45,46 @@ export default async function Home() {
           {/* Left Sidebar (Desktop Only) */}
           <Card className="hidden lg:block w-64 shrink-0 rounded-lg border-none shadow-sm h-full overflow-hidden">
             <nav className="flex flex-col py-2 h-full bg-white">
-              <Link href="/shop?category=Newborn" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Newborn Essentials <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=Feeding" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Baby Feeding <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=Bath" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Baby Care & Bath <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=Safety" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Baby Safety <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=Travel" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Baby Travel <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=Toys" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Toys & Development <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=Maternity" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Maternity & Mother Care <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
+              <Link href="/shop?category=roller-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Roller Blinds <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
+              <Link href="/shop?category=zebra-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Zebra Blinds <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
+              <Link href="/shop?category=venetian-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Venetian Blinds <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
+              <Link href="/shop?category=roman-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Roman Shades <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
+              <Link href="/shop?category=curtains" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Curtains & Drapes <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
+              <Link href="/shop?category=motorized" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Smart / Motorized <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
+              <Link href="/shop?category=accessories" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Tracks & Accessories <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
               <div className="mt-auto border-t px-4 py-3">
-                <Link href="/shop?bundle=true" className="text-blue-600 font-bold text-sm flex items-center gap-2 hover:underline"><Gift className="w-4 h-4"/> Shop Gift Bundles</Link>
+                <Link href="/book-measurement" className="text-blue-600 font-bold text-sm flex items-center gap-2 hover:underline"><Blinds className="w-4 h-4"/> Book Free Measurement</Link>
               </div>
             </nav>
           </Card>
 
           {/* Main Hero Slider */}
-          <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm min-h-[350px] sm:min-h-[400px] lg:h-full group bg-rose-50">
-            <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?q=80&w=2000" alt="Premium Mother and Baby Products" className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-black/20"></div>
+          <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm min-h-[350px] sm:min-h-[400px] lg:h-full group bg-slate-900">
+            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2000" alt="Premium Window Treatments" className="w-full h-full object-cover absolute inset-0 opacity-80" />
+            <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
             <div className="relative z-10 w-full h-full flex flex-col items-start justify-center text-left p-8 md:p-12 max-w-2xl">
-              <span className="bg-rose-500 text-white px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full mb-4 flex items-center gap-1 w-max"><Heart className="w-3 h-3"/> Thoughtfully Chosen</span>
-              <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg leading-tight">Everything You Need<br/>for Motherhood & Baby.</h1>
-              <p className="text-white/90 text-sm md:text-lg mb-8 max-w-md font-medium drop-shadow-md">Premium newborn essentials, maternity care, and nursery products safely delivered to your doorstep anywhere in Nigeria.</p>
+              <span className="bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full mb-4 flex items-center gap-1 w-max"><Star className="w-3 h-3 fill-white"/> Premium Quality</span>
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg leading-tight">Elevate Your Space<br/>with Perfect Blinds.</h1>
+              <p className="text-white/90 text-sm md:text-lg mb-8 max-w-md font-medium drop-shadow-md">Custom-fitted blinds, elegant curtains, and smart window treatments tailored for your home and office in Nigeria.</p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/shop"><Button size="lg" className="bg-rose-500 hover:bg-rose-600 text-white font-bold px-8 h-12 shadow-lg border-none text-base rounded-full">Shop Baby Essentials</Button></Link>
-                <Link href="/shop?category=Maternity"><Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-bold px-8 h-12 text-base rounded-full backdrop-blur-sm">Shop for Mum</Button></Link>
+                <Link href="/shop"><Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 h-12 shadow-lg border-none text-base rounded-full">Shop Collection</Button></Link>
+                <Link href="/book-measurement"><Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-bold px-8 h-12 text-base rounded-full backdrop-blur-sm">Book Measurement</Button></Link>
               </div>
             </div>
           </div>
 
           {/* Right Promo Banners */}
           <div className="hidden lg:flex flex-col gap-4 w-[280px] shrink-0 h-full">
-            <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm bg-rose-50 border border-rose-100 p-5 flex flex-col justify-center group hover:shadow-md transition-all cursor-pointer">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-3 text-rose-500 shadow-sm"><Baby className="w-5 h-5"/></div>
-              <h3 className="font-bold text-slate-900 text-lg mb-1">Newborn Starters</h3>
-              <p className="text-xs text-slate-600">Perfectly curated bundles for your baby's first months.</p>
-              <ChevronRight className="w-5 h-5 text-rose-400 absolute bottom-5 right-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+            <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm bg-slate-800 border border-slate-700 p-5 flex flex-col justify-center group hover:shadow-md transition-all cursor-pointer">
+              <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center mb-3 text-white shadow-sm"><Sun className="w-5 h-5"/></div>
+              <h3 className="font-bold text-white text-lg mb-1">100% Blackout</h3>
+              <p className="text-xs text-slate-300">Total privacy and light control for your bedrooms and media rooms.</p>
+              <ChevronRight className="w-5 h-5 text-blue-400 absolute bottom-5 right-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </div>
             <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm bg-blue-50 border border-blue-100 p-5 flex flex-col justify-center group hover:shadow-md transition-all cursor-pointer">
-              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-3 text-blue-500 shadow-sm"><Shield className="w-5 h-5"/></div>
-              <h3 className="font-bold text-slate-900 text-lg mb-1">Trusted Quality</h3>
-              <p className="text-xs text-slate-600">Carefully sourced materials prioritizing safety and comfort.</p>
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-3 text-blue-600 shadow-sm"><Shield className="w-5 h-5"/></div>
+              <h3 className="font-bold text-slate-900 text-lg mb-1">Expert Installation</h3>
+              <p className="text-xs text-slate-600">Professional measuring and fitting by our certified ICONJ installers.</p>
               <ChevronRight className="w-5 h-5 text-blue-400 absolute bottom-5 right-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </div>
           </div>
@@ -94,54 +94,48 @@ export default async function Home() {
       {/* TOP SELLING PRODUCTS */}
       <section className="mb-8 w-full">
         <Card className="border-none shadow-sm rounded-none overflow-hidden bg-white">
-          <div className="bg-rose-500 px-4 md:px-8 py-3 flex justify-between items-center">
-            <h2 className="text-white font-bold text-lg flex items-center gap-2"><Star className="w-5 h-5 fill-white"/> Mother's Picks & Best Sellers</h2>
+          <div className="bg-blue-600 px-4 md:px-8 py-3 flex justify-between items-center">
+            <h2 className="text-white font-bold text-lg flex items-center gap-2"><Star className="w-5 h-5 fill-white"/> Premium Window Treatments</h2>
             <Link href="/shop" className="text-white text-sm font-medium hover:underline flex items-center">See All <ChevronRight className="w-4 h-4"/></Link>
           </div>
-          <CardContent className="p-4 md:px-8">
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {products?.map((product: any, idx: number) => {
-                // Keep the placeholder images for now if they don't have real ones, but this logic assumes existing images
-                return <ProductCard key={product.id} product={product} hideOnLg={false} />;
-              })}
+          <CardContent className="p-4 md:p-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-6">
+              {products?.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
             </div>
           </CardContent>
         </Card>
       </section>
 
-      {/* TRUST & PROOF SECTION */}
-      <section className="container mx-auto px-4 mt-12">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-slate-900">Why Shop With ICONJ?</h2>
-          <p className="text-slate-500 mt-2">We prioritize safety, comfort, and convenience for growing families.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="border border-slate-200 shadow-sm bg-white hover:border-blue-200 transition-colors">
-            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Truck className="w-6 h-6"/></div>
-              <h3 className="font-bold text-slate-900">Nationwide Delivery</h3>
-              <p className="text-xs text-slate-500">Secure and trackable shipping directly to you, anywhere in Nigeria.</p>
+      {/* WHY CHOOSE ICONJ */}
+      <section className="container mx-auto px-4 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600">
+                <Blinds className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">Custom Made-to-Measure</h3>
+              <p className="text-sm text-slate-500">Every blind is tailored exactly to your window's dimensions for a perfect fit.</p>
             </CardContent>
           </Card>
-          <Card className="border border-slate-200 shadow-sm bg-white hover:border-emerald-200 transition-colors">
-            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600"><ShieldCheck className="w-6 h-6"/></div>
-              <h3 className="font-bold text-slate-900">Secure Payments</h3>
-              <p className="text-xs text-slate-500">100% secure checkout via Paystack. Card, USSD, or Bank Transfer.</p>
+          <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">Premium Materials</h3>
+              <p className="text-sm text-slate-500">Sourced directly from top manufacturers globally for durability and style.</p>
             </CardContent>
           </Card>
-          <Card className="border border-slate-200 shadow-sm bg-white hover:border-rose-200 transition-colors">
-            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center text-rose-500"><Heart className="w-6 h-6"/></div>
-              <h3 className="font-bold text-slate-900">Carefully Selected</h3>
-              <p className="text-xs text-slate-500">Products thoughtfully chosen for quality, safety, and modern parenting.</p>
-            </CardContent>
-          </Card>
-          <Card className="border border-slate-200 shadow-sm bg-white hover:border-purple-200 transition-colors">
-            <CardContent className="p-6 flex flex-col items-center text-center gap-3">
-              <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center text-purple-600"><Baby className="w-6 h-6"/></div>
-              <h3 className="font-bold text-slate-900">Dedicated Support</h3>
-              <p className="text-xs text-slate-500">Our team is ready to help resolve issues quickly and seamlessly.</p>
+          <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
+            <CardContent className="p-6 flex flex-col items-center text-center">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600">
+                <Truck className="w-6 h-6" />
+              </div>
+              <h3 className="font-bold text-lg mb-2">Delivery & Installation</h3>
+              <p className="text-sm text-slate-500">Fast nationwide delivery with optional professional installation available.</p>
             </CardContent>
           </Card>
         </div>
@@ -149,4 +143,3 @@ export default async function Home() {
     </div>
   );
 }
-

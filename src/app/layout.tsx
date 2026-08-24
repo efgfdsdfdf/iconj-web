@@ -9,8 +9,8 @@ import { Footer } from "@/components/layout/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ICONJ — Premium Mother & Baby Essentials in Nigeria",
-  description: "Premium mother and baby essentials, maternity care, and nursery products thoughtfully chosen for you and your baby. Delivered across Nigeria.",
+  title: "ICONJ - Premium Blinds, Curtains & Window Treatments",
+  description: "Custom-fitted blinds, elegant curtains, and smart window treatments tailored for your home and office in Nigeria.",
   appleWebApp: {
     capable: true,
     title: "ICONJ",

@@ -7,7 +7,7 @@ export function Footer() {
         <div>
           <h3 className="font-bold text-lg text-blue-700 mb-4">ICONJ</h3>
           <p className="text-sm">
-            Premium mother & baby essentials, maternity care, and nursery products thoughtfully chosen for you. Delivered across Nigeria.
+            Custom-fitted blinds, elegant curtains, and smart window treatments tailored for your home and office in Nigeria.
           </p>
         </div>
         <div>
