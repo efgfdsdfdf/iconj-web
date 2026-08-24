@@ -15,6 +15,7 @@ export interface CartItem {
   motorType?: string;
   fabric?: string;
   configuration?: any;
+  storeName?: string;
 }
 
 interface CartState {

@@ -142,8 +142,8 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
             </CardContent>
           </Card>
           
-          <EmailHistory emails={orderEmails || []} />
-          <AdminNotes orderId={order.id} initialNotes={adminNotes || []} />
+          <EmailHistory orderId={order.id} emails={orderEmails || []} />
+          <AdminNotes orderId={order.id} notes={adminNotes || []} />
         </div>
       </div>
     </main>

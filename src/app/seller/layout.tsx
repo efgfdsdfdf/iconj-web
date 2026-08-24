@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Package, ShoppingCart, DollarSign, Store, LogOut } from "lucide-react";
-import LogoutButton from "@/app/account/LogoutButton";
+import { LogoutButton } from "@/app/account/LogoutButton";
 
 export default async function SellerLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
