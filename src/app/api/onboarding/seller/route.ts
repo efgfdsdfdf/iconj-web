@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     const { data: sellerData, error: sellerError } = await supabaseAdmin.from('sellers').insert({
       profile_id: user.id,
       business_id: businessData.id,
-      status: 'pending_review'
+      status: 'pending_verification'
     }).select().single();
 
     if (sellerError) throw sellerError;
