@@ -104,15 +104,12 @@ export default function CheckoutPage() {
       });
 
       const data = await response.json();
-      
-      if (data.authorization_url) {
-        // Guarantee cart is cleared both in state and directly in storage before redirect
-        clearCart();
-        try {
-          localStorage.removeItem('iconj-cart');
-        } catch (e) {}
-        window.location.href = data.authorization_url;
-      } else {
+            if (data.authorization_url) {
+          // Do NOT clear the cart here. 
+          // The cart should only be cleared upon successful verification 
+          // in src/app/checkout/verify/page.tsx
+          window.location.href = data.authorization_url;
+        } else {
         alert("Payment initialization failed: " + (data.error || "Unknown error"));
         setLoading(false);
       }

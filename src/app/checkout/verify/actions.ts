@@ -30,8 +30,8 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
     );
 
     await supabaseAdmin.from("orders").update({
-      payment_status: "paid",
-      order_status: "processing", // Or whatever the next step is
+      payment_status: "PAID",
+      order_status: "PAYMENT_CONFIRMED", 
       paystack_reference: reference
     }).eq("id", orderId);
 
