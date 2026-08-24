@@ -146,6 +146,8 @@ export function Navbar() {
             <Link href="/faq" className="hover:text-blue-600 flex items-center gap-1"><HelpCircle className="w-3 h-3"/> Help & Support</Link>
           </div>
           <div className="flex gap-4 text-[11px] text-sky-800 font-medium">
+            <Link href="/shop?filter=wholesale" className="hover:text-blue-600">Wholesale Center</Link>
+            <Link href="/onboarding/seller" className="hover:text-blue-600">Sell on ICON</Link>
             <Link href="/track" className="hover:text-blue-600">Track Order</Link>
             <Link href="/shop?bundle=true" className="hover:text-rose-600 text-rose-500 font-bold">Shop Gift Bundles</Link>
           </div>
