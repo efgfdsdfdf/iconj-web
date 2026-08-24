@@ -47,12 +47,13 @@ export function PwaInstallBanner() {
     
     if (outcome === "accepted") {
       console.log("User accepted the install prompt");
-      setIsVisible(false);
     } else {
       console.log("User dismissed the install prompt");
     }
     
-    // We've used the prompt, and can't use it again, throw it away
+    // Whether they accepted or rejected the OS prompt, the deferredPrompt is consumed.
+    // We must hide our banner because the button will no longer work without a refresh.
+    setIsVisible(false);
     setDeferredPrompt(null);
   };
 
