@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       total_amount: totalAmount,
       shipping_cost: shippingFee,
       payment_status: "PENDING",
-      order_status: "PENDING_PAYMENT",
+      order_status: "pending_payment",
       delivery_address: { ...body.address, name: body.name, phone: body.phone, email: email },
     }]).select().single();
 
