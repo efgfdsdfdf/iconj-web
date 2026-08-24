@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { LayoutDashboard, Package, ShoppingCart, DollarSign, Store, LogOut } from "lucide-react";
+import { LayoutDashboard, Package, ShoppingCart, DollarSign, Store, LogOut, CheckCircle, XCircle } from "lucide-react";
 import { LogoutButton } from "@/app/account/LogoutButton";
 
 export default async function SellerLayout({ children }: { children: React.ReactNode }) {
@@ -74,16 +74,38 @@ export default async function SellerLayout({ children }: { children: React.React
           </div>
         </header>
         <div className="flex-1 p-4 md:p-8 overflow-auto">
-          {seller?.status !== 'approved' && (
-            <div className="mb-6 p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg flex items-start gap-3">
-              <div className="mt-0.5">⚠️</div>
-              <div>
-                <h3 className="font-bold">Account Pending Approval</h3>
-                <p className="text-sm mt-1">Your seller account is currently {seller?.status.replace('_', ' ')}. You can set up your store and draft products, but they won't be visible to customers until an admin approves your application.</p>
+          {seller?.status === 'pending_verification' ? (
+            <div className="max-w-2xl mx-auto mt-12 text-center bg-white p-12 rounded-2xl shadow-sm border">
+              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-10 h-10" />
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Application Submitted Successfully!</h2>
+              <p className="text-lg text-slate-600 mb-8">
+                Your KYC documents and business profile have been securely sent to the ICONJ compliance team for review. 
+                We will notify you once your account is fully verified.
+              </p>
+              <div className="bg-blue-50 p-6 rounded-lg text-left border border-blue-100">
+                <h3 className="font-bold text-blue-900 mb-2">What happens next?</h3>
+                <ul className="list-disc list-inside text-blue-800 space-y-2">
+                  <li>An admin will review your uploaded CAC and ID documents.</li>
+                  <li>Your bank details will be verified for automatic payout capability.</li>
+                  <li>Once approved, this dashboard will unlock and you can start listing products!</li>
+                </ul>
               </div>
             </div>
+          ) : seller?.status === 'rejected' ? (
+            <div className="max-w-2xl mx-auto mt-12 text-center bg-white p-12 rounded-2xl shadow-sm border">
+              <div className="w-20 h-20 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <XCircle className="w-10 h-10" />
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Application Rejected</h2>
+              <p className="text-lg text-slate-600 mb-8">
+                Unfortunately, your seller application was not approved. Please contact support for more details.
+              </p>
+            </div>
+          ) : (
+            children
           )}
-          {children}
         </div>
       </main>
     </div>
