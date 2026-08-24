@@ -98,6 +98,11 @@ export async function POST(request: Request) {
       role: 'seller'
     });
 
+    // 7. Notify Admin (Email placeholder)
+    console.log(`[EMAIL DISPATCH] Sending email to Admin...`);
+    console.log(`[EMAIL DISPATCH] Subject: New Seller Application: ${businessName}`);
+    console.log(`[EMAIL DISPATCH] Body: A new seller has applied and is pending review. Store Name: ${storeName}`);
+
     return NextResponse.json({ success: true });
   } catch (err: any) {
     console.error("Onboarding Error:", err);

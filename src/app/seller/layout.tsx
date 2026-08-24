@@ -100,8 +100,36 @@ export default async function SellerLayout({ children }: { children: React.React
               </div>
               <h2 className="text-3xl font-bold text-slate-900 mb-4">Application Rejected</h2>
               <p className="text-lg text-slate-600 mb-8">
-                Unfortunately, your seller application was not approved. Please contact support for more details.
+                Unfortunately, your seller application was not approved by the ICONJ compliance team. 
+                Please ensure your KYC documents are clear, valid, and exactly match your provided business details.
               </p>
+              
+              <form action={async () => {
+                "use server";
+                const supabaseAdmin = await createClient(); // Need admin client to delete
+                const adminClient = require('@supabase/supabase-js').createClient(
+                  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                  process.env.SUPABASE_SERVICE_ROLE_KEY!
+                );
+                
+                // Delete the rejected seller and business to allow a fresh start
+                if (seller?.business_id) {
+                   await adminClient.from('businesses').delete().eq('id', seller.business_id);
+                }
+                if (seller?.id) {
+                   await adminClient.from('sellers').delete().eq('id', seller.id);
+                }
+                
+                // Also remove the seller role
+                await adminClient.from('user_roles').delete().eq('user_id', user.id).eq('role', 'seller');
+                
+                const { redirect } = await import('next/navigation');
+                redirect("/onboarding/seller");
+              }}>
+                <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-8 rounded-lg shadow-sm transition-colors">
+                  Start New Application
+                </button>
+              </form>
             </div>
           ) : (
             children

@@ -37,6 +37,14 @@ export function Navbar() {
         } else {
           setUserName(session.user.email ? session.user.email.split("@")[0] : "User");
         }
+        
+        // Fetch seller status
+        const { data: sellerData } = await supabase
+          .from('sellers')
+          .select('status')
+          .eq('profile_id', session.user.id)
+          .single();
+        if (sellerData) setSellerStatus(sellerData.status);
       }
 
       // 2. BACKGROUND NETWORK CHECK - Syncs the cloud cart
@@ -62,7 +70,7 @@ export function Navbar() {
     checkAuth();
 
     // Listen for login/logout events across tabs or from the login page!
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         setUserEmail(session.user.email || null);
         if (session.user.user_metadata?.full_name) {
@@ -70,9 +78,17 @@ export function Navbar() {
         } else {
           setUserName(session.user.email ? session.user.email.split("@")[0] : "User");
         }
+        
+        const { data: sellerData } = await supabase
+          .from('sellers')
+          .select('status')
+          .eq('profile_id', session.user.id)
+          .single();
+        if (sellerData) setSellerStatus(sellerData.status);
       } else {
         setUserName(null);
         setUserEmail(null);
+        setSellerStatus(null);
       }
     });
 
@@ -147,7 +163,15 @@ export function Navbar() {
           </div>
           <div className="flex gap-4 text-[11px] text-sky-800 font-medium">
             <Link href="/shop?filter=wholesale" className="hover:text-blue-600">Wholesale Center</Link>
-            <Link href="/onboarding/seller" className="hover:text-blue-600">Sell on ICON</Link>
+            {sellerStatus === 'pending_verification' ? (
+              <Link href="/seller" className="text-orange-600 font-bold hover:underline">Application Pending</Link>
+            ) : sellerStatus === 'rejected' ? (
+              <Link href="/seller" className="text-red-600 font-bold hover:underline">Application Rejected</Link>
+            ) : sellerStatus === 'approved' ? (
+              <Link href="/seller" className="text-blue-600 font-bold hover:underline">Seller Portal</Link>
+            ) : (
+              <Link href="/onboarding/seller" className="hover:text-blue-600 hover:underline">Sell on ICON</Link>
+            )}
             <Link href="/track" className="hover:text-blue-600">Track Order</Link>
             <Link href="/shop?bundle=true" className="hover:text-rose-600 text-rose-500 font-bold">Shop Gift Bundles</Link>
           </div>
@@ -191,6 +215,15 @@ export function Navbar() {
                 <div className="absolute top-full right-0 w-48 bg-white shadow-lg border rounded-md hidden group-hover:block z-50">
                     <div className="py-2">
                       <Link href="/account" className="block px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">Dashboard</Link>
+                      {sellerStatus === 'pending_verification' && (
+                        <Link href="/seller" className="block px-4 py-2 text-sm font-bold text-orange-600 hover:bg-orange-50">Application Pending</Link>
+                      )}
+                      {sellerStatus === 'rejected' && (
+                        <Link href="/seller" className="block px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50">Application Rejected</Link>
+                      )}
+                      {sellerStatus === 'approved' && (
+                        <Link href="/seller" className="block px-4 py-2 text-sm font-bold text-blue-600 hover:bg-blue-50">Seller Portal</Link>
+                      )}
                       {userEmail === "ezeilodavid292@gmail.com" && (
                         <Link href="/admin" className="block px-4 py-2 text-sm font-bold text-blue-700 hover:bg-blue-50">Admin Panel</Link>
                       )}
@@ -273,7 +306,9 @@ export function Navbar() {
               <p className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Menu</p>
               <Link href="/" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Home</Link>
               <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Shop All Products</Link>
-              <Link href="/onboarding/seller" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-orange-600 border-b border-slate-100">Sell on ICON</Link>
+              {!sellerStatus && (
+                <Link href="/onboarding/seller" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-orange-600 border-b border-slate-100">Sell on ICON</Link>
+              )}
               <Link href="/shop?filter=wholesale" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-blue-600 border-b border-slate-100">Wholesale Center</Link>
               <Link href="/about" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">About Us</Link>
               <Link href="/contact" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Contact Us</Link>
@@ -288,6 +323,15 @@ export function Navbar() {
               <Link href="/account" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Dashboard</Link>
               <Link href="/cart" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">My Cart</Link>
               <Link href="/account/orders" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Track Order</Link>
+              {sellerStatus === 'pending_verification' && (
+                <Link href="/seller" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3.5 hover:bg-orange-50 font-bold text-orange-600 border-b border-slate-100">Application Pending</Link>
+              )}
+              {sellerStatus === 'rejected' && (
+                <Link href="/seller" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3.5 hover:bg-red-50 font-bold text-red-600 border-b border-slate-100">Application Rejected</Link>
+              )}
+              {sellerStatus === 'approved' && (
+                <Link href="/seller" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3.5 hover:bg-blue-50 font-bold text-blue-600 border-b border-slate-100">Seller Portal</Link>
+              )}
               
               {userEmail === "ezeilodavid292@gmail.com" && (
                 <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="block px-4 py-3.5 hover:bg-blue-50 font-bold text-blue-700 border-b border-slate-100">Admin Panel</Link>
