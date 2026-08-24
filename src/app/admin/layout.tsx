@@ -24,6 +24,12 @@ function AdminNavLinks() {
       <Link href="/admin/issues" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors text-orange-400">
         <AlertCircle className="w-5 h-5" /> Order Issues
       </Link>
+      <Link href="/admin/sellers" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
+        <Users className="w-5 h-5" /> Seller Approvals
+      </Link>
+      <Link href="/admin/payouts" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
+        <WalletCards className="w-5 h-5" /> Seller Payouts
+      </Link>
       <Link href="/admin/categories" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
         <ImageIcon className="w-5 h-5" /> Categories
       </Link>
