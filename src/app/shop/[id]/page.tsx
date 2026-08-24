@@ -22,7 +22,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   
   const { data: productRaw, error } = await supabaseAdmin
     .from("products")
-    .select("*, stores(store_name, slug), inventory(available_quantity), wholesale_pricing(*)")
+    .select("*, stores(store_name, slug), inventory(available_quantity), wholesale_pricing(*), product_configuration_rules(*)")
     .eq("id", id)
     .single();
 
@@ -109,7 +109,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
       <div className="container mx-auto px-4">
         {/* Pass data to Client Component for interactivity */}
-        <ProductDetailsClient product={product} images={images} />
+        <ProductDetailsClient 
+          product={product} 
+          images={images} 
+          rules={product.product_configuration_rules?.[0]} 
+        />
         
         {/* Rich Content Below The Fold */}
         <div className="mt-8 grid lg:grid-cols-3 gap-8">

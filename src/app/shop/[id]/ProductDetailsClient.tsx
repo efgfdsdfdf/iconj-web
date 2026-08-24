@@ -7,8 +7,9 @@ import Link from "next/link";
 import { Star, Truck, Check, Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { MeasurementConfigurator } from "@/components/product/MeasurementConfigurator";
 
-export function ProductDetailsClient({ product, images }: { product: any, images: string[] }) {
+export function ProductDetailsClient({ product, images, rules }: { product: any, images: string[], rules?: any }) {
   const router = useRouter();
   const addItem = useCartStore((state) => state.addItem);
 
@@ -43,6 +44,7 @@ export function ProductDetailsClient({ product, images }: { product: any, images
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");
+  const [customConfig, setCustomConfig] = useState<any>(null);
 
   const handleAddToCart = () => {
     setAdding(true);
@@ -50,15 +52,16 @@ export function ProductDetailsClient({ product, images }: { product: any, images
       id: product.id,
       name: product.name,
       basePrice: Number(product.base_selling_price) || 0,
-      price: currentPrice,
+      price: customConfig ? customConfig.finalPrice : currentPrice,
       quantity: qty,
       moq: moq,
       pricingTiers: pricingTiers,
       storeName: product.stores?.store_name || "ICON Official",
-      width: selectedSize || "Standard",
-      height: selectedSize || "Standard",
-      motorType: selectedMotor || "Manual",
+      width: customConfig ? `${customConfig.width}cm` : (selectedSize || "Standard"),
+      height: customConfig ? `${customConfig.height}cm` : (selectedSize || "Standard"),
+      motorType: customConfig?.isMotorized ? "Motorized" : (selectedMotor || "Manual"),
       image: images[0],
+      requiresInstall: customConfig?.requiresInstall || false,
     });
     setTimeout(() => {
       setAdding(false);
@@ -119,8 +122,12 @@ export function ProductDetailsClient({ product, images }: { product: any, images
         <div className="mb-6 pb-6 border-b">
           <div className="flex flex-col gap-2">
             <div className="flex items-end gap-3">
-              <span className="text-3xl md:text-4xl font-black text-slate-900">₦{currentPrice.toLocaleString()}</span>
-              <span className="text-sm font-semibold text-slate-500 mb-1.5">/ unit</span>
+              <span className="text-3xl md:text-4xl font-black text-slate-900">
+                ₦{(customConfig ? customConfig.finalPrice : currentPrice).toLocaleString()}
+              </span>
+              <span className="text-sm font-semibold text-slate-500 mb-1.5">
+                {rules?.pricing_model === 'per_sqm' ? '/ unit (calculated by sqm)' : '/ unit'}
+              </span>
             </div>
             
             {pricingTiers.length > 0 && (
@@ -154,7 +161,13 @@ export function ProductDetailsClient({ product, images }: { product: any, images
         {/* Dynamic Configurator */}
         <div className="space-y-6 mb-8">
           
-          {sizes.length > 0 && (
+          {rules ? (
+            <MeasurementConfigurator 
+              rules={rules} 
+              basePrice={Number(product.base_selling_price) || 0} 
+              onConfigChange={setCustomConfig} 
+            />
+          ) : sizes.length > 0 && (
             <div className="space-y-3">
               <Label className="text-base font-bold text-slate-900">Select Size / Dimension</Label>
               <div className="flex flex-wrap gap-2">
