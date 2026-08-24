@@ -389,10 +389,27 @@ export default function AddProductPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm">
-            <CardHeader><CardTitle>Status & Visibility</CardTitle></CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
+            <Card className="border-none shadow-sm">
+              <CardHeader><CardTitle>Status & Visibility</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                
+                {/* LISTING TYPE SELECTION */}
+                <div className="p-4 bg-slate-50 border rounded-lg space-y-4">
+                  <Label className="text-base font-bold">Where should this product be listed?</Label>
+                  <p className="text-sm text-slate-500 mb-2">You can list products in Retail, Wholesale, or both.</p>
+                  
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="isRetail" checked={formData.is_retail_enabled !== false} onChange={e => setFormData({...formData, is_retail_enabled: e.target.checked})} className="w-5 h-5 accent-blue-600" />
+                    <Label htmlFor="isRetail" className="cursor-pointer">Retail Marketplace (B2C)</Label>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="isWholesale" checked={formData.is_wholesale_enabled === true} onChange={e => setFormData({...formData, is_wholesale_enabled: e.target.checked})} className="w-5 h-5 accent-blue-600" />
+                    <Label htmlFor="isWholesale" className="cursor-pointer">Wholesale Center (B2B)</Label>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                 <Label>Stock Status</Label>
                 <select value={formData.stock_status} onChange={e => setFormData({...formData, stock_status: e.target.value})} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
                   <option>In Stock</option>
