@@ -1,0 +1,72 @@
+import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+import { createClient as createServerClient } from "@/lib/supabase/server";
+
+export async function POST(request: Request) {
+  try {
+    const supabaseUser = await createServerClient();
+    const { data: { user } } = await supabaseUser.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { businessName, storeName, bankName, accountNumber, accountName } = body;
+
+    // Use service role to bypass RLS for onboarding
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // 1. Create Business
+    const { data: businessData, error: businessError } = await supabaseAdmin.from('businesses').insert({
+      owner_id: user.id,
+      business_name: businessName,
+      business_type: 'retail'
+    }).select().single();
+
+    if (businessError) throw businessError;
+
+    // 2. Create Seller Record
+    const { data: sellerData, error: sellerError } = await supabaseAdmin.from('sellers').insert({
+      profile_id: user.id,
+      business_id: businessData.id,
+      status: 'pending_verification'
+    }).select().single();
+
+    if (sellerError) throw sellerError;
+
+    // 3. Create Store
+    const storeSlug = storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const { error: storeError } = await supabaseAdmin.from('stores').insert({
+      seller_id: sellerData.id,
+      store_name: storeName,
+      slug: storeSlug
+    });
+
+    if (storeError) throw storeError;
+
+    // 4. Add Payout Account
+    const { error: payoutError } = await supabaseAdmin.from('seller_payout_accounts').insert({
+      seller_id: sellerData.id,
+      bank_name: bankName,
+      account_number: accountNumber,
+      account_name: accountName
+    });
+
+    if (payoutError) throw payoutError;
+
+    // 5. Update user_roles
+    await supabaseAdmin.from('user_roles').insert({
+      user_id: user.id,
+      role: 'seller'
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error("Onboarding Error:", err);
+    return NextResponse.json({ error: err.message || "Failed to submit seller application" }, { status: 500 });
+  }
+}

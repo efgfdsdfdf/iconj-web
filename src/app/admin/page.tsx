@@ -110,6 +110,36 @@ export default async function AdminDashboardPage() {
         </Card>
       </div>
 
+      {/* KPI Cards (Restored from previous view) */}
+      <div className="mt-12 mb-8">
+        <h2 className="text-lg font-bold text-slate-800 mb-4">Financial Overview</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <Wallet className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Total Revenue</p>
+              <h3 className="text-2xl font-bold text-slate-900">₦0</h3>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-none shadow-sm">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <Users className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Total Users</p>
+              <h3 className="text-2xl font-bold text-slate-900">Active</h3>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
     </main>
   );
 }

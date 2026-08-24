@@ -32,49 +32,17 @@ export default function SellerOnboardingPage() {
       
       if (!session) throw new Error("No active session");
 
-      // 1. Create Business
-      const { data: businessData, error: businessError } = await supabase.from('businesses').insert({
-        owner_id: session.user.id,
-        business_name: formData.businessName,
-        business_type: 'retail'
-      }).select().single();
-
-      if (businessError) throw businessError;
-
-      // 2. Create Seller Record (Pending status by default)
-      const { data: sellerData, error: sellerError } = await supabase.from('sellers').insert({
-        profile_id: session.user.id,
-        business_id: businessData.id,
-        status: 'pending_verification'
-      }).select().single();
-
-      if (sellerError) throw sellerError;
-
-      // 3. Create Store
-      const storeSlug = formData.storeName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const { error: storeError } = await supabase.from('stores').insert({
-        seller_id: sellerData.id,
-        store_name: formData.storeName,
-        slug: storeSlug
+      const response = await fetch("/api/onboarding/seller", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
-      if (storeError) throw storeError;
+      const result = await response.json();
 
-      // 4. Add Payout Account
-      const { error: payoutError } = await supabase.from('seller_payout_accounts').insert({
-        seller_id: sellerData.id,
-        bank_name: formData.bankName,
-        account_number: formData.accountNumber,
-        account_name: formData.accountName
-      });
-
-      if (payoutError) throw payoutError;
-
-      // Update user_roles
-      await supabase.from('user_roles').insert({
-        user_id: session.user.id,
-        role: 'seller'
-      });
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit seller application");
+      }
 
       // Redirect to seller dashboard pending page or account
       router.push("/account");

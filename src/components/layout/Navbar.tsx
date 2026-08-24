@@ -273,6 +273,8 @@ export function Navbar() {
               <p className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Menu</p>
               <Link href="/" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Home</Link>
               <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Shop All Products</Link>
+              <Link href="/onboarding/seller" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-orange-600 border-b border-slate-100">Sell on ICON</Link>
+              <Link href="/shop?filter=wholesale" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-blue-600 border-b border-slate-100">Wholesale Center</Link>
               <Link href="/about" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">About Us</Link>
               <Link href="/contact" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Contact Us</Link>
               

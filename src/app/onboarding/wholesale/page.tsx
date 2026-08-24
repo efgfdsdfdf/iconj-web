@@ -31,23 +31,17 @@ export default function WholesaleOnboardingPage() {
       
       if (!session) throw new Error("No active session");
 
-      // Insert into businesses
-      const { error: dbError } = await supabase.from('businesses').insert({
-        owner_id: session.user.id,
-        business_name: formData.businessName,
-        registration_number: formData.registrationNumber,
-        tax_id: formData.taxId,
-        business_type: 'wholesale',
-        address: { street: formData.address } // Simplified for now
+      const response = await fetch("/api/onboarding/wholesale", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
 
-      if (dbError) throw dbError;
+      const result = await response.json();
 
-      // Update user_roles
-      await supabase.from('user_roles').insert({
-        user_id: session.user.id,
-        role: 'wholesale'
-      });
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to submit business profile");
+      }
 
       // Redirect to account dashboard
       router.push("/account");
