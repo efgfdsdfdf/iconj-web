@@ -104,9 +104,9 @@ export default async function AdminPayoutsPage() {
                     </td>
                     <td className="px-6 py-4">
                       {/* Form to mark as paid manually if needed (future implementation) */}
-                      <Button variant="outline" className="text-xs font-bold uppercase tracking-wider" asChild>
-                        <Link href={`/admin/sellers`}>View Seller</Link>
-                      </Button>
+                      <Link href={`/admin/sellers`} className="inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white hover:bg-slate-50 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-slate-700 transition-colors">
+                        View Seller
+                      </Link>
                     </td>
                   </tr>
                 ))}
