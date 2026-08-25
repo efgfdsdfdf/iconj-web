@@ -16,7 +16,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   const resolvedParams = await params;
   
-  const { data: order } = await supabaseAdmin.from("orders").select("*, supplier:suppliers(email, name)").eq("id", resolvedParams.id).single();
+  const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", resolvedParams.id).single();
   if (!order) return notFound();
 
   const { data: items } = await supabaseAdmin.from("order_items").select(`
