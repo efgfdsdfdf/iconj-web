@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import { ProductCard } from "@/components/product/ProductCard";
 import { Store, ShieldCheck, MapPin, Calendar, Star } from "lucide-react";
 import Link from "next/link";
@@ -8,7 +8,7 @@ export const revalidate = 0;
 
 export default async function StorePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const supabase = await createClient();
+  const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
   // Fetch the store and seller information
   const { data: store } = await supabase

@@ -66,6 +66,15 @@ export default function SellerAddProductPage() {
     loadSellerInfo();
   }, [supabase, router]);
 
+  // Auto-generate SKU when category changes
+  const generateSku = (categoryId: string) => {
+    const cat = categories.find(c => c.id === categoryId);
+    if (!cat) return;
+    const prefix = cat.name.substring(0, 3).toUpperCase().replace(/[^A-Z]/g, 'X');
+    const rand = Math.random().toString(36).substring(2, 7).toUpperCase();
+    setFormData(prev => ({ ...prev, category_id: categoryId, sku: `${prefix}-${rand}` }));
+  };
+
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
     const file = e.target.files[0];
@@ -197,7 +206,7 @@ export default function SellerAddProductPage() {
                   required
                   className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   value={formData.category_id}
-                  onChange={e => setFormData({...formData, category_id: e.target.value})}
+                  onChange={e => generateSku(e.target.value)}
                 >
                   <option value="">Select a category</option>
                   {categories.map(cat => (
@@ -213,8 +222,9 @@ export default function SellerAddProductPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label>SKU *</Label>
-                <Input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} placeholder="e.g. ZB-PREM-001" />
+                <Label>Product ID (Auto-generated)</Label>
+                <Input required readOnly value={formData.sku} className="bg-slate-50 text-slate-600" placeholder="Select a category first" />
+                <p className="text-xs text-slate-500">Auto-generated based on category</p>
               </div>
               <div className="space-y-2">
                 <Label>Stock Quantity *</Label>

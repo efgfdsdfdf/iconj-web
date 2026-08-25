@@ -109,6 +109,48 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
     await supabaseAdmin.from("sellers").update({ status: "approved" }).eq("id", sellerId);
     await supabaseAdmin.from("stores").update({ is_active: true }).eq("seller_id", sellerId);
     await supabaseAdmin.from("seller_verifications").update({ status: "approved" }).eq("seller_id", sellerId);
+
+    // Send approval email
+    const { data: seller } = await supabaseAdmin.from("sellers").select("profile_id, businesses(business_name), stores(store_name, slug)").eq("id", sellerId).single();
+    if (seller?.profile_id) {
+      const { data: profile } = await supabaseAdmin.from("profiles").select("email").eq("id", seller.profile_id).single();
+      if (profile?.email) {
+        const storeName = (seller as any).stores?.store_name || (seller as any).businesses?.business_name || "Your Store";
+        const storeSlug = (seller as any).stores?.slug || "";
+        try {
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "ICONJ <noreply@iconj.com.ng>",
+              to: profile.email,
+              subject: "🎉 Your Seller Application Has Been Approved!",
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                  <h1 style="color: #1e293b; font-size: 24px;">Congratulations! 🎉</h1>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                    Your seller application for <strong>${storeName}</strong> has been approved on ICONJ Marketplace.
+                  </p>
+                  <p style="color: #475569; font-size: 16px; line-height: 1.6;">
+                    You can now start listing products and selling to customers across Nigeria.
+                  </p>
+                  <div style="margin: 30px 0;">
+                    <a href="https://iconj-web-rust.vercel.app/seller" style="background: #f97316; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+                      Go to Seller Dashboard →
+                    </a>
+                  </div>
+                  ${storeSlug ? `<p style="color: #64748b; font-size: 14px;">Your public store: <a href="https://iconj-web-rust.vercel.app/store/${storeSlug}">iconj-web-rust.vercel.app/store/${storeSlug}</a></p>` : ""}
+                  <p style="color: #94a3b8; font-size: 13px; margin-top: 30px;">— The ICONJ Team</p>
+                </div>
+              `
+            })
+          });
+        } catch (e) {
+          console.error("Failed to send approval email:", e);
+        }
+      }
+    }
+
     revalidatePath("/admin/sellers");
     revalidatePath("/seller");
   }
@@ -141,6 +183,29 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
     revalidatePath("/admin/sellers");
   }
 
+  async function clearAllSellers() {
+    "use server";
+    const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    // Delete in correct order to avoid FK violations
+    await supabaseAdmin.from("financial_ledger").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("commissions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("seller_payout_accounts").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("seller_verifications").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("wholesale_pricing").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    // Delete seller products (but NOT admin products)
+    const { data: allSellers } = await supabaseAdmin.from("sellers").select("id");
+    if (allSellers) {
+      for (const s of allSellers) {
+        await supabaseAdmin.from("products").delete().eq("seller_id", s.id);
+      }
+    }
+    await supabaseAdmin.from("stores").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("sellers").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    // Clean up businesses that no longer have sellers
+    await supabaseAdmin.from("businesses").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    revalidatePath("/admin/sellers");
+  }
+
   const formatCurrency = (val: number) => `₦${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const tabs = [
@@ -152,9 +217,21 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
 
   return (
     <main className="flex-1 p-4 md:p-8 overflow-auto bg-slate-50 min-h-[calc(100vh-130px)]">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900">Sellers</h1>
-        <p className="text-sm text-slate-500">Manage all marketplace sellers — approvals, finances, and Paystack connections.</p>
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Sellers</h1>
+          <p className="text-sm text-slate-500">Manage all marketplace sellers — approvals, finances, and Paystack connections.</p>
+        </div>
+        <form action={clearAllSellers}>
+          <Button type="submit" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 text-xs"
+            onClick={(e) => {
+              if (!confirm('⚠️ WARNING: This will permanently delete ALL sellers, their stores, products, and financial data. This cannot be undone. Are you sure?')) {
+                e.preventDefault();
+              }
+            }}>
+            <AlertTriangle className="w-3.5 h-3.5 mr-1.5" /> Clear All Sellers (Testing)
+          </Button>
+        </form>
       </div>
 
       {/* Tabs */}
@@ -284,7 +361,10 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
                             <div key={i} className="flex items-center gap-2 p-2 bg-slate-50 border rounded-md text-sm">
                               <FileText className="w-4 h-4 text-blue-600" />
                               <div className="flex-1 truncate">
-                                <span className="font-semibold text-slate-700">{doc.document_type}:</span> {doc.document_url}
+                                <span className="font-semibold text-slate-700">{doc.document_type}:</span> 
+                                <a href={doc.document_url} target="_blank" rel="noopener noreferrer" className="ml-1 text-blue-600 hover:underline">
+                                  View Document
+                                </a>
                               </div>
                             </div>
                           ))}
