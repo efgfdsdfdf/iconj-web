@@ -15,25 +15,41 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
       return { success: false, message: "Payment verification failed" };
     }
 
-    const customFields = paystackData.data.metadata?.custom_fields || [];
-    const orderIdField = customFields.find((f: any) => f.variable_name === "order_id");
+    const orderId = paystackData.data.metadata?.order_id || paystackData.data.reference || reference;
     
-    if (!orderIdField || !orderIdField.value) {
+    if (!orderId) {
       return { success: false, message: "Order ID not found in transaction metadata" };
     }
-
-    const orderId = orderIdField.value;
 
     const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!, 
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
+    // Update main order
     await supabaseAdmin.from("orders").update({
       payment_status: "PAID",
       order_status: "PAYMENT_CONFIRMED", 
-      paystack_reference: reference
+      paystack_reference: reference,
+      admin_viewed: false // Important for admin notifications
     }).eq("id", orderId);
+
+    // Update suborders
+    await supabaseAdmin.from("seller_orders").update({
+      status: "PROCESSING"
+    }).eq("parent_order_id", orderId);
+
+    // Update payment record
+    await supabaseAdmin.from("payments").update({
+      status: "SUCCESS"
+    }).eq("order_id", orderId);
+
+    // Add timeline event
+    await supabaseAdmin.from('order_events').insert({
+      order_id: orderId,
+      event_type: 'PAYMENT_CONFIRMED',
+      description: `Payment confirmed (Ref: ${reference}).`
+    });
 
     return { success: true, orderId };
   } catch (error: any) {

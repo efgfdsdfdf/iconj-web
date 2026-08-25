@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     name, sku, selling_price, description, stock_status,
     category_id, category, images,
     // New fields
-    moq, pricing_tiers, brand, features, weight_kg
+    moq, pricing_tiers, brand, features, weight_kg, stock_quantity
   } = body;
 
   if (!name || !sku || !selling_price) {
@@ -98,6 +98,21 @@ export async function POST(req: NextRequest) {
       if (tierError) {
         console.error("Pricing tier insert error:", tierError);
       }
+    }
+  }
+
+  // Insert initial stock quantity
+  if (stock_quantity !== undefined && stock_quantity !== null && data) {
+    const { error: invError } = await supabaseAdmin
+      .from("inventory")
+      .insert({
+        product_id: data.id,
+        available_quantity: parseInt(stock_quantity),
+        reserved_quantity: 0
+      });
+      
+    if (invError) {
+      console.error("Inventory insert error:", invError);
     }
   }
 

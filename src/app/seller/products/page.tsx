@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
+import { DeleteProductButton } from "@/components/seller/DeleteProductButton";
 
 export default async function SellerProductsPage() {
   const supabase = await createClient();
@@ -67,8 +68,9 @@ export default async function SellerProductsPage() {
                         <span className="px-2 py-1 rounded bg-slate-100 text-slate-700 text-xs font-bold">Inactive</span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 flex items-center">
                       <Link href={`/seller/products/${product.id}/edit`} className="text-blue-600 hover:underline text-xs font-bold">Edit</Link>
+                      <DeleteProductButton productId={product.id} />
                     </td>
                   </tr>
                 ))}

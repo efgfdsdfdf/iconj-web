@@ -29,6 +29,7 @@ export default function SellerAddProductPage() {
     brand: "",
     weight_kg: "",
     moq: "1",
+    stock_quantity: "",
   });
 
   const [features, setFeatures] = useState<string[]>([]);
@@ -150,6 +151,7 @@ export default function SellerAddProductPage() {
           features: features,
           moq: isWholesale ? formData.moq : "1",
           pricing_tiers: isWholesale ? pricingTiers : [],
+          stock_quantity: formData.stock_quantity,
         }),
       });
 
@@ -209,10 +211,19 @@ export default function SellerAddProductPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>SKU *</Label>
                 <Input required value={formData.sku} onChange={e => setFormData({...formData, sku: e.target.value})} placeholder="e.g. ZB-PREM-001" />
+              </div>
+              <div className="space-y-2">
+                <Label>Stock Quantity *</Label>
+                <Input type="number" required min="0" value={formData.stock_quantity} onChange={e => setFormData({...formData, stock_quantity: e.target.value})} placeholder="e.g. 100" />
+                <p className="text-xs text-slate-500">How many units do you have?</p>
+              </div>
+              <div className="space-y-2">
+                <Label>Weight (kg)</Label>
+                <Input type="number" step="0.1" value={formData.weight_kg} onChange={e => setFormData({...formData, weight_kg: e.target.value})} placeholder="0.5" />
               </div>
               <div className="space-y-2">
                 <Label>Stock Status</Label>
@@ -225,10 +236,6 @@ export default function SellerAddProductPage() {
                   <option value="Out of Stock">Out of Stock</option>
                   <option value="Pre-order">Pre-order</option>
                 </select>
-              </div>
-              <div className="space-y-2">
-                <Label>Weight (kg)</Label>
-                <Input type="number" step="0.1" value={formData.weight_kg} onChange={e => setFormData({...formData, weight_kg: e.target.value})} placeholder="0.5" />
               </div>
             </div>
 

@@ -99,5 +99,53 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
   }
 
+  // Update or insert stock quantity
+  if (body.stock_quantity !== undefined && body.stock_quantity !== null && data) {
+    const { data: invData } = await supabaseAdmin.from("inventory").select("id").eq("product_id", data.id).single();
+    if (invData) {
+      await supabaseAdmin.from("inventory").update({ available_quantity: parseInt(body.stock_quantity) }).eq("id", invData.id);
+    } else {
+      await supabaseAdmin.from("inventory").insert({
+        product_id: data.id,
+        available_quantity: parseInt(body.stock_quantity),
+        reserved_quantity: 0
+      });
+    }
+  }
+
   return NextResponse.json({ product: data });
+}
+
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { createClient: createAdminClient } = require("@supabase/supabase-js");
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: seller } = await supabaseAdmin
+    .from("sellers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .single();
+
+  if (!seller) return NextResponse.json({ error: "Not a seller" }, { status: 403 });
+
+  // Delete product (cascade deletes should handle related tables, or we can soft delete)
+  const { error } = await supabaseAdmin.from("products").delete().eq("id", id).eq("seller_id", seller.id);
+
+  if (error) {
+    console.error("Delete error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ success: true });
 }

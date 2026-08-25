@@ -176,11 +176,21 @@ export async function POST(request: Request) {
       }));
 
       await supabaseAdmin.from("order_items").insert(orderItems);
+
+      // Deduct inventory
+      for (const item of sellerItems) {
+        const { data: inv } = await supabaseAdmin.from("inventory").select("id, available_quantity").eq("product_id", item.dbProduct.id).single();
+        if (inv) {
+          await supabaseAdmin.from("inventory").update({
+            available_quantity: Math.max(0, inv.available_quantity - item.quantity)
+          }).eq("id", inv.id);
+        }
+      }
     }
 
     // 3. Initialize Paystack
     const amountInKobo = totalAmount * 100;
-    const siteUrl = "https://iconj-web-rust.vercel.app";
+    const siteUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || request.headers.get("origin") || "https://iconj-web-rust.vercel.app";
     
     // Construct payload
     const paystackPayload: any = {
