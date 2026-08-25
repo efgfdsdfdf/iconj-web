@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ChevronRight, Filter, SlidersHorizontal, ChevronDown, Star, CheckCircle } from "lucide-react";
+import { ChevronRight, Filter, SlidersHorizontal, ChevronDown, Star, CheckCircle, ShieldCheck, Truck } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/product/ProductCard";

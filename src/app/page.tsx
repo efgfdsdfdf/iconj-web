@@ -11,13 +11,14 @@ export const revalidate = 0;
 export default async function Home() {
   const supabase = await createClient();
 
-  const { data: products } = await supabase
+  const { data: rawProducts } = await supabase
     .from("products")
     .select("*")
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .order("created_at", { ascending: false })
-    .limit(5);
+    .limit(50);
+    
+  const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 5) : [];
 
   const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
   const categories: { name: string, icon: string }[] = settings?.value || [

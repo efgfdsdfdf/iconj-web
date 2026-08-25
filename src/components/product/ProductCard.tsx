@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
@@ -38,10 +39,13 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
       className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''} ${isOutOfStock ? 'opacity-75 grayscale-[0.2]' : ''}`}
     >
       <Link href={`/shop/${product.id}`} className="block relative aspect-[4/5] bg-slate-100 rounded mb-3 overflow-hidden">
-        <img 
+        <Image 
           src={product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"} 
-          alt={product.name} 
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          alt={product.name}
+          fill
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
         />
         
         {/* Badges */}
