@@ -1,10 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Package, Truck, CheckCircle2, User } from "lucide-react";
+import { Package, Loader2 } from "lucide-react";
+import { updateSellerOrderStatus } from "@/app/seller/orders/actions";
 
 export function SellerSubOrdersPanel({ subOrders }: { subOrders: any[] }) {
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   
   if (!subOrders || subOrders.length === 0) {
     return (
@@ -24,6 +27,12 @@ export function SellerSubOrdersPanel({ subOrders }: { subOrders: any[] }) {
     CANCELLED: "bg-red-100 text-red-800",
   };
 
+  const handleStatusChange = async (orderId: string, newStatus: string) => {
+    setLoadingId(orderId);
+    await updateSellerOrderStatus(orderId, newStatus);
+    setLoadingId(null);
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
@@ -32,7 +41,6 @@ export function SellerSubOrdersPanel({ subOrders }: { subOrders: any[] }) {
       
       {subOrders.map(so => {
         const businessName = so.sellers?.businesses?.business_name || "ICON Official";
-        const totalItems = so.order_items?.length || 0;
         
         return (
           <Card key={so.id} className="overflow-hidden">
@@ -43,11 +51,31 @@ export function SellerSubOrdersPanel({ subOrders }: { subOrders: any[] }) {
                   <span className="font-bold text-slate-900">{businessName}</span>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="text-right">
-                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Status</p>
+                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Current Status</p>
                   <Badge className={statusColors[so.status] || "bg-slate-100 text-slate-700"}>{so.status}</Badge>
                 </div>
+                
+                <div className="text-right border-l pl-3">
+                  <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Admin Override</p>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={so.status}
+                      onChange={(e) => handleStatusChange(so.id, e.target.value)}
+                      disabled={loadingId === so.id}
+                      className="text-xs bg-white border border-slate-300 rounded px-2 py-1 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
+                    >
+                      <option value="PENDING_PAYMENT">Pending Payment</option>
+                      <option value="PROCESSING">Processing</option>
+                      <option value="SHIPPED">Shipped</option>
+                      <option value="DELIVERED">Delivered</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                    {loadingId === so.id && <Loader2 className="w-3 h-3 animate-spin text-blue-600" />}
+                  </div>
+                </div>
+
                 <div className="text-right border-l pl-3">
                   <p className="text-xs text-slate-500 uppercase font-bold tracking-wider mb-1">Payout</p>
                   <p className="font-bold text-slate-900">₦{so.total_amount?.toLocaleString()}</p>
