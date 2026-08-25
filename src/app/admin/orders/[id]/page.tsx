@@ -8,7 +8,7 @@ import { OrderTimeline } from "./components/OrderTimeline";
 import { AdminNotes } from "./components/AdminNotes";
 import { requireAdmin } from "@/lib/auth/admin";
 import { EmailHistory } from "./components/EmailHistory";
-import { LogisticsCommandPanel } from "./components/LogisticsCommandPanel";
+import { SellerSubOrdersPanel } from "./components/SellerSubOrdersPanel";
 import { getActiveForwarder, getLogisticsIssues } from "@/lib/logistics";
 
 export default async function AdminOrderDetailsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -18,6 +18,12 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
   
   const { data: order } = await supabaseAdmin.from("orders").select("*").eq("id", resolvedParams.id).single();
   if (!order) return notFound();
+
+  // Fetch sub-orders and their items
+  const { data: sellerOrders } = await supabaseAdmin
+    .from("seller_orders")
+    .select("*, sellers(businesses(business_name)), order_items(*)")
+    .eq("parent_order_id", order.id);
 
   const { data: items } = await supabaseAdmin.from("order_items").select(`
     *,
@@ -54,14 +60,9 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
         <div className="lg:col-span-2 space-y-6">
           
           {/* THE NEW COMMAND CENTER */}
-          <LogisticsCommandPanel 
-            order={order} 
-            items={items || []} 
-            activeForwarder={activeForwarder}
-            issues={issues}
-          />
+          <SellerSubOrdersPanel subOrders={sellerOrders || []} />
 
-          {/* ORDER ITEMS */}
+          {/* Customer Info Card */}
           <Card className="border-none shadow-sm mt-8">
             <CardHeader className="border-b pb-4">
               <CardTitle className="text-lg">Order Items</CardTitle>

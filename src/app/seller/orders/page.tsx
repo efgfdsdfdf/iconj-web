@@ -3,6 +3,7 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Package, MapPin, User, Ruler, Settings, Wrench } from "lucide-react";
+import { SellerOrderStatusDropdown } from "./SellerOrderStatusDropdown";
 
 export const revalidate = 0;
 
@@ -100,6 +101,13 @@ export default async function SellerOrdersPage() {
                 <span className="text-sm text-slate-300">
                   {new Date(order.created_at).toLocaleDateString('en-NG', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </span>
+                
+                {/* STATUS UPDATER */}
+                {payStatus === "PAID" && (
+                  <div className="ml-0 md:ml-4 border-l border-slate-700 pl-0 md:pl-4">
+                    <SellerOrderStatusDropdown orderId={order.id} currentStatus={order.status} />
+                  </div>
+                )}
               </div>
             </div>
 
