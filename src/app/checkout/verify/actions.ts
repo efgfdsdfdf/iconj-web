@@ -51,6 +51,51 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
       description: `Payment confirmed (Ref: ${reference}).`
     });
 
+    // Sync financial ledger for admin payouts page
+    const { data: sellerOrders } = await supabaseAdmin.from("seller_orders").select("id, seller_id").eq("parent_order_id", orderId);
+    if (sellerOrders && sellerOrders.length > 0) {
+      const sellerOrderIds = sellerOrders.map(so => so.id);
+      const { data: commissions } = await supabaseAdmin.from("commissions").select("*").in("seller_order_id", sellerOrderIds);
+      
+      if (commissions && commissions.length > 0) {
+        // Idempotency check: Don't insert if webhook already did it
+        const { data: existingLedger } = await supabaseAdmin.from('financial_ledger').select('id').eq('paystack_reference', reference).limit(1);
+        
+        if (!existingLedger || existingLedger.length === 0) {
+          const ledgerEntries = [];
+          for (const comm of commissions) {
+            ledgerEntries.push({
+              seller_id: comm.seller_id,
+              order_id: orderId,
+              paystack_reference: reference,
+              transaction_type: 'SALE_GROSS',
+              amount: comm.gross_amount,
+              description: 'Customer payment received'
+            });
+            ledgerEntries.push({
+              seller_id: comm.seller_id,
+              order_id: orderId,
+              paystack_reference: reference,
+              transaction_type: 'ICONJ_COMMISSION',
+              amount: -comm.commission_amount,
+              description: 'ICONJ platform fee deduction'
+            });
+            ledgerEntries.push({
+              seller_id: comm.seller_id,
+              order_id: orderId,
+              paystack_reference: reference,
+              transaction_type: 'SETTLEMENT_PENDING',
+              amount: comm.seller_net_amount,
+              description: 'Funds pending settlement to payout account'
+            });
+          }
+          await supabaseAdmin.from("financial_ledger").insert(ledgerEntries);
+          // Also mark commissions as AVAILABLE
+          await supabaseAdmin.from("commissions").update({ status: 'AVAILABLE' }).in('id', commissions.map(c => c.id));
+        }
+      }
+    }
+
     return { success: true, orderId };
   } catch (error: any) {
     console.error("Verification error:", error);

@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/admin";
 import { FileText, CheckCircle, XCircle, Store, DollarSign, Users, AlertTriangle } from "lucide-react";
 import { revalidatePath } from "next/cache";
+import { ClearAllSellersButton } from "@/components/admin/ClearAllSellersButton";
 import Link from "next/link";
 
 export const revalidate = 0;
@@ -222,16 +223,7 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
           <h1 className="text-2xl font-bold text-slate-900">Sellers</h1>
           <p className="text-sm text-slate-500">Manage all marketplace sellers — approvals, finances, and Paystack connections.</p>
         </div>
-        <form action={clearAllSellers}>
-          <Button type="submit" variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 text-xs"
-            onClick={(e) => {
-              if (!confirm('⚠️ WARNING: This will permanently delete ALL sellers, their stores, products, and financial data. This cannot be undone. Are you sure?')) {
-                e.preventDefault();
-              }
-            }}>
-            <AlertTriangle className="w-3.5 h-3.5 mr-1.5" /> Clear All Sellers (Testing)
-          </Button>
-        </form>
+        <ClearAllSellersButton action={clearAllSellers} />
       </div>
 
       {/* Tabs */}
