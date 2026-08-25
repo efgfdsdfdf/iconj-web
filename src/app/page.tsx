@@ -16,7 +16,6 @@ export default async function Home() {
     .select("*")
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .eq('is_retail_enabled', true)
     .order("created_at", { ascending: false })
     .limit(5);
 
