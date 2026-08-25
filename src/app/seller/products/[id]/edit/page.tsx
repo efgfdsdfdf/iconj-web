@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, UploadCloud, X } from "lucide-react";
 
 export default function SellerEditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
@@ -19,14 +19,19 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
   const [initialLoading, setInitialLoading] = useState(true);
   const [sellerBusiness, setSellerBusiness] = useState<any>(null);
   const [originalProduct, setOriginalProduct] = useState<any>(null);
+  const [categories, setCategories] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: "",
     sku: "",
     selling_price: "",
     description: "",
-    stock_status: "In Stock"
+    stock_status: "In Stock",
+    category_id: ""
   });
+
+  const [images, setImages] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -43,6 +48,9 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
         
       if (!sellerData) return router.push('/account');
       setSellerBusiness(sellerData);
+
+      const { data: catData } = await supabase.from('categories').select('*').eq('is_active', true);
+      if (catData) setCategories(catData);
 
       const { data: productData, error } = await supabase
         .from('products')
@@ -62,18 +70,56 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
         sku: productData.sku,
         selling_price: productData.base_selling_price?.toString() || "",
         description: productData.description || "",
-        stock_status: productData.stock_status || "In Stock"
+        stock_status: productData.stock_status || "In Stock",
+        category_id: productData.category_id || ""
       });
+      setImages(productData.images || []);
       setInitialLoading(false);
     }
     loadData();
   }, [supabase, router, unwrappedParams.id]);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    
+    setUploadingImage(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `${sellerBusiness?.id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file);
+        
+      if (uploadError) throw uploadError;
+      
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
+        
+      setImages([...images, publicUrl]);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!sellerBusiness || !originalProduct) return;
+    if (!formData.category_id) return alert("Please select a category");
     
     setLoading(true);
+
+    const categoryName = categories.find(c => c.id === formData.category_id)?.name || '';
 
     try {
       const { error } = await supabase
@@ -84,6 +130,9 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
           base_selling_price: parseFloat(formData.selling_price),
           description: formData.description,
           stock_status: formData.stock_status,
+          category_id: formData.category_id,
+          category: categoryName,
+          images: images,
           approval_status: originalProduct.approval_status === 'rejected' ? 'pending' : originalProduct.approval_status
         })
         .eq('id', unwrappedParams.id)
@@ -133,6 +182,22 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
               <Label>Product Title</Label>
               <Input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Newborn Onesie" />
             </div>
+
+            <div className="space-y-2">
+              <Label>Category</Label>
+              <select 
+                required
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                value={formData.category_id}
+                onChange={e => setFormData({...formData, category_id: e.target.value})}
+              >
+                <option value="">Select a category</option>
+                {categories.map(cat => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>SKU</Label>
@@ -146,6 +211,34 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
             <div className="space-y-2">
               <Label>Description</Label>
               <Textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="h-32" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle>Product Images</CardTitle></CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {images.map((url, i) => (
+                <div key={i} className="relative aspect-square rounded-lg border overflow-hidden bg-slate-50 group">
+                  <img src={url} alt="Product" className="w-full h-full object-cover" />
+                  <button type="button" onClick={() => removeImage(i)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+              
+              <label className="aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center text-slate-500 hover:bg-slate-50 hover:text-blue-600 transition-colors cursor-pointer">
+                {uploadingImage ? (
+                  <span className="text-sm font-medium">Uploading...</span>
+                ) : (
+                  <>
+                    <UploadCloud className="w-8 h-8 mb-2" />
+                    <span className="text-sm font-medium">Add Image</span>
+                  </>
+                )}
+                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+              </label>
             </div>
           </CardContent>
         </Card>
