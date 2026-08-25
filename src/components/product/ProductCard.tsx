@@ -56,11 +56,6 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
               <Heart className="w-2.5 h-2.5" /> Designer&apos;s Pick
             </span>
           )}
-          {!isOutOfStock && product.is_wholesale_enabled && (
-            <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
-              Wholesale
-            </span>
-          )}
           {!isOutOfStock && isBundle && (
             <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
               Bundle
