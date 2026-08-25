@@ -29,6 +29,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   }
   if (filter === 'wholesale') {
     query = query.eq('is_wholesale_enabled', true);
+  } else {
+    // Default to retail view
+    query = query.eq('is_retail_enabled', true);
   }
   if (q) {
     query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);

@@ -14,6 +14,9 @@ export default async function Home() {
   const { data: products } = await supabase
     .from("products")
     .select("*")
+    .eq('approval_status', 'approved')
+    .eq('is_active', true)
+    .eq('is_retail_enabled', true)
     .order("created_at", { ascending: false })
     .limit(5);
 
@@ -66,10 +69,10 @@ export default async function Home() {
               <span className="bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full mb-4 flex items-center gap-1 w-max"><Star className="w-3 h-3 fill-white"/> Premium Quality</span>
               <h1 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight drop-shadow-lg leading-tight">Elevate Your Space<br/>with Perfect Blinds.</h1>
               <p className="text-white/90 text-sm md:text-lg mb-8 max-w-md font-medium drop-shadow-md">Custom-fitted blinds, elegant curtains, and smart window treatments tailored for your home and office in Nigeria.</p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/shop"><Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 h-12 shadow-lg border-none text-base rounded-full">Shop Collection</Button></Link>
-                <Link href="/book-measurement"><Button size="lg" variant="outline" className="bg-white/10 hover:bg-white/20 text-white border-white/30 font-bold px-8 h-12 text-base rounded-full backdrop-blur-sm">Book Measurement</Button></Link>
-              </div>
+                <div className="flex flex-col sm:flex-row gap-4 w-full mt-2">
+                  <Link href="/shop" className="w-full sm:w-auto"><Button size="lg" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 h-12 shadow-lg border-none text-base rounded-full flex items-center justify-center gap-2"><Star className="w-4 h-4 fill-white"/> Retail Center</Button></Link>
+                  <Link href="/shop?filter=wholesale" className="w-full sm:w-auto"><Button size="lg" className="w-full bg-amber-500 hover:bg-amber-600 text-amber-950 font-bold px-6 h-12 shadow-lg border-none text-base rounded-full flex items-center justify-center gap-2"><Truck className="w-4 h-4"/> Wholesale Center</Button></Link>
+                </div>
             </div>
           </div>
 
