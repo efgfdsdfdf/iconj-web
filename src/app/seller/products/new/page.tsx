@@ -59,24 +59,21 @@ export default function SellerAddProductPage() {
     
     setUploadingImage(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${sellerBusiness?.id}/${fileName}`;
+      const formData = new FormData();
+      formData.append('file', file);
       
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
+      const res = await fetch('/api/seller/upload', {
+        method: 'POST',
+        body: formData,
+      });
       
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-        
-      setImages([...images, publicUrl]);
-    } catch (error) {
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Upload failed');
+      
+      setImages([...images, result.url]);
+    } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image. Please try again.');
+      alert(error.message || 'Failed to upload image. Please try again.');
     } finally {
       setUploadingImage(false);
     }
@@ -93,35 +90,32 @@ export default function SellerAddProductPage() {
     
     setLoading(true);
 
-    const bType = sellerBusiness.businesses?.business_type;
-    const isRetail = (bType === 'retail' || bType === 'manufacturer');
-    const isWholesale = (bType === 'wholesale' || bType === 'manufacturer');
-    
     // Find category name
     const categoryName = categories.find(c => c.id === formData.category_id)?.name || '';
 
     try {
-      const { error } = await supabase.from('products').insert({
-        seller_id: sellerBusiness.id,
-        name: formData.name,
-        sku: formData.sku,
-        base_selling_price: parseFloat(formData.selling_price),
-        base_supplier_cost: 0, // Required field
-        description: formData.description,
-        stock_status: formData.stock_status,
-        category_id: formData.category_id,
-        category: categoryName,
-        images: images,
-        approval_status: 'pending',
-        is_retail_enabled: isRetail,
-        is_wholesale_enabled: isWholesale
+      const res = await fetch('/api/seller/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          sku: formData.sku,
+          selling_price: formData.selling_price,
+          description: formData.description,
+          stock_status: formData.stock_status,
+          category_id: formData.category_id,
+          category: categoryName,
+          images: images,
+        }),
       });
 
-      if (error) throw error;
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Failed to add product');
+      
       router.push('/seller/products');
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("Failed to add product");
+      alert(err.message || "Failed to add product");
     } finally {
       setLoading(false);
     }

@@ -85,24 +85,21 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
     
     setUploadingImage(true);
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${sellerBusiness?.id}/${fileName}`;
+      const formData = new FormData();
+      formData.append('file', file);
       
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file);
-        
-      if (uploadError) throw uploadError;
+      const res = await fetch('/api/seller/upload', {
+        method: 'POST',
+        body: formData,
+      });
       
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-        
-      setImages([...images, publicUrl]);
-    } catch (error) {
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || 'Upload failed');
+      
+      setImages([...images, result.url]);
+    } catch (error: any) {
       console.error('Error uploading image:', error);
-      alert('Failed to upload image. Please try again.');
+      alert(error.message || 'Failed to upload image. Please try again.');
     } finally {
       setUploadingImage(false);
     }
