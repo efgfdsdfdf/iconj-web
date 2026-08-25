@@ -44,6 +44,8 @@ export function Navbar() {
           .from('sellers')
           .select('status')
           .eq('profile_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .single();
         if (sellerData) setSellerStatus(sellerData.status);
       }
@@ -84,6 +86,8 @@ export function Navbar() {
           .from('sellers')
           .select('status')
           .eq('profile_id', session.user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
           .single();
         if (sellerData) setSellerStatus(sellerData.status);
       } else {

@@ -13,7 +13,7 @@ export default async function SellerLayout({ children }: { children: React.React
   }
 
   // Get their seller profile
-  const { data: seller, error } = await supabase
+  const { data: seller } = await supabase
     .from("sellers")
     .select("*, stores(store_name)")
     .eq("profile_id", user.id)
@@ -23,14 +23,7 @@ export default async function SellerLayout({ children }: { children: React.React
 
   // If not a seller, redirect to their account page
   if (!seller) {
-    return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold text-red-600">Debug: Seller Not Found in Layout</h1>
-        <p>User ID: {user.id}</p>
-        <p>Supabase Error: {JSON.stringify(error)}</p>
-        <p>This means the layout query failed or returned null.</p>
-      </div>
-    );
+    redirect("/account");
   }
 
   return (

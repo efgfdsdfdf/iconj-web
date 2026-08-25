@@ -9,7 +9,7 @@ export default async function SellerDashboard() {
 
   const { data: seller } = await supabase
     .from("sellers")
-    .select("id, status, created_at, stores(store_name)")
+    .select("id, status, created_at, seller_identifier, stores(store_name)")
     .eq("profile_id", user?.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -78,7 +78,14 @@ export default async function SellerDashboard() {
               <CheckCircle2 className="w-8 h-8" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold mb-2">Welcome to the ICONJ Seller Center! 🎉</h2>
+              <div className="flex items-center gap-3 mb-2">
+                <h2 className="text-2xl font-bold">Welcome to the ICONJ Seller Center! 🎉</h2>
+                {seller.seller_identifier && (
+                  <span className="bg-emerald-900/50 text-emerald-100 px-3 py-1 rounded-full text-xs font-mono font-bold border border-emerald-500/30">
+                    {seller.seller_identifier}
+                  </span>
+                )}
+              </div>
               <p className="text-emerald-100 text-lg mb-6">
                 Your seller application has been approved. Complete the setup steps below to start selling on ICONJ.
               </p>

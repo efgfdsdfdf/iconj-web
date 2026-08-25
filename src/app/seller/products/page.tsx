@@ -68,7 +68,7 @@ export default async function SellerProductsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <button className="text-blue-600 hover:underline text-xs font-bold">Edit</button>
+                      <Link href={`/seller/products/${product.id}/edit`} className="text-blue-600 hover:underline text-xs font-bold">Edit</Link>
                     </td>
                   </tr>
                 ))}

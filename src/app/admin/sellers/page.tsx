@@ -34,7 +34,7 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
   const { data: sellers } = await supabaseAdmin
     .from("sellers")
     .select(`
-      id, status, created_at, profile_id,
+      id, status, created_at, profile_id, seller_identifier,
       profiles ( email ),
       businesses ( business_name, business_type, address, tax_id ),
       stores ( store_name, slug ),
