@@ -64,13 +64,33 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           </div>
         </div>
       ) : (
-        <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
-          <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
-            <ChevronRight className="w-3 h-3 mx-2" />
-            <span className="text-slate-900">{q ? `Search Results for "${q}"` : category ? categories?.find(c => c.id === category)?.name || "Category" : "All Products"}</span>
+        <>
+          {/* Retail Hero */}
+          <div className="relative bg-slate-900 text-white mb-0 overflow-hidden">
+            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2000" alt="Retail Store" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-transparent"></div>
+            <div className="container mx-auto px-4 py-12 md:py-16 relative z-10 flex flex-col items-start">
+              <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 flex items-center gap-2"><Star className="w-3 h-3 fill-white" /> Retail Center</span>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">Premium Window Treatments</h1>
+              <p className="text-slate-200 max-w-xl text-base md:text-lg mb-6">
+                Transform your space with our curated collection of custom blinds, elegant curtains, and smart motorization systems.
+              </p>
+              <div className="flex flex-wrap gap-4 items-center text-sm font-medium text-slate-300">
+                <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4 text-emerald-400"/> Buyer Protection</span>
+                <span className="flex items-center gap-1"><Truck className="w-4 h-4 text-blue-400"/> Nationwide Delivery</span>
+              </div>
+            </div>
           </div>
-        </div>
+          
+          {/* Breadcrumb */}
+          <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
+            <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500">
+              <Link href="/" className="hover:text-blue-600">Home</Link>
+              <ChevronRight className="w-3 h-3 mx-2 shrink-0" />
+              <span className="text-slate-900 truncate">{q ? `Search Results for "${q}"` : category ? categories?.find(c => c.id === category)?.name || "Category" : "All Products"}</span>
+            </div>
+          </div>
+        </>
       )}
 
       <div className="container mx-auto px-4">
