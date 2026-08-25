@@ -244,7 +244,7 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
           headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
           body: JSON.stringify({
             from: "ICONJ Admin <noreply@iconj.com.ng>",
-            to: "iconjhomes@gmail.com", // Send to admin email directly
+            to: "ezeilodavid292@gmail.com", // Send to admin email directly
             subject: `🚨 [ADMIN] New Order: #${orderId.split('-')[0].toUpperCase()}`,
             html: adminEmailHtml
           })
