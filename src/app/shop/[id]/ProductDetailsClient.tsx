@@ -117,6 +117,12 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           <a href="#" className="text-sm text-blue-600 hover:underline">12 Verified Ratings</a>
           <span className="text-slate-300">|</span>
           <span className="text-sm text-slate-500">SKU: {product.sku}</span>
+          {product.brand && (
+            <>
+              <span className="text-slate-300">|</span>
+              <span className="text-sm text-slate-500">Brand: <span className="font-semibold text-slate-900">{product.brand}</span></span>
+            </>
+          )}
         </div>
 
         <div className="mb-6 pb-6 border-b">

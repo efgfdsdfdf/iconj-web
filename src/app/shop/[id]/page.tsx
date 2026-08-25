@@ -22,7 +22,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   
   const { data: productRaw, error } = await supabaseAdmin
     .from("products")
-    .select("*, stores(store_name, slug), inventory(available_quantity), wholesale_pricing(*), product_configuration_rules(*)")
+    .select("*, stores(store_name, slug, logo_url, created_at), inventory(available_quantity), wholesale_pricing(*), product_configuration_rules(*)")
     .eq("id", id)
     .single();
 
@@ -160,8 +160,68 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             )}
           </div>
 
-          {/* Trust Sidebar */}
+          {/* Trust Sidebar & Seller Info */}
           <div className="space-y-4">
+            {/* Jumia-style Sold By Card */}
+            <div className="bg-white rounded-lg shadow-sm border p-5">
+              <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider">Sold By</h3>
+              {product.stores ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center border shrink-0 overflow-hidden">
+                      {product.stores.logo_url ? (
+                        <img src={product.stores.logo_url} alt={product.stores.store_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-lg font-bold text-slate-400">{product.stores.store_name.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <div>
+                      <Link href={`/store/${product.stores.slug}`} className="font-bold text-base text-blue-600 hover:underline line-clamp-1">
+                        {product.stores.store_name}
+                      </Link>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${product.is_wholesale_enabled ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {product.is_wholesale_enabled ? 'Wholesale Seller' : 'Retail Seller'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-between items-center text-sm border-t pt-3 mt-1">
+                    <div className="text-slate-500">
+                      Joined {new Date(product.stores.created_at).getFullYear()}
+                    </div>
+                    <div className="flex items-center gap-1 text-emerald-600 font-medium text-xs">
+                      <ShieldCheck className="w-4 h-4" /> Verified
+                    </div>
+                  </div>
+                  
+                  <Link href={`/store/${product.stores.slug}`} className="w-full">
+                    <button className="w-full py-2 bg-slate-50 hover:bg-slate-100 border text-slate-700 text-sm font-bold rounded-md transition-colors">
+                      Visit Store
+                    </button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center border shrink-0">
+                      <Star className="w-6 h-6 fill-white text-white" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-base text-slate-900">ICONJ Official</div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-slate-100 text-slate-700">
+                          Direct from Brand
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Delivery Info */}
             <div className="bg-white rounded-lg shadow-sm border p-5">
               <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider">Delivery & Returns</h3>
               <div className="space-y-4">

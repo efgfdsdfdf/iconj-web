@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req: NextRequest) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -16,7 +17,7 @@ export async function POST(req: NextRequest) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 
-  // Verify the user is an approved seller and get their business type + store
+  // Verify the user is an approved seller
   const { data: seller } = await supabaseAdmin
     .from("sellers")
     .select("id, businesses(business_type)")
@@ -30,57 +31,59 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Not an approved seller" }, { status: 403 });
   }
 
-  // Get the seller's store
-  const { data: store } = await supabaseAdmin
-    .from("stores")
-    .select("id")
+  // Verify product belongs to seller
+  const { data: existingProduct } = await supabaseAdmin
+    .from("products")
+    .select("id, approval_status")
+    .eq("id", id)
     .eq("seller_id", seller.id)
-    .limit(1)
     .single();
+
+  if (!existingProduct) {
+    return NextResponse.json({ error: "Product not found or unauthorized" }, { status: 404 });
+  }
 
   const body = await req.json();
   const {
     name, sku, selling_price, description, stock_status,
     category_id, category, images,
-    // New fields
     moq, pricing_tiers, brand, features, weight_kg
   } = body;
-
-  if (!name || !sku || !selling_price) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
 
   const bType = (seller as any).businesses?.business_type;
   const isRetail = (bType === "retail" || bType === "manufacturer");
   const isWholesale = (bType === "wholesale" || bType === "manufacturer");
 
-  const { data, error } = await supabaseAdmin.from("products").insert({
-    seller_id: seller.id,
-    store_id: store?.id || null,
+  // Keep existing approval status unless it was rejected, then move to pending
+  const newApprovalStatus = existingProduct.approval_status === "rejected" ? "pending" : existingProduct.approval_status;
+
+  const { data, error } = await supabaseAdmin.from("products").update({
     name,
     sku,
     base_selling_price: parseFloat(selling_price),
-    base_supplier_cost: 0,
     description: description || "",
     stock_status: stock_status || "In Stock",
     category_id: category_id || null,
     category: category || "",
     images: images || [],
-    approval_status: "pending",
+    approval_status: newApprovalStatus,
     is_retail_enabled: isRetail,
     is_wholesale_enabled: isWholesale,
     moq: moq ? parseInt(moq) : 1,
     brand: brand || null,
     features: features || [],
     weight_kg: weight_kg ? parseFloat(weight_kg) : null,
-  }).select().single();
+  }).eq("id", id).select().single();
 
   if (error) {
-    console.error("Product insert error:", error);
+    console.error("Product update error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
-  // Insert wholesale pricing tiers if provided
+  // Update wholesale pricing tiers
+  // First, delete old tiers
+  await supabaseAdmin.from("wholesale_pricing").delete().eq("product_id", id);
+
   if (pricing_tiers && pricing_tiers.length > 0 && data) {
     const tierRows = pricing_tiers
       .filter((t: any) => t.min_quantity && t.price_per_unit)
@@ -92,12 +95,7 @@ export async function POST(req: NextRequest) {
       }));
 
     if (tierRows.length > 0) {
-      const { error: tierError } = await supabaseAdmin
-        .from("wholesale_pricing")
-        .insert(tierRows);
-      if (tierError) {
-        console.error("Pricing tier insert error:", tierError);
-      }
+      await supabaseAdmin.from("wholesale_pricing").insert(tierRows);
     }
   }
 
