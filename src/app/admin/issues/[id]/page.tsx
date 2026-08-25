@@ -14,7 +14,7 @@ export default async function AdminIssueDetails({ params }: { params: Promise<{ 
   
   const { data: issue } = await supabase
     .from("order_issues")
-    .select("*, profiles(name, email, phone), orders(total_amount, shipping_address)")
+    .select("*, profiles(name, email, phone), orders(total_amount, delivery_address)")
     .eq("id", id)
     .single();
 
