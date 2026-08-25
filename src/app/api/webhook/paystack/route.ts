@@ -129,18 +129,54 @@ export async function POST(req: Request) {
       }
     }
 
-    // Handle Transfer Success (Paystack automatically transferred to Subaccount)
-    if (event.event === "transfer.success") {
+    // Handle Payouts / Settlements (Transfer or Automatic Subaccount Settlement)
+    if (event.event === "transfer.success" || event.event === "transfer.failed" || event.event === "settlement.successful") {
       const data = event.data;
-      // Transfer success means the seller actually got paid.
-      // Paystack payload contains recipient info and transfer code.
       
-      // We must match the subaccount back to the seller
-      // For dynamic splits, Paystack usually settles subaccounts automatically via settlement webhooks, 
-      // but if a manual transfer was used, transfer.success fires.
+      // Determine the amount (Paystack sends amounts in kobo for transfers, settlements might be different but usually kobo)
+      // Some settlement webhooks send amount in kobo, we'll convert back to NGN
+      const amountInNaira = data.amount / 100;
+      const reference = data.reference || data.settlement_reference || data.id?.toString();
       
-      // We log it to the ledger if possible. Since this is an architectural skeleton for when 
-      // the platform upgrades, we log the raw event.
+      // Find which seller this belongs to.
+      // Paystack might send subaccount code, recipient code, or subaccount object
+      const subaccountCode = data.subaccount?.subaccount_code || data.recipient?.recipient_code || data.subaccount_code;
+      
+      if (subaccountCode) {
+        const { data: payoutAcc } = await supabaseAdmin
+          .from("seller_payout_accounts")
+          .select("seller_id")
+          .eq("paystack_subaccount_code", subaccountCode)
+          .single();
+          
+        if (payoutAcc) {
+          // Idempotency check
+          const txType = (event.event === "transfer.success" || event.event === "settlement.successful") 
+            ? 'SETTLEMENT_SUCCESSFUL' 
+            : 'SETTLEMENT_FAILED';
+            
+          const { data: existingLedger } = await supabaseAdmin
+            .from('financial_ledger')
+            .select('id')
+            .eq('paystack_reference', reference)
+            .eq('transaction_type', txType)
+            .limit(1)
+            .single();
+            
+          if (!existingLedger) {
+            await supabaseAdmin.from("financial_ledger").insert([{
+              seller_id: payoutAcc.seller_id,
+              paystack_reference: reference,
+              transaction_type: txType,
+              amount: amountInNaira,
+              description: txType === 'SETTLEMENT_SUCCESSFUL' 
+                ? 'Paystack settlement/transfer successful' 
+                : `Paystack settlement failed: ${data.reason || 'Unknown error'}`
+            }]);
+          }
+        }
+      }
+
       await supabaseAdmin.from("payment_events").insert([{
         event_type: event.event,
         payload: event
