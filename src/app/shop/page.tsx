@@ -22,7 +22,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     .select("*, stores(store_name, slug)")
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .order("created_at", { ascending: false });
+    .limit(100);
 
   if (category) {
     query = query.eq('category_id', category);
@@ -36,7 +36,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   if (q) {
     query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
   }
-  const { data: products } = await query;
+  
+  const { data: rawProducts } = await query;
+  const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5) : [];
 
   const getProductImage = (catName: string) => {
     return "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&q=80";
