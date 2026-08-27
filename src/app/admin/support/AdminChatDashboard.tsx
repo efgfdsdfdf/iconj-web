@@ -95,8 +95,13 @@ export function AdminChatDashboard({ initialMessages }: { initialMessages: any[]
             users.map(uid => {
               const userMessages = messages.filter(m => m.user_id === uid);
               const lastMsg = userMessages[userMessages.length - 1];
+              const lastAdminMsgIndex = userMessages.findLastIndex(m => {
+                if (!m.is_from_admin) return false;
+                // Treat the automated bot reply as if it's not a real admin response
+                // so the chat remains unread for the human admin
+                return !m.message.includes("Thank you for reaching out to ICONJ Support");
+              });
               
-              const lastAdminMsgIndex = userMessages.findLastIndex(m => m.is_from_admin);
               const unreadCount = userMessages.length - 1 - lastAdminMsgIndex;
               const hasUnread = unreadCount > 0;
 
