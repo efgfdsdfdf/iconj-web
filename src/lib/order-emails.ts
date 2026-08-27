@@ -341,15 +341,15 @@ async function getOrderDetails(orderId: string) {
     product_name: item.product?.name || 'Product'
   }));
 
-  // Determine customer email
+  // Determine customer email - try delivery address first, then Auth
   let customerEmail = order.delivery_address?.email;
   if (!customerEmail && order.user_id) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('id', order.user_id)
-      .single();
-    if (profile?.email) customerEmail = profile.email;
+    try {
+      const { data: authUser } = await supabase.auth.admin.getUserById(order.user_id);
+      if (authUser?.user?.email) customerEmail = authUser.user.email;
+    } catch (e) {
+      console.error("Failed to fetch user email from Auth:", e);
+    }
   }
 
   return { order, items: normalizedItems, customerEmail };
