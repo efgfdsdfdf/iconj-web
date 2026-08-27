@@ -59,7 +59,7 @@ export async function replyToUser(userId: string, message: string) {
     // Send email using our mailer
     try {
       const { sendEmailTo } = await import("@/lib/email");
-      await sendEmailTo(profile.email, "New reply from ICONJ Support", htmlContent);
+      await sendEmailTo(user.email, "New reply from ICONJ Support", htmlContent);
     } catch (e) {
       console.error("Failed to send customer notification email:", e);
     }
