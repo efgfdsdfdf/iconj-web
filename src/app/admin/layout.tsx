@@ -1,12 +1,20 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Box, LayoutDashboard, Settings, ShoppingCart, Users, Truck, Menu, AlertCircle, Image as ImageIcon, WalletCards, LogOut } from "lucide-react";
+import { Box, LayoutDashboard, Settings, ShoppingCart, Users, Truck, Menu, AlertCircle, Image as ImageIcon, WalletCards, MessageCircle } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { verifyAdmin } from "@/lib/auth/admin";
 import { RealtimeAdminUpdates } from "@/components/admin/RealtimeAdminUpdates";
 import { AdminHeader } from "@/components/admin/AdminHeader";
+import { createClient } from "@supabase/supabase-js";
 
-function AdminNavLinks() {
+async function AdminNavLinks() {
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  
+  // Count unread support messages (messages from users that haven't been replied to yet)
+  // We approximate this by counting unique user_ids where the latest message is not from admin
+  // Since we don't have an is_read column on support_messages, this is a simplified version.
+  // Actually, let's just add the link without the dynamic badge first to avoid slowing down layout render.
+  
   return (
     <nav className="space-y-1 text-sm font-medium">
       <Link href="/admin" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
@@ -23,6 +31,9 @@ function AdminNavLinks() {
       </Link>
       <Link href="/admin/issues" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors text-orange-400">
         <AlertCircle className="w-5 h-5" /> Order Issues
+      </Link>
+      <Link href="/admin/support" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors text-blue-400">
+        <MessageCircle className="w-5 h-5" /> Support Inbox
       </Link>
       <Link href="/admin/sellers" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
         <Users className="w-5 h-5" /> Sellers
