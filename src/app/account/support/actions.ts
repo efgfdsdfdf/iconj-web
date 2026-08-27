@@ -22,20 +22,24 @@ export async function sendSupportMessage(message: string) {
     return { error: "Failed to send message. Note: support_messages table must be created." };
   }
 
-  // Check if this is their first message to send an automated response
-  const { count } = await supabase
+  // Check if we should send an automated response (no admin reply in the last 2 hours)
+  const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+  const { data: recentAdminMessages } = await supabase
     .from("support_messages")
-    .select("*", { count: 'exact', head: true })
-    .eq("user_id", user.id);
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("is_from_admin", true)
+    .gte("created_at", twoHoursAgo)
+    .limit(1);
     
-  if (count === 1) {
+  if (!recentAdminMessages || recentAdminMessages.length === 0) {
     const supabaseAdmin = require("@supabase/supabase-js").createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_ROLE_KEY
     );
     await supabaseAdmin.from("support_messages").insert([{
       user_id: user.id,
-      message: "Hi there! 👋 Thank you for reaching out to ICONJ Support. We have received your message. One of our agents will be with you shortly. If this is urgent, please leave your phone number.",
+      message: "Hi there! 👋 Thank you for reaching out to ICONJ Support. We have received your message and our team will get back to you shortly. If this is urgent, please leave your phone number.",
       is_from_admin: true
     }]);
   }
