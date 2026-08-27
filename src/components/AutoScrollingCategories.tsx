@@ -17,7 +17,7 @@ export function AutoScrollingCategories({ categories }: { categories: { name: st
         .animate-custom-marquee {
           display: flex;
           width: max-content;
-          animation: custom-marquee 160s linear infinite;
+          animation: custom-marquee 400s linear infinite;
         }
         .animate-custom-marquee:hover {
           animation-play-state: paused;
