@@ -3,6 +3,28 @@
 import { createClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 
+export async function fetchAllMessages() {
+  const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+  
+  const { data: rawMessages } = await supabaseAdmin
+    .from("support_messages")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (!rawMessages || rawMessages.length === 0) return [];
+
+  const userIds = Array.from(new Set(rawMessages.map((m: any) => m.user_id)));
+  const { data: profiles } = await supabaseAdmin
+    .from("profiles")
+    .select("id, full_name, email")
+    .in("id", userIds);
+
+  const profileMap: Record<string, any> = {};
+  if (profiles) profiles.forEach((p: any) => { profileMap[p.id] = p; });
+
+  return rawMessages.map((m: any) => ({ ...m, profiles: profileMap[m.user_id] || null }));
+}
+
 export async function replyToUser(userId: string, message: string) {
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   
