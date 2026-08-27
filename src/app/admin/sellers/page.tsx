@@ -114,8 +114,9 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
     // Send approval email
     const { data: seller } = await supabaseAdmin.from("sellers").select("profile_id, businesses(business_name), stores(store_name, slug)").eq("id", sellerId).single();
     if (seller?.profile_id) {
-      const { data: profile } = await supabaseAdmin.from("profiles").select("email").eq("id", seller.profile_id).single();
-      if (profile?.email) {
+      const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(seller.profile_id);
+      if (user?.email) {
+        const profile = { email: user.email }; // Keep variable name so rest of code works
         const storeName = (seller as any).stores?.store_name || (seller as any).businesses?.business_name || "Your Store";
         const storeSlug = (seller as any).stores?.slug || "";
         try {

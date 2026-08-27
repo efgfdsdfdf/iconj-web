@@ -100,11 +100,12 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
 
       for (const so of sellerOrders) {
         try {
-          // Get seller email
+          // Get seller email from Auth
           const { data: seller } = await supabaseAdmin.from("sellers").select("profile_id, stores(store_name)").eq("id", so.seller_id).single();
           if (!seller?.profile_id) continue;
-          const { data: profile } = await supabaseAdmin.from("profiles").select("email").eq("id", seller.profile_id).single();
-          if (!profile?.email) continue;
+          const { data: { user: sellerUser } } = await supabaseAdmin.auth.admin.getUserById(seller.profile_id);
+          if (!sellerUser?.email) continue;
+          const profile = { email: sellerUser.email }; // Keep variable name for rest of logic
 
           // Get order items for this seller
           const { data: items } = await supabaseAdmin.from("order_items").select("*, products(name)").eq("seller_order_id", so.id);
