@@ -79,6 +79,30 @@ export default function AddProductPage() {
     }
   };
 
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      const filesArray: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) filesArray.push(file);
+        }
+      }
+      
+      if (filesArray.length > 0) {
+        setImageFiles(prev => [...prev, ...filesArray]);
+        const previews = filesArray.map(file => URL.createObjectURL(file));
+        setImagePreviews(prev => [...prev, ...previews]);
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, []);
+
   const removeImage = (index: number) => {
     setImageFiles(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
@@ -333,8 +357,9 @@ export default function AddProductPage() {
               <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer relative">
                 <input type="file" multiple accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-4" />
-                <p className="font-medium text-slate-700">Drag & drop lifestyle and product images here</p>
+                <p className="font-medium text-slate-700">Drag & drop or Paste lifestyle and product images here</p>
                 <p className="text-xs text-slate-500 mt-2">Supports JPG, PNG (Max 5MB each)</p>
+                <p className="text-[10px] text-slate-400 mt-1">(You can simply press Ctrl+V / Cmd+V anywhere on this page)</p>
               </div>
               
               {imagePreviews.length > 0 && (

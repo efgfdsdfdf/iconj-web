@@ -34,21 +34,10 @@ export async function replyToUser(userId: string, message: string) {
       <p><a href="https://iconj-web-rust.vercel.app/account/support">Click here to reply</a></p>
     `;
     
-    // Send email via Resend API
+    // Send email using our mailer
     try {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { 
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 
-          "Content-Type": "application/json" 
-        },
-        body: JSON.stringify({
-          from: "ICONJ Support <noreply@iconj.com.ng>",
-          to: [profile.email],
-          subject: "New reply from ICONJ Support",
-          html: htmlContent
-        })
-      });
+      const { sendEmailTo } = await import("@/lib/email");
+      await sendEmailTo(profile.email, "New reply from ICONJ Support", htmlContent);
     } catch (e) {
       console.error("Failed to send customer notification email:", e);
     }

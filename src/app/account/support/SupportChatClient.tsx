@@ -68,7 +68,7 @@ export function SupportChatClient({ initialMessages, userId }: { initialMessages
       <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")' }}></div>
 
       {/* Header */}
-      <div className="h-16 px-4 bg-[#00a884] text-white flex items-center gap-3 shrink-0 relative z-10 shadow-sm">
+      <div className="h-16 px-4 bg-blue-600 text-white flex items-center gap-3 shrink-0 relative z-10 shadow-sm">
         <Link href="/account" className="p-2 -ml-2 hover:bg-black/10 rounded-full transition-colors">
           <ChevronLeft className="w-6 h-6" />
         </Link>
@@ -99,11 +99,11 @@ export function SupportChatClient({ initialMessages, userId }: { initialMessages
               <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} ${showTail ? 'mt-2' : ''}`}>
                 <div className={`max-w-[85%] sm:max-w-[75%] px-3 py-2 rounded-lg relative shadow-sm text-sm ${
                   isMe 
-                    ? "bg-[#d9fdd3] text-slate-800 rounded-tr-sm" 
+                    ? "bg-blue-100 text-slate-800 rounded-tr-sm" 
                     : "bg-white text-slate-800 rounded-tl-sm"
                 }`}>
                   <p className="whitespace-pre-wrap leading-relaxed pb-3 pr-4">{msg.message}</p>
-                  <span className={`text-[10px] absolute bottom-1 right-2 ${isMe ? "text-emerald-700/70" : "text-slate-400"}`}>
+                  <span className={`text-[10px] absolute bottom-1 right-2 ${isMe ? "text-blue-700/70" : "text-slate-400"}`}>
                     {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -127,7 +127,7 @@ export function SupportChatClient({ initialMessages, userId }: { initialMessages
           <button 
             type="submit" 
             disabled={!newMessage.trim() || loading} 
-            className="text-slate-500 hover:text-[#00a884] disabled:opacity-50 transition-colors p-2"
+            className="text-slate-500 hover:text-blue-600 disabled:opacity-50 transition-colors p-2"
           >
             <Send className="w-5 h-5" />
           </button>
