@@ -10,6 +10,11 @@ export default async function SupportPage() {
 
   if (!user) redirect("/login");
 
+  // If the admin accidentally goes to the customer support page, redirect them to the admin support inbox
+  if (user.email === "ezeilodavid292@gmail.com") {
+    redirect("/admin/support");
+  }
+
   let messages = [];
   try {
     const res = await supabase
