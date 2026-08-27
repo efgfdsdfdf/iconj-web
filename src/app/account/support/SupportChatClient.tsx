@@ -1,13 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, User, ShieldAlert } from "lucide-react";
+import { Send, MessageSquare, ChevronLeft } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { sendSupportMessage } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "react-hot-toast";
+import Link from "next/link";
 
 export function SupportChatClient({ initialMessages, userId }: { initialMessages: any[], userId: string }) {
   const [messages, setMessages] = useState(initialMessages);
@@ -64,49 +63,76 @@ export function SupportChatClient({ initialMessages, userId }: { initialMessages
   };
 
   return (
-    <Card className="border-none shadow-sm h-[600px] flex flex-col">
-      <CardHeader className="border-b bg-slate-50/50 py-4">
-        <CardTitle className="text-lg flex items-center">
-          ICONJ Support Team
-        </CardTitle>
-      </CardHeader>
+    <div className="flex-1 bg-[#efeae2] flex flex-col relative w-full h-full max-w-4xl mx-auto border-x border-slate-200 shadow-sm">
+      {/* Chat Background Pattern */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'url("https://www.transparenttextures.com/patterns/cubes.png")' }}></div>
+
+      {/* Header */}
+      <div className="h-16 px-4 bg-[#00a884] text-white flex items-center gap-3 shrink-0 relative z-10 shadow-sm">
+        <Link href="/account" className="p-2 -ml-2 hover:bg-black/10 rounded-full transition-colors">
+          <ChevronLeft className="w-6 h-6" />
+        </Link>
+        <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+          <MessageSquare className="w-5 h-5 text-white" />
+        </div>
+        <div className="flex flex-col">
+          <h2 className="font-bold text-white text-base">ICONJ Support Team</h2>
+          <span className="text-xs text-white/80">Typically replies in a few minutes</span>
+        </div>
+      </div>
       
-      <CardContent className="flex-1 p-4 overflow-y-auto bg-slate-50 flex flex-col gap-4">
+      {/* Messages */}
+      <div className="flex-1 p-4 overflow-y-auto flex flex-col gap-2 relative z-10">
         {messages.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-slate-400 h-full">
-            <ShieldAlert className="w-12 h-12 mb-3 text-slate-300" />
-            <p>How can we help you today?</p>
-            <p className="text-xs mt-2">Send us a message and we'll reply as soon as possible.</p>
+          <div className="flex-1 flex flex-col items-center justify-center text-slate-500 h-full">
+            <div className="bg-[#fff9c4] text-[#8a6d3b] p-3 rounded-lg text-xs max-w-xs text-center shadow-sm mb-4">
+              Send us a message and one of our agents will reply as soon as possible.
+            </div>
           </div>
         ) : (
-          messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.is_from_admin ? "justify-start" : "justify-end"}`}>
-              <div className={`max-w-[80%] p-3 rounded-2xl ${msg.is_from_admin ? "bg-white border text-slate-800 rounded-tl-none" : "bg-blue-600 text-white rounded-tr-none shadow-md shadow-blue-600/20"}`}>
-                <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                <span className={`text-[10px] block mt-1 ${msg.is_from_admin ? "text-slate-400" : "text-blue-200 text-right"}`}>
-                  {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
+          messages.map((msg, index) => {
+            const isMe = !msg.is_from_admin;
+            const prevMsg = index > 0 ? messages[index - 1] : null;
+            const showTail = !prevMsg || prevMsg.is_from_admin !== msg.is_from_admin;
+            
+            return (
+              <div key={msg.id} className={`flex ${isMe ? "justify-end" : "justify-start"} ${showTail ? 'mt-2' : ''}`}>
+                <div className={`max-w-[85%] sm:max-w-[75%] px-3 py-2 rounded-lg relative shadow-sm text-sm ${
+                  isMe 
+                    ? "bg-[#d9fdd3] text-slate-800 rounded-tr-sm" 
+                    : "bg-white text-slate-800 rounded-tl-sm"
+                }`}>
+                  <p className="whitespace-pre-wrap leading-relaxed pb-3 pr-4">{msg.message}</p>
+                  <span className={`text-[10px] absolute bottom-1 right-2 ${isMe ? "text-emerald-700/70" : "text-slate-400"}`}>
+                    {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
         <div ref={bottomRef} />
-      </CardContent>
+      </div>
 
-      <div className="p-4 border-t bg-white rounded-b-xl">
-        <form onSubmit={handleSend} className="flex gap-2">
+      {/* Input */}
+      <div className="p-3 bg-slate-50 relative z-10">
+        <form onSubmit={handleSend} className="flex gap-2 items-center bg-white rounded-full px-4 py-2 shadow-sm border border-slate-200">
           <Input 
-            placeholder="Type your message..." 
+            placeholder="Type a message..." 
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             disabled={loading}
-            className="flex-1 rounded-full px-4"
+            className="flex-1 border-none shadow-none focus-visible:ring-0 px-0 h-auto"
           />
-          <Button type="submit" disabled={!newMessage.trim() || loading} className="rounded-full w-10 h-10 p-0 bg-blue-600 hover:bg-blue-700">
-            <Send className="w-4 h-4 ml-0.5" />
-          </Button>
+          <button 
+            type="submit" 
+            disabled={!newMessage.trim() || loading} 
+            className="text-slate-500 hover:text-[#00a884] disabled:opacity-50 transition-colors p-2"
+          >
+            <Send className="w-5 h-5" />
+          </button>
         </form>
       </div>
-    </Card>
+    </div>
   );
 }

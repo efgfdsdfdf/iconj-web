@@ -11,7 +11,7 @@ export default async function AdminSupportPage() {
   try {
     const res = await supabaseAdmin
       .from("support_messages")
-      .select("*")
+      .select("*, profiles:user_id(full_name, email)")
       .order("created_at", { ascending: true });
     if (res.data) messages = res.data;
   } catch (e) {
@@ -19,16 +19,8 @@ export default async function AdminSupportPage() {
   }
 
   return (
-    <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen h-[calc(100vh-60px)]">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Support Inbox</h1>
-          <p className="text-sm text-slate-500">Live chat with your customers.</p>
-        </div>
-      </div>
-      <div className="h-[calc(100%-80px)]">
-        <AdminChatDashboard initialMessages={messages || []} />
-      </div>
+    <main className="flex-1 bg-slate-50 flex flex-col h-[calc(100vh-64px)] overflow-hidden">
+      <AdminChatDashboard initialMessages={messages || []} />
     </main>
   );
 }

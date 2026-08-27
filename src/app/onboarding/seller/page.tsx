@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-hot-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -73,6 +74,39 @@ export default function SellerOnboardingPage() {
 
   const updateForm = (updates: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
+  };
+
+  const [isUploadingCac, setIsUploadingCac] = useState(false);
+  const [isUploadingId, setIsUploadingId] = useState(false);
+
+  const uploadKycDocument = async (file: File, type: 'cac' | 'id') => {
+    try {
+      if (type === 'cac') setIsUploadingCac(true);
+      else setIsUploadingId(true);
+
+      const formDataObj = new FormData();
+      formDataObj.append("file", file);
+
+      const res = await fetch("/api/onboarding/upload", {
+        method: "POST",
+        body: formDataObj,
+      });
+
+      if (!res.ok) throw new Error("Upload failed");
+
+      const data = await res.json();
+      
+      if (type === 'cac') {
+        updateForm({ cacDocumentName: data.url }); // Store the FULL URL
+      } else {
+        updateForm({ idDocumentName: data.url }); // Store the FULL URL
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload document");
+    } finally {
+      if (type === 'cac') setIsUploadingCac(false);
+      else setIsUploadingId(false);
+    }
   };
 
   const handleNext = () => {
@@ -294,16 +328,26 @@ export default function SellerOnboardingPage() {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if(file) updateForm({ cacDocumentName: file.name });
+                          if(file) uploadKycDocument(file, 'cac');
                         }}
+                        disabled={isUploadingCac}
                       />
-                      <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
-                      {formData.cacDocumentName ? (
-                        <p className="text-sm font-bold text-emerald-600">{formData.cacDocumentName}</p>
+                      {isUploadingCac ? (
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                          <p className="text-sm font-medium text-slate-700">Uploading...</p>
+                        </div>
                       ) : (
                         <>
-                          <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
-                          <p className="text-xs text-slate-500 mt-1">PDF, JPG or PNG (max. 5MB)</p>
+                          <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                          {formData.cacDocumentName ? (
+                            <p className="text-sm font-bold text-emerald-600">Document Uploaded Successfully</p>
+                          ) : (
+                            <>
+                              <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
+                              <p className="text-xs text-slate-500 mt-1">PDF, JPG or PNG (max. 5MB)</p>
+                            </>
+                          )}
                         </>
                       )}
                     </div>
@@ -318,16 +362,26 @@ export default function SellerOnboardingPage() {
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if(file) updateForm({ idDocumentName: file.name });
+                          if(file) uploadKycDocument(file, 'id');
                         }}
+                        disabled={isUploadingId}
                       />
-                      <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
-                      {formData.idDocumentName ? (
-                        <p className="text-sm font-bold text-emerald-600">{formData.idDocumentName}</p>
+                      {isUploadingId ? (
+                        <div className="flex flex-col items-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
+                          <p className="text-sm font-medium text-slate-700">Uploading...</p>
+                        </div>
                       ) : (
                         <>
-                          <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
-                          <p className="text-xs text-slate-500 mt-1">Passport, Driver's License, NIN (max. 5MB)</p>
+                          <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
+                          {formData.idDocumentName ? (
+                            <p className="text-sm font-bold text-emerald-600">Document Uploaded Successfully</p>
+                          ) : (
+                            <>
+                              <p className="text-sm font-medium text-slate-700">Click to upload or drag and drop</p>
+                              <p className="text-xs text-slate-500 mt-1">PDF, JPG or PNG (max. 5MB)</p>
+                            </>
+                          )}
                         </>
                       )}
                     </div>

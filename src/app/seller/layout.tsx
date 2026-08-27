@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { LayoutDashboard, Package, ShoppingCart, DollarSign, Store, LogOut, CheckCircle, XCircle } from "lucide-react";
 import { LogoutButton } from "@/app/account/LogoutButton";
+import { MobileSidebar } from "./MobileSidebar";
 
 export default async function SellerLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -65,6 +66,7 @@ export default async function SellerLayout({ children }: { children: React.React
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b shadow-sm flex items-center px-4 md:px-8 shrink-0">
+          <MobileSidebar storeName={seller?.stores?.[0]?.store_name || "My Store"} />
           <h1 className="text-lg font-semibold text-slate-800 md:hidden">Seller Portal</h1>
           <div className="ml-auto flex items-center gap-4">
             <Link href="/" className="text-sm text-blue-600 hover:underline">Back to Main Site</Link>

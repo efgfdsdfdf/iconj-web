@@ -13,27 +13,42 @@ export default async function AdminOrdersPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  await requireAdmin();
+  const adminUserId = await requireAdmin();
   const resolvedParams = await searchParams;
   const filter = typeof resolvedParams.filter === 'string' ? resolvedParams.filter : 'all';
 
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
-  
+
+  // Find admin's own seller account
+  const { data: adminSeller } = await supabaseAdmin
+    .from("sellers")
+    .select("id")
+    .eq("profile_id", adminUserId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
+
   let query = supabaseAdmin.from("orders").select("*");
 
   // Apply quick filters
   if (filter === 'unviewed') query = query.eq('admin_viewed', false);
   else if (filter === 'paid') query = query.eq('payment_status', 'PAID').eq('order_status', 'PAYMENT_CONFIRMED');
-  else if (filter === 'ready') query = query.eq('order_status', 'READY_FOR_SUPPLIER').eq('supplier_order_status', 'NOT_SENT');
-  else if (filter === 'supplier_pending') query = query.eq('supplier_order_status', 'PAYMENT_PENDING');
-  else if (filter === 'sent') query = query.eq('supplier_order_status', 'SENT');
   else if (filter === 'processing') query = query.eq('order_status', 'PROCESSING');
   else if (filter === 'shipped') query = query.eq('order_status', 'SHIPPED');
 
   // We fetch all matching orders so we can sort them in memory for the Priority Queue
   const { data: rawOrders } = await query;
-  
-  const orders = rawOrders || [];
+
+  // Filter to only orders that include items sold by admin's seller account
+  let orders = rawOrders || [];
+  if (adminSeller) {
+    const { data: adminSubOrders } = await supabaseAdmin
+      .from("seller_orders")
+      .select("parent_order_id")
+      .eq("seller_id", adminSeller.id);
+    const adminOrderIds = new Set((adminSubOrders || []).map(so => so.parent_order_id));
+    orders = orders.filter(o => adminOrderIds.has(o.id));
+  }
 
   // PRIORITY QUEUE SORTING
   orders.sort((a, b) => {
@@ -76,9 +91,6 @@ export default async function AdminOrdersPage({
         <Link href="/admin/orders?filter=all"><Button variant="outline" size="sm" className={getFilterClass('all')}>All</Button></Link>
         <Link href="/admin/orders?filter=unviewed"><Button variant="outline" size="sm" className={getFilterClass('unviewed')}>Unviewed</Button></Link>
         <Link href="/admin/orders?filter=paid"><Button variant="outline" size="sm" className={getFilterClass('paid')}>Paid (Unprocessed)</Button></Link>
-        <Link href="/admin/orders?filter=ready"><Button variant="outline" size="sm" className={getFilterClass('ready')}>Ready for Supplier</Button></Link>
-        <Link href="/admin/orders?filter=sent"><Button variant="outline" size="sm" className={getFilterClass('sent')}>Sent to Supplier</Button></Link>
-        <Link href="/admin/orders?filter=supplier_pending"><Button variant="outline" size="sm" className={getFilterClass('supplier_pending')}>Supplier Payment Pending</Button></Link>
         <Link href="/admin/orders?filter=processing"><Button variant="outline" size="sm" className={getFilterClass('processing')}>Processing</Button></Link>
         <Link href="/admin/orders?filter=shipped"><Button variant="outline" size="sm" className={getFilterClass('shipped')}>Shipped</Button></Link>
       </div>
@@ -117,14 +129,14 @@ export default async function AdminOrdersPage({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-fit ${['NEW', 'PAYMENT_CONFIRMED'].includes(order.order_status) ? "bg-blue-100 text-blue-700" : "bg-slate-100 text-slate-700"}`}>
-                            C: {order.order_status}
-                          </span>
-                          <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase tracking-wider w-fit ${order.supplier_order_status === "PAYMENT_PENDING" ? "bg-red-100 text-red-700" : "bg-slate-100 text-slate-600"}`}>
-                            S: {order.supplier_order_status}
-                          </span>
-                        </div>
+                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                          order.order_status === 'DELIVERED' ? "bg-green-100 text-green-700" :
+                          order.order_status === 'SHIPPED' ? "bg-purple-100 text-purple-700" :
+                          order.order_status === 'PROCESSING' ? "bg-blue-100 text-blue-700" :
+                          "bg-slate-100 text-slate-700"
+                        }`}>
+                          {order.order_status}
+                        </span>
                       </TableCell>
                       <TableCell className="text-right pr-6">
                         <Link href={`/admin/orders/${order.id}`}>
