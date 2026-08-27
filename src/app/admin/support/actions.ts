@@ -13,14 +13,18 @@ export async function fetchAllMessages() {
 
   if (!rawMessages || rawMessages.length === 0) return [];
 
-  const userIds = Array.from(new Set(rawMessages.map((m: any) => m.user_id)));
-  const { data: profiles } = await supabaseAdmin
-    .from("profiles")
-    .select("id, full_name, email")
-    .in("id", userIds);
+  // Fetch users directly from Supabase Auth since profiles table might be empty
+  const { data: authData } = await supabaseAdmin.auth.admin.listUsers();
+  const users = authData?.users || [];
 
   const profileMap: Record<string, any> = {};
-  if (profiles) profiles.forEach((p: any) => { profileMap[p.id] = p; });
+  users.forEach((u: any) => { 
+    profileMap[u.id] = {
+      id: u.id,
+      email: u.email,
+      full_name: u.user_metadata?.full_name || u.user_metadata?.name || null
+    }; 
+  });
 
   return rawMessages.map((m: any) => ({ ...m, profiles: profileMap[m.user_id] || null }));
 }
@@ -38,15 +42,11 @@ export async function replyToUser(userId: string, message: string) {
 
   if (error) return { error: error.message };
 
-  // Fetch the customer's email
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("email, full_name")
-    .eq("id", userId)
-    .single();
+  // Fetch the customer's email directly from Auth
+  const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(userId);
 
-  if (profile?.email) {
-    const customerName = profile.full_name || "Customer";
+  if (user?.email) {
+    const customerName = user.user_metadata?.full_name || user.user_metadata?.name || "Customer";
     const htmlContent = `
       <h2>New reply from ICONJ Support</h2>
       <p>Hi ${customerName},</p>
