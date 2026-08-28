@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverExternalPackages: [],
+  serverActions: {
+    bodySizeLimit: '10mb',
+  },
 };
 
 export default nextConfig;
