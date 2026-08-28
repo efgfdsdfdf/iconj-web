@@ -57,6 +57,12 @@ export default function CheckoutPage() {
               city: addr.city,
               state: addr.state
             });
+            setFormData(prev => ({
+              ...prev,
+              address: addr.street || "",
+              city: addr.city || "",
+              state: addr.state || ""
+            }));
             setUseSavedAddress(true);
           }
       }
@@ -224,9 +230,7 @@ export default function CheckoutPage() {
               <Card className="border-none shadow-sm">
                 <CardHeader className="border-b bg-slate-50/50 pb-4 flex flex-row items-center justify-between">
                   <CardTitle className="text-lg flex items-center gap-2"><Truck className="w-5 h-5 text-emerald-600" /> Delivery Address</CardTitle>
-                  {!useSavedAddress && (
-                    <button onClick={() => setStep("address")} className="text-sm font-bold text-blue-600 hover:underline">Edit</button>
-                  )}
+                  <button onClick={() => setStep("address")} className="text-sm font-bold text-blue-600 hover:underline">Edit</button>
                 </CardHeader>
                 <CardContent className="pt-6">
                   {useSavedAddress && savedAddress ? (
