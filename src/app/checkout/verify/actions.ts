@@ -178,10 +178,10 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
               `
             })
           });
-        } catch (emailErr) {
-          console.error("Failed to send seller order notification:", emailErr);
-        }
+        } catch (e) { console.error("Seller email error:", e); }
       }
+
+
 
       // Notify the Admin (forwarder/supplier equivalent) with FULL details
       try {
