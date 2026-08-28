@@ -14,8 +14,10 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: [],
-  serverActions: {
-    bodySizeLimit: '10mb',
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
   },
 };
 
