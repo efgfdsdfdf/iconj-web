@@ -46,8 +46,9 @@ export async function updateSellerOrderStatus(orderId: string, status: string) {
         await supabaseAdmin.from("orders").update({ order_status: "DELIVERED" }).eq("id", subOrder.parent_order_id);
       }
     }
-    // Notify customer by email when order is SHIPPED or DELIVERED
-    if ((status === "SHIPPED" || status === "DELIVERED") && subOrder.parent_order_id) {
+    // Notify customer by email on key status changes
+    const emailStatuses = ["PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"];
+    if (emailStatuses.includes(status) && subOrder.parent_order_id) {
       try {
         const { sendStatusNotification } = await import("@/lib/order-emails");
         await sendStatusNotification(subOrder.parent_order_id, status);

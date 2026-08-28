@@ -30,6 +30,15 @@ export async function importTrackingData(updates: { id: string, tracking: string
         
         if (!error) {
           successCount++;
+          try {
+            const { sendStatusNotification } = await import("@/lib/order-emails");
+            await sendStatusNotification(orderId, "SHIPPED", {
+              tracking_number: update.tracking,
+              shipping_carrier: update.carrier
+            });
+          } catch (e) {
+            console.error("Failed to send tracking email:", e);
+          }
         }
       }
     }
