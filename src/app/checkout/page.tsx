@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard } from "lucide-react";
+import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, CheckCircle2, Plus } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -18,6 +18,8 @@ export default function CheckoutPage() {
   const [mounted, setMounted] = useState(false);
   const supabase = createClient();
   const [userId, setUserId] = useState<string | null>(null);
+  const [userAddresses, setUserAddresses] = useState<any[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | "new">("new");
   const [useSavedAddress, setUseSavedAddress] = useState(false);
   const [savedAddress, setSavedAddress] = useState<any>(null);
 
@@ -48,23 +50,19 @@ export default function CheckoutPage() {
           }
         });
 
-          const rawAddresses = data.user.user_metadata?.addresses || [];
-          const addresses = Array.isArray(rawAddresses) ? rawAddresses.sort((a: any, b: any) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0)) : [];
+        // Fetch user's address book from DB
+        supabase.from("addresses").select("*").eq("user_id", data.user.id).order("is_default", { ascending: false }).order("created_at", { ascending: false }).then(({ data: addresses }) => {
           if (addresses && addresses.length > 0) {
-            const addr = addresses[0];
+            setUserAddresses(addresses);
+            setSelectedAddressId(addresses[0].id);
             setSavedAddress({
-              street: addr.street,
-              city: addr.city,
-              state: addr.state
+              street: addresses[0].street,
+              city: addresses[0].city,
+              state: addresses[0].state
             });
-            setFormData(prev => ({
-              ...prev,
-              address: addr.street || "",
-              city: addr.city || "",
-              state: addr.state || ""
-            }));
             setUseSavedAddress(true);
           }
+        });
       }
     });
   }, [supabase]);
@@ -86,12 +84,28 @@ export default function CheckoutPage() {
 
   const handleContinueToPayment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedAddressId !== "new") {
+      const selected = userAddresses.find(a => a.id === selectedAddressId);
+      if (selected) {
+        setSavedAddress({
+          street: selected.street,
+          city: selected.city,
+          state: selected.state
+        });
+        setUseSavedAddress(true);
+      }
+    } else {
+      setUseSavedAddress(false);
+    }
     setStep("payment");
   };
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
+      const isNewAddress = selectedAddressId === "new";
+      const selectedAddr = isNewAddress ? null : userAddresses.find(a => a.id === selectedAddressId);
+
       const response = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -99,17 +113,17 @@ export default function CheckoutPage() {
           email: formData.email, 
           userId: userId,
           name: `${formData.firstName} ${formData.lastName}`,
-          phone: formData.phone,
-          address: useSavedAddress && savedAddress ? {
-            street: savedAddress.street,
-            city: savedAddress.city,
-            state: savedAddress.state
-          } : {
+          phone: isNewAddress ? formData.phone : (selectedAddr?.phone || formData.phone),
+          address: isNewAddress ? {
             street: formData.address,
             city: formData.city,
             state: formData.state
+          } : {
+            street: selectedAddr.street,
+            city: selectedAddr.city,
+            state: selectedAddr.state
           },
-          saveAddress: !useSavedAddress && userId ? true : false,
+          saveAddress: isNewAddress && userId ? true : false,
           items: items 
         }),
       });
@@ -146,74 +160,87 @@ export default function CheckoutPage() {
           <div className="max-w-2xl mx-auto">
             <Card className="border-none shadow-sm">
               <CardHeader className="border-b bg-slate-50/50 pb-4">
-                <CardTitle className="text-lg flex items-center gap-2"><Truck className="w-5 h-5 text-orange-500" /> Enter Delivery Information</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2"><Truck className="w-5 h-5 text-orange-500" /> Delivery Information</CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
                 <form onSubmit={handleContinueToPayment} className="space-y-6">
-                  <div className={useSavedAddress ? "hidden" : "space-y-6"}>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>First Name</Label>
-                        <Input required={!useSavedAddress} value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                  
+                  {userAddresses.length > 0 && (
+                    <div className="grid gap-4 sm:grid-cols-2 mb-6">
+                      {userAddresses.map(addr => (
+                        <div 
+                          key={addr.id}
+                          onClick={() => setSelectedAddressId(addr.id)}
+                          className={`border p-4 rounded-lg cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300'}`}
+                        >
+                           <div className="flex justify-between items-start">
+                             <p className="font-bold text-slate-900">{addr.label || 'Delivery Address'}</p>
+                             {selectedAddressId === addr.id && <CheckCircle2 className="w-5 h-5 text-blue-600" />}
+                           </div>
+                           <p className="text-sm text-slate-600 mt-2">{addr.street}</p>
+                           <p className="text-sm text-slate-600">{addr.city}, {addr.state}</p>
+                           <p className="text-sm text-slate-600 mt-1">{addr.phone}</p>
+                        </div>
+                      ))}
+                      
+                      <div 
+                        onClick={() => setSelectedAddressId('new')}
+                        className={`border p-4 rounded-lg cursor-pointer flex flex-col items-center justify-center min-h-[120px] ${selectedAddressId === 'new' ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-dashed border-slate-300 text-slate-500 hover:border-orange-400 hover:bg-orange-50'}`}
+                      >
+                         <Plus className="w-6 h-6 mb-2" />
+                         <span className="font-medium">Add New Address</span>
                       </div>
-                      <div className="space-y-2">
-                        <Label>Last Name</Label>
-                        <Input required={!useSavedAddress} value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
-                      </div>
-                    </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Email Address</Label>
-                        <Input type="email" required={!useSavedAddress} value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>Phone Number</Label>
-                        <Input type="tel" required={!useSavedAddress} placeholder="e.g. 08012345678" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                      </div>
-                    </div>
-                  </div>
-
-                  {savedAddress && (
-                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-blue-50/50 border-blue-100 mb-2 mt-4">
-                      <input 
-                        type="checkbox" 
-                        checked={useSavedAddress} 
-                        onChange={(e) => setUseSavedAddress(e.target.checked)}
-                        className="w-4 h-4 mt-1 text-blue-600 rounded"
-                        id="use-saved"
-                      />
-                      <label htmlFor="use-saved" className="text-sm font-medium cursor-pointer text-slate-900">
-                        Deliver to my saved address<br/>
-                        <span className="text-slate-500 font-normal block mt-1">{savedAddress.street}, {savedAddress.city}, {savedAddress.state}</span>
-                      </label>
                     </div>
                   )}
 
-                  <div className={useSavedAddress ? "hidden" : "space-y-6"}>
-                    <div className="space-y-2">
-                      <Label>Delivery Address</Label>
-                      <Input required={!useSavedAddress} placeholder="Street address, apartment, suite, etc." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
-                    </div>
-                    
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>State</Label>
-                        <select required={!useSavedAddress} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}>
-                          <option value="">Select State</option>
-                          <option value="Lagos">Lagos</option>
-                          <option value="Abuja">Abuja (FCT)</option>
-                          <option value="Rivers">Rivers</option>
-                          <option value="Oyo">Oyo</option>
-                          <option value="Kano">Kano</option>
-                          <option value="Enugu">Enugu</option>
-                        </select>
+                  {selectedAddressId === "new" && (
+                    <div className={userAddresses.length > 0 ? "space-y-6 border-t pt-6" : "space-y-6"}>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>First Name</Label>
+                          <Input required value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Last Name</Label>
+                          <Input required value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+                        </div>
                       </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>Email Address</Label>
+                          <Input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                        </div>
+                        <div className="space-y-2">
+                          <Label>Phone Number</Label>
+                          <Input type="tel" required placeholder="e.g. 08012345678" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                        </div>
+                      </div>
+
                       <div className="space-y-2">
-                        <Label>City / L.G.A</Label>
-                        <Input required={!useSavedAddress} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+                        <Label>Delivery Address</Label>
+                        <Input required placeholder="Street address, apartment, suite, etc." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                      </div>
+                      
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label>State</Label>
+                          <select required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}>
+                            <option value="">Select State</option>
+                            <option value="Lagos">Lagos</option>
+                            <option value="Abuja">Abuja (FCT)</option>
+                            <option value="Rivers">Rivers</option>
+                            <option value="Oyo">Oyo</option>
+                            <option value="Kano">Kano</option>
+                            <option value="Enugu">Enugu</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label>City / L.G.A</Label>
+                          <Input required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   <Button type="submit" className="w-full h-12 text-md font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-md mt-4">
                     Continue to Payment <ChevronRight className="w-4 h-4 ml-1" />
