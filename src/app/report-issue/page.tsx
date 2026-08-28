@@ -36,7 +36,7 @@ export default function ReportIssuePage() {
       
       const { data } = await supabase
         .from("orders")
-        .select("id, created_at, status")
+        .select("id, created_at, order_status")
         .eq("user_id", user.id)
         .order("created_at", { ascending: false });
         
@@ -186,7 +186,7 @@ export default function ReportIssuePage() {
                 <option value="" disabled>Select an order...</option>
                 {userOrders.map(order => (
                   <option key={order.id} value={order.id}>
-                    Order #{order.id.substring(0,8).toUpperCase()} ({new Date(order.created_at).toLocaleDateString()}) - {order.status}
+                    Order #{order.id.substring(0,8).toUpperCase()} ({new Date(order.created_at).toLocaleDateString()}) - {order.order_status}
                   </option>
                 ))}
               </select>

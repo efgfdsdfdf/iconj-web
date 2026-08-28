@@ -182,10 +182,22 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
 
       // Notify the customer
       try {
-        if (addr.email) {
-          const { data: orderTotal } = await supabaseAdmin.from("orders").select("total_amount").eq("id", orderId).single();
+        const { data: orderDetails } = await supabaseAdmin.from("orders").select("total_amount, user_id").eq("id", orderId).single();
+        
+        let customerEmail = addr.email;
+        let customerName = addr.name?.split(' ')[0] || 'there';
+
+        if (orderDetails?.user_id) {
+          const { data: profile } = await supabaseAdmin.from("profiles").select("email, full_name").eq("id", orderDetails.user_id).single();
+          if (profile?.email) {
+            customerEmail = profile.email;
+            if (profile.full_name) customerName = profile.full_name.split(' ')[0];
+          }
+        }
+
+        if (customerEmail) {
           const custEmailSuccess = await sendEmailTo(
-            addr.email,
+            customerEmail,
             `🎉 Order Confirmed! #${orderId.split('-')[0].toUpperCase()}`,
             `
               <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -194,8 +206,8 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
                   <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">Order #${orderId.split('-')[0].toUpperCase()}</p>
                 </div>
                 <div style="padding: 30px 20px; border: 1px solid #e2e8f0; border-top: none;">
-                  <h2 style="margin: 0 0 16px; font-size: 18px; color: #1e293b;">Hi ${addr.name?.split(' ')[0] || 'there'},</h2>
-                  <p style="margin: 0 0 20px; font-size: 15px; color: #475569; line-height: 1.5;">We've received your order and payment of <strong>₦${orderTotal?.total_amount?.toLocaleString()}</strong>. We're currently processing it and will notify you as soon as it ships.</p>
+                  <h2 style="margin: 0 0 16px; font-size: 18px; color: #1e293b;">Hi ${customerName},</h2>
+                  <p style="margin: 0 0 20px; font-size: 15px; color: #475569; line-height: 1.5;">We've received your order and payment of <strong>₦${orderDetails?.total_amount?.toLocaleString()}</strong>. We're currently processing it and will notify you as soon as it ships.</p>
                   
                   <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
                     <h3 style="margin: 0 0 8px; font-size: 13px; color: #64748b; text-transform: uppercase;">Shipping To</h3>
@@ -216,7 +228,7 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
             await supabaseAdmin.from('order_emails').insert({
               order_id: orderId,
               email_type: 'PAYMENT_RECEIPT',
-              recipient_email: addr.email,
+              recipient_email: customerEmail,
               status: 'SENT',
               sent_at: new Date().toISOString()
             });

@@ -49,14 +49,13 @@ export async function sendEmailTo(toEmail: string, subject: string, htmlContent:
       from: process.env.EMAIL_USER,
       to: toEmail,
       subject: subject,
-      text: htmlContent, // Fallback
-      html: htmlContent.replace(/\n/g, '<br>'), // Simple newlines to HTML
+      html: htmlContent,
     };
 
     await transporter.sendMail(mailOptions);
     return true;
   } catch (error) {
-    console.error("Failed to send email:", error);
+    console.error("Failed to send email to " + toEmail + ":", error);
     return false;
   }
 }
