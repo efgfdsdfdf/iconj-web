@@ -184,7 +184,7 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
       try {
         if (addr.email) {
           const { data: orderTotal } = await supabaseAdmin.from("orders").select("total_amount").eq("id", orderId).single();
-          await sendEmailTo(
+          const custEmailSuccess = await sendEmailTo(
             addr.email,
             `🎉 Order Confirmed! #${orderId.split('-')[0].toUpperCase()}`,
             `
@@ -212,6 +212,15 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
               </div>
             `
           );
+          if (custEmailSuccess) {
+            await supabaseAdmin.from('order_emails').insert({
+              order_id: orderId,
+              email_type: 'PAYMENT_RECEIPT',
+              recipient_email: addr.email,
+              status: 'SENT',
+              sent_at: new Date().toISOString()
+            });
+          }
         }
       } catch (e) { console.error("Customer email error:", e); }
 
@@ -256,7 +265,7 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
             `;
           }).join('');
 
-          await sendEmailTo(
+          const emailSuccess = await sendEmailTo(
             group.email,
             `📦 New Fulfillment Order #${orderId.split('-')[0].toUpperCase()} from ICONJ`,
             `
@@ -288,6 +297,16 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
               </div>
             `
           );
+          
+          if (emailSuccess) {
+            await supabaseAdmin.from('order_emails').insert({
+              order_id: orderId,
+              email_type: 'SENT_TO_SUPPLIER',
+              recipient_email: group.email,
+              status: 'SENT',
+              sent_at: new Date().toISOString()
+            });
+          }
         }
       } catch (supplierErr) {
         console.error("Failed to automate supplier emails:", supplierErr);
