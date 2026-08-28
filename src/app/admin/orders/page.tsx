@@ -19,7 +19,14 @@ export default async function AdminOrdersPage({
 
   const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-  // Admin has access to all orders
+  // Find admin's own seller account
+  const { data: adminSeller } = await supabaseAdmin
+    .from("sellers")
+    .select("id")
+    .eq("profile_id", adminUserId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single();
 
   let query = supabaseAdmin.from("orders").select("*");
 
@@ -32,8 +39,16 @@ export default async function AdminOrdersPage({
   // We fetch all matching orders so we can sort them in memory for the Priority Queue
   const { data: rawOrders } = await query;
 
-  // The admin should see all orders across the entire platform
+  // Filter to only orders that include items sold by admin's seller account
   let orders = rawOrders || [];
+  if (adminSeller) {
+    const { data: adminSubOrders } = await supabaseAdmin
+      .from("seller_orders")
+      .select("parent_order_id")
+      .eq("seller_id", adminSeller.id);
+    const adminOrderIds = new Set((adminSubOrders || []).map(so => so.parent_order_id));
+    orders = orders.filter(o => adminOrderIds.has(o.id));
+  }
 
   // PRIORITY QUEUE SORTING
   orders.sort((a, b) => {

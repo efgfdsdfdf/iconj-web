@@ -173,13 +173,51 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
                       </a>
                     </div>
                   </div>
-                  <p style="text-align: center; color: #94a3b8; font-size: 12px; margin-top: 16px;">— ICONJ Marketplace</p>
-                </div>
               `
             })
           });
         } catch (e) { console.error("Seller email error:", e); }
       }
+
+      // Notify the customer
+      try {
+        if (addr.email) {
+          const { data: orderTotal } = await supabaseAdmin.from("orders").select("total_amount").eq("id", orderId).single();
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "ICONJ Store <noreply@iconj.com.ng>",
+              to: addr.email,
+              subject: `🎉 Order Confirmed! #${orderId.split('-')[0].toUpperCase()}`,
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                  <div style="background: #2563eb; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+                    <h1 style="margin: 0; font-size: 24px;">Thank you for your order!</h1>
+                    <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">Order #${orderId.split('-')[0].toUpperCase()}</p>
+                  </div>
+                  <div style="padding: 30px 20px; border: 1px solid #e2e8f0; border-top: none;">
+                    <h2 style="margin: 0 0 16px; font-size: 18px; color: #1e293b;">Hi ${addr.name?.split(' ')[0] || 'there'},</h2>
+                    <p style="margin: 0 0 20px; font-size: 15px; color: #475569; line-height: 1.5;">We've received your order and payment of <strong>₦${orderTotal?.total_amount?.toLocaleString()}</strong>. We're currently processing it and will notify you as soon as it ships.</p>
+                    
+                    <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
+                      <h3 style="margin: 0 0 8px; font-size: 13px; color: #64748b; text-transform: uppercase;">Shipping To</h3>
+                      <p style="margin: 0; font-size: 14px; color: #334155;"><strong>${addr.name || ''}</strong></p>
+                      <p style="margin: 2px 0 0; font-size: 14px; color: #475569;">${addr.street || ''}<br/>${addr.city || ''}, ${addr.state || ''}</p>
+                    </div>
+
+                    <div style="text-align: center;">
+                      <a href="https://iconj-web-rust.vercel.app/account/orders" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
+                        View Order Status
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              `
+            })
+          });
+        }
+      } catch (e) { console.error("Customer email error:", e); }
 
 
 
