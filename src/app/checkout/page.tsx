@@ -26,6 +26,8 @@ export default function CheckoutPage() {
     address: "", state: "", city: ""
   });
 
+  const [step, setStep] = useState<"address" | "payment">("address");
+
   useEffect(() => {
     setMounted(true);
     supabase.auth.getUser().then(({ data }) => {
@@ -56,6 +58,7 @@ export default function CheckoutPage() {
               state: addr.state
             });
             setUseSavedAddress(true);
+            setStep("payment"); // Auto-skip to payment if address is saved
           }
       }
     });
@@ -76,10 +79,13 @@ export default function CheckoutPage() {
   const shipping = 0;
   const total = subtotal + shipping;
 
-  const handleCheckout = async (e: React.FormEvent) => {
+  const handleContinueToPayment = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setStep("payment");
+  };
 
+  const handleCheckout = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/checkout", {
         method: "POST",
@@ -104,12 +110,9 @@ export default function CheckoutPage() {
       });
 
       const data = await response.json();
-            if (data.authorization_url) {
-          // Do NOT clear the cart here. 
-          // The cart should only be cleared upon successful verification 
-          // in src/app/checkout/verify/page.tsx
-          window.location.href = data.authorization_url;
-        } else {
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
+      } else {
         alert("Payment initialization failed: " + (data.error || "Unknown error"));
         setLoading(false);
       }
@@ -133,16 +136,15 @@ export default function CheckoutPage() {
       </div>
 
       <div className="container mx-auto px-4 max-w-6xl">
-        <div className="flex flex-col lg:flex-row gap-8">
-          
-          {/* Left: Checkout Form */}
-          <div className="flex-1 space-y-6">
+        
+        {step === "address" ? (
+          <div className="max-w-2xl mx-auto">
             <Card className="border-none shadow-sm">
               <CardHeader className="border-b bg-slate-50/50 pb-4">
-                <CardTitle className="text-lg flex items-center gap-2"><Truck className="w-5 h-5 text-orange-500" /> 1. Delivery Information</CardTitle>
+                <CardTitle className="text-lg flex items-center gap-2"><Truck className="w-5 h-5 text-orange-500" /> Enter Delivery Information</CardTitle>
               </CardHeader>
               <CardContent className="pt-6">
-                <form id="checkout-form" onSubmit={handleCheckout} className="space-y-6">
+                <form onSubmit={handleContinueToPayment} className="space-y-6">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>First Name</Label>
@@ -163,65 +165,85 @@ export default function CheckoutPage() {
                       <Input type="tel" required placeholder="e.g. 08012345678" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
                     </div>
                   </div>
-                    {savedAddress && (
-                      <div className="flex items-start gap-3 p-4 border rounded-lg bg-blue-50/50 border-blue-100 mb-6">
-                        <input 
-                          type="checkbox" 
-                          checked={useSavedAddress} 
-                          onChange={(e) => setUseSavedAddress(e.target.checked)}
-                          className="w-4 h-4 mt-1 text-blue-600 rounded"
-                          id="use-saved"
-                        />
-                        <label htmlFor="use-saved" className="text-sm font-medium cursor-pointer text-slate-900">
-                          Deliver to my saved address<br/>
-                          <span className="text-slate-500 font-normal block mt-1">{savedAddress.street}, {savedAddress.city}, {savedAddress.state}</span>
-                        </label>
-                      </div>
-                    )}
 
-                    <div className={useSavedAddress ? "hidden" : "space-y-6"}>
-                      <div className="space-y-2">
-                        <Label>Delivery Address</Label>
-                        <Input required={!useSavedAddress} placeholder="Street address, apartment, suite, etc." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
-                      </div>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>State</Label>
-                          <select required={!useSavedAddress} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}>
-                            <option value="">Select State</option>
-                            <option value="Lagos">Lagos</option>
-                            <option value="Abuja">Abuja (FCT)</option>
-                            <option value="Rivers">Rivers</option>
-                            <option value="Oyo">Oyo</option>
-                            <option value="Kano">Kano</option>
-                            <option value="Enugu">Enugu</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>City / L.G.A</Label>
-                          <Input required={!useSavedAddress} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
-                        </div>
-                      </div>
+                  <div className="space-y-2">
+                    <Label>Delivery Address</Label>
+                    <Input required placeholder="Street address, apartment, suite, etc." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                  </div>
+                  
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label>State</Label>
+                      <select required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}>
+                        <option value="">Select State</option>
+                        <option value="Lagos">Lagos</option>
+                        <option value="Abuja">Abuja (FCT)</option>
+                        <option value="Rivers">Rivers</option>
+                        <option value="Oyo">Oyo</option>
+                        <option value="Kano">Kano</option>
+                        <option value="Enugu">Enugu</option>
+                      </select>
                     </div>
+                    <div className="space-y-2">
+                      <Label>City / L.G.A</Label>
+                      <Input required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full h-12 text-md font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-md mt-4">
+                    Continue to Payment <ChevronRight className="w-4 h-4 ml-1" />
+                  </Button>
                 </form>
               </CardContent>
             </Card>
-
-            <Card className="border-none shadow-sm">
-              <CardHeader className="border-b bg-slate-50/50 pb-4">
-                <CardTitle className="text-lg flex items-center gap-2"><CreditCard className="w-5 h-5 text-orange-500" /> 2. Payment Method</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <div className="border border-emerald-200 bg-emerald-50 rounded-lg p-4 flex items-start gap-4">
-                  <div className="mt-1"><ShieldCheck className="w-6 h-6 text-emerald-600" /></div>
-                  <div>
-                    <h4 className="font-bold text-slate-900">Paystack Secure Payment</h4>
-                    <p className="text-sm text-slate-600 mt-1">You will be securely redirected to Paystack to complete your payment using Card, Bank Transfer, USSD, or Mobile Money.</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
+        ) : (
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Left: Summary Info */}
+            <div className="flex-1 space-y-6">
+              
+              <Card className="border-none shadow-sm">
+                <CardHeader className="border-b bg-slate-50/50 pb-4 flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2"><Truck className="w-5 h-5 text-emerald-600" /> Delivery Address</CardTitle>
+                  {!useSavedAddress && (
+                    <button onClick={() => setStep("address")} className="text-sm font-bold text-blue-600 hover:underline">Edit</button>
+                  )}
+                </CardHeader>
+                <CardContent className="pt-6">
+                  {useSavedAddress && savedAddress ? (
+                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-blue-50/50 border-blue-100">
+                      <div className="mt-1"><ShieldCheck className="w-5 h-5 text-blue-600" /></div>
+                      <div>
+                        <p className="font-bold text-slate-900">Delivering to your default address</p>
+                        <p className="text-sm text-slate-600 mt-1">{savedAddress.street}, {savedAddress.city}, {savedAddress.state}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-4 border rounded-lg bg-slate-50">
+                      <p className="font-bold text-slate-900">{formData.firstName} {formData.lastName}</p>
+                      <p className="text-sm text-slate-600 mt-1">{formData.address}</p>
+                      <p className="text-sm text-slate-600">{formData.city}, {formData.state}</p>
+                      <p className="text-sm text-slate-600 mt-1">{formData.phone} | {formData.email}</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="border-none shadow-sm">
+                <CardHeader className="border-b bg-slate-50/50 pb-4">
+                  <CardTitle className="text-lg flex items-center gap-2"><CreditCard className="w-5 h-5 text-orange-500" /> Secure Payment</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                  <div className="border border-emerald-200 bg-emerald-50 rounded-lg p-4 flex items-start gap-4">
+                    <div className="mt-1"><ShieldCheck className="w-6 h-6 text-emerald-600" /></div>
+                    <div>
+                      <h4 className="font-bold text-slate-900">Paystack Secure Checkout</h4>
+                      <p className="text-sm text-slate-600 mt-1">When you click Confirm & Pay Now, you will be securely redirected to Paystack to complete your payment using Card, Bank Transfer, USSD, or Mobile Money.</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
 
           {/* Right: Order Summary */}
           <div className="w-full lg:w-[400px] shrink-0">
@@ -278,8 +300,7 @@ export default function CheckoutPage() {
                 </div>
 
                 <Button 
-                  type="submit" 
-                  form="checkout-form"
+                  onClick={handleCheckout}
                   disabled={loading} 
                   className="w-full h-14 text-lg font-bold bg-orange-500 hover:bg-orange-600 shadow-xl shadow-orange-500/20 uppercase tracking-wider rounded-md"
                 >
