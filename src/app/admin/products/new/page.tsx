@@ -9,7 +9,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { createProduct, uploadProductImage, getSuppliers } from "../../actions";
+import { createProduct, uploadProductImageBase64, getSuppliers } from "../../actions";
 import { createClient } from "@/lib/supabase/client";
 
 export default function AddProductPage() {
@@ -115,13 +115,17 @@ export default function AddProductPage() {
     setSuccess(false);
 
     try {
-      // 1. Upload Images
+      // 1. Upload Images using Base64 to avoid FormData/File serialization errors (Error 441)
       const uploadedUrls: string[] = [];
       for (const file of imageFiles) {
-        const fileData = new FormData();
-        fileData.append("file", file);
+        const base64: string = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.readAsDataURL(file);
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = error => reject(error);
+        });
         
-        const result = await uploadProductImage(fileData);
+        const result = await uploadProductImageBase64(base64, file.name, file.type);
         if (result.success && result.url) {
           uploadedUrls.push(result.url);
         } else {

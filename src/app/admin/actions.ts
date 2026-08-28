@@ -84,7 +84,29 @@ export async function uploadProductImage(formData: FormData) {
     return { success: true, url: data.publicUrl };
   } catch (err: any) {
     console.error("Upload error:", err);
-    // Return a plain object instead of throwing to avoid Next.js serialization errors (Error 441)
+    return { success: false, error: err.message || "Failed to upload image" };
+  }
+}
+
+export async function uploadProductImageBase64(base64Str: string, originalName: string, contentType: string) {
+  try {
+    const fileExt = originalName.split(".").pop() || "jpg";
+    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+    
+    // Convert base64 to buffer
+    const base64Data = base64Str.replace(/^data:image\/\w+;base64,/, "");
+    const buffer = Buffer.from(base64Data, "base64");
+    
+    const { error } = await supabaseAdmin.storage.from("product-images").upload(fileName, buffer, {
+      contentType: contentType || "image/jpeg"
+    });
+    
+    if (error) throw new Error(error.message);
+    
+    const { data } = supabaseAdmin.storage.from("product-images").getPublicUrl(fileName);
+    return { success: true, url: data.publicUrl };
+  } catch (err: any) {
+    console.error("Upload base64 error:", err);
     return { success: false, error: err.message || "Failed to upload image" };
   }
 }
