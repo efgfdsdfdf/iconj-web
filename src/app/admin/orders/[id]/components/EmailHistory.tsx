@@ -52,18 +52,23 @@ export function EmailHistory({ orderId, emails }: { orderId: string; emails: any
           <div className="space-y-3">
             {emails.map((email: any) => (
               <div key={email.id} className="flex items-center justify-between gap-2 text-sm">
-                <div className="flex items-center gap-2 min-w-0">
-                  {email.status === 'SENT' ? (
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
-                  ) : email.status === 'FAILED' ? (
-                    <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
-                  ) : (
-                    <Clock className="w-4 h-4 text-amber-500 shrink-0" />
-                  )}
-                  <span className="font-medium text-slate-900 truncate">
-                    {EMAIL_TYPE_LABELS[email.email_type] || email.email_type}
-                  </span>
-                </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="font-medium text-slate-900 truncate flex items-center gap-2">
+                      {email.status === 'SENT' ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                      ) : email.status === 'FAILED' ? (
+                        <AlertTriangle className="w-4 h-4 text-red-500 shrink-0" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+                      )}
+                      {EMAIL_TYPE_LABELS[email.email_type] || email.email_type}
+                    </span>
+                    {email.recipient_email && (
+                      <span className="text-[10px] text-slate-500 ml-6 truncate font-mono">
+                        to: {email.recipient_email}
+                      </span>
+                    )}
+                  </div>
                 <div className="flex items-center gap-2 shrink-0">
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     email.status === 'SENT' ? 'bg-emerald-100 text-emerald-700' :
