@@ -144,24 +144,26 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent className="pt-6">
                 <form onSubmit={handleContinueToPayment} className="space-y-6">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>First Name</Label>
-                      <Input required value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                  <div className={useSavedAddress ? "hidden" : "space-y-6"}>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>First Name</Label>
+                        <Input required={!useSavedAddress} value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Last Name</Label>
+                        <Input required={!useSavedAddress} value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label>Last Name</Label>
-                      <Input required value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
-                    </div>
-                  </div>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Email Address</Label>
-                      <Input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Phone Number</Label>
-                      <Input type="tel" required placeholder="e.g. 08012345678" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>Email Address</Label>
+                        <Input type="email" required={!useSavedAddress} value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Phone Number</Label>
+                        <Input type="tel" required={!useSavedAddress} placeholder="e.g. 08012345678" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
+                      </div>
                     </div>
                   </div>
 
