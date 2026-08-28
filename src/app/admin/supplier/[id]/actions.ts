@@ -77,11 +77,6 @@ export async function recordSupplierPayment(supplierId: string, orderId: string,
     throw new Error(error.message);
   }
 
-  // Update order status if payment succeeds
-  await supabaseAdmin.from("orders").update({
-    supplier_order_status: "PAID"
-  }).eq("id", orderId);
-
   // Record order event
   await supabaseAdmin.from("order_events").insert({
     order_id: orderId,

@@ -33,12 +33,45 @@ export default async function SupplierLedgerPage({ params }: { params: Promise<{
     .eq("supplier_id", supplier.id)
     .order("sequence_num", { ascending: false });
 
-  // Fetch orders assigned to supplier that are pending payment
-  const { data: pendingOrders } = await supabaseAdmin
-    .from("orders")
-    .select("id, created_at, supplier_cost, supplier_order_status")
-    .eq("supplier_id", supplier.id)
-    .in("supplier_order_status", ["SENT", "PAYMENT_PENDING"]);
+  // Fetch paid order items for this supplier
+  const { data: rawItems } = await supabaseAdmin
+    .from("order_items")
+    .select("order_id, quantity, unit_price, created_at, orders!inner(payment_status, id, created_at), products!inner(supplier_id, base_supplier_cost, base_selling_price)")
+    .eq("products.supplier_id", supplier.id)
+    .eq("orders.payment_status", "PAID");
+
+  // Fetch already paid order IDs from ledger
+  const { data: paidTxs } = await supabaseAdmin
+    .from("supplier_transactions")
+    .select("order_id")
+    .eq("transaction_type", "SUPPLIER_PAYMENT")
+    .eq("supplier_id", supplier.id);
+    
+  const paidOrderIds = new Set(paidTxs?.filter(t => t.order_id).map(t => t.order_id) || []);
+
+  // Group items into orders and calculate total supplier cost per order
+  const pendingOrderMap = new Map();
+  rawItems?.forEach((item: any) => {
+    if (paidOrderIds.has(item.order_id)) return;
+
+    let costPerItem = item.products.base_supplier_cost || 0;
+    if (item.products.base_selling_price && item.products.base_selling_price > 0 && costPerItem > 0) {
+       costPerItem = item.unit_price * (costPerItem / item.products.base_selling_price);
+    }
+    const totalCost = costPerItem * item.quantity;
+    
+    if (!pendingOrderMap.has(item.order_id)) {
+      pendingOrderMap.set(item.order_id, {
+        id: item.order_id,
+        created_at: item.orders.created_at,
+        supplier_cost: 0,
+        supplier_order_status: "PAYMENT_PENDING"
+      });
+    }
+    pendingOrderMap.get(item.order_id).supplier_cost += totalCost;
+  });
+
+  const pendingOrders = Array.from(pendingOrderMap.values()).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const txs = transactions || [];
   

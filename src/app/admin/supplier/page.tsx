@@ -23,11 +23,19 @@ export default async function AdminSupplierListPage() {
     .select("supplier_id, new_balance")
     .order("sequence_num", { ascending: false });
 
-  // Fetch pending supplier payments (orders that are SENT or PAYMENT_PENDING)
-  const { data: pendingOrders } = await supabaseAdmin
-    .from("orders")
-    .select("supplier_id, supplier_cost")
-    .eq("supplier_order_status", "PAYMENT_PENDING");
+  // Fetch paid order items to calculate pending supplier payments
+  const { data: rawItems } = await supabaseAdmin
+    .from("order_items")
+    .select("order_id, quantity, unit_price, orders!inner(payment_status, id, created_at), products!inner(supplier_id, base_supplier_cost, base_selling_price)")
+    .eq("orders.payment_status", "PAID");
+
+  // Fetch already paid order IDs from ledger
+  const { data: paidTxs } = await supabaseAdmin
+    .from("supplier_transactions")
+    .select("order_id")
+    .eq("transaction_type", "SUPPLIER_PAYMENT");
+    
+  const paidOrderIds = new Set(paidTxs?.filter(t => t.order_id).map(t => t.order_id) || []);
 
   const supplierMap = new Map();
   latestBalances?.forEach(tx => {
@@ -37,9 +45,20 @@ export default async function AdminSupplierListPage() {
   });
 
   const pendingMap = new Map();
-  pendingOrders?.forEach(order => {
-    if (!pendingMap.has(order.supplier_id)) pendingMap.set(order.supplier_id, 0);
-    pendingMap.set(order.supplier_id, pendingMap.get(order.supplier_id) + Number(order.supplier_cost));
+  rawItems?.forEach((item: any) => {
+    const orderId = item.order_id;
+    const supplierId = item.products?.supplier_id;
+    if (!supplierId || paidOrderIds.has(orderId)) return;
+    
+    // Calculate cost (using proportional ratio if selling price > 0, else base cost)
+    let costPerItem = item.products.base_supplier_cost || 0;
+    if (item.products.base_selling_price && item.products.base_selling_price > 0 && costPerItem > 0) {
+       costPerItem = item.unit_price * (costPerItem / item.products.base_selling_price);
+    }
+    const totalCost = costPerItem * item.quantity;
+    
+    if (!pendingMap.has(supplierId)) pendingMap.set(supplierId, 0);
+    pendingMap.set(supplierId, pendingMap.get(supplierId) + totalCost);
   });
 
   return (
