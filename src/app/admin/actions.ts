@@ -53,8 +53,9 @@ export async function createProduct(data: any) {
 
     const { error } = await supabaseAdmin.from("products").insert([data]);
     if (error) return { success: false, error: error.message };
-    revalidatePath("/admin/products");
-    revalidatePath("/shop");
+    // Temporarily disabled to debug Error #441:
+    // revalidatePath("/admin/products");
+    // revalidatePath("/shop");
     return { success: true };
   } catch (err: any) {
     console.error("Create product error:", err);
