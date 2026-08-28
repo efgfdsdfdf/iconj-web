@@ -221,7 +221,88 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
 
 
 
-      // Notify the Admin (forwarder/supplier equivalent) with FULL details
+      // Automate sending orders to respective suppliers
+      try {
+        const { data: allItems } = await supabaseAdmin.from("order_items").select("*, products(name, supplier_id, suppliers(email, name))").eq("order_id", orderId);
+        
+        // Group items by supplier
+        const supplierGroups: Record<string, { email: string, name: string, items: any[] }> = {};
+        
+        (allItems || []).forEach(item => {
+          const supplier = item.products?.suppliers;
+          if (supplier && supplier.email) {
+            if (!supplierGroups[supplier.email]) {
+              supplierGroups[supplier.email] = { email: supplier.email, name: supplier.name, items: [] };
+            }
+            supplierGroups[supplier.email].items.push(item);
+          }
+        });
+
+        // Send email to each supplier
+        for (const supplierEmail of Object.keys(supplierGroups)) {
+          const group = supplierGroups[supplierEmail];
+          
+          const supplierItemRows = group.items.map((item: any) => {
+            const config = item.configuration_details || {};
+            let specs = '';
+            if (config.width && config.width !== '0cm') specs += `Width: ${config.width} | `;
+            if (config.height && config.height !== '0cm') specs += `Height: ${config.height} | `;
+            if (config.motorType) specs += `Motor: ${config.motorType} | `;
+            if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant}`;
+            if (config.supplier_sku) specs += `Supplier SKU: ${config.supplier_sku} | `;
+            
+            return `
+              <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="padding: 12px 8px; font-weight: 600;">${config.product_name || item.products?.name || 'Product'}</td>
+                <td style="padding: 12px 8px; text-align: center;">${item.quantity}</td>
+              </tr>
+              ${specs ? `<tr><td colspan="2" style="padding: 4px 8px 12px; font-size: 12px; color: #d97706; background: #fffbeb;">📐 ${specs.replace(/\| $/, '')}</td></tr>` : ''}
+            `;
+          }).join('');
+
+          await fetch("https://api.resend.com/emails", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              from: "ICONJ Fulfillment <noreply@iconj.com.ng>",
+              to: group.email,
+              subject: `📦 New Fulfillment Order #${orderId.split('-')[0].toUpperCase()} from ICONJ`,
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                  <div style="background: #0f172a; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                    <h1 style="margin: 0; font-size: 20px;">New Order for Fulfillment</h1>
+                    <p style="margin: 4px 0 0; opacity: 0.7; font-size: 14px;">Order #${orderId.split('-')[0].toUpperCase()}</p>
+                  </div>
+                  <div style="padding: 20px; border: 1px solid #e2e8f0; border-top: none;">
+                    <p>Hello ${group.name},</p>
+                    <p>Please fulfill the following items for a new order:</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 20px;">
+                      <thead>
+                        <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                          <th style="padding: 8px; text-align: left;">Product</th>
+                          <th style="padding: 8px; text-align: center;">Quantity</th>
+                        </tr>
+                      </thead>
+                      <tbody>${supplierItemRows}</tbody>
+                    </table>
+                    
+                    <h3 style="margin: 20px 0 8px; font-size: 14px; color: #64748b;">SHIPPING DETAILS</h3>
+                    <p style="margin: 0;"><strong>${addr.name || 'N/A'}</strong></p>
+                    <p style="margin: 2px 0; color: #475569; font-size: 14px;">${addr.phone || ''}</p>
+                    <p style="margin: 2px 0; color: #475569; font-size: 14px;">${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''}</p>
+                    <p style="margin: 2px 0; color: #475569; font-size: 14px;">Nigeria</p>
+                  </div>
+                </div>
+              `
+            })
+          });
+        }
+      } catch (supplierErr) {
+        console.error("Failed to automate supplier emails:", supplierErr);
+      }
+
+      // Notify the Admin with FULL details (including prices)
       try {
         const { data: allItems } = await supabaseAdmin.from("order_items").select("*, products(name)").eq("order_id", orderId);
         const adminItemRows = (allItems || []).map((item: any) => {
