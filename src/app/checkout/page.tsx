@@ -58,7 +58,6 @@ export default function CheckoutPage() {
               state: addr.state
             });
             setUseSavedAddress(true);
-            setStep("payment"); // Auto-skip to payment if address is saved
           }
       }
     });
@@ -166,27 +165,45 @@ export default function CheckoutPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>Delivery Address</Label>
-                    <Input required placeholder="Street address, apartment, suite, etc." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
-                  </div>
-                  
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>State</Label>
-                      <select required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}>
-                        <option value="">Select State</option>
-                        <option value="Lagos">Lagos</option>
-                        <option value="Abuja">Abuja (FCT)</option>
-                        <option value="Rivers">Rivers</option>
-                        <option value="Oyo">Oyo</option>
-                        <option value="Kano">Kano</option>
-                        <option value="Enugu">Enugu</option>
-                      </select>
+                  {savedAddress && (
+                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-blue-50/50 border-blue-100 mb-2 mt-4">
+                      <input 
+                        type="checkbox" 
+                        checked={useSavedAddress} 
+                        onChange={(e) => setUseSavedAddress(e.target.checked)}
+                        className="w-4 h-4 mt-1 text-blue-600 rounded"
+                        id="use-saved"
+                      />
+                      <label htmlFor="use-saved" className="text-sm font-medium cursor-pointer text-slate-900">
+                        Deliver to my saved address<br/>
+                        <span className="text-slate-500 font-normal block mt-1">{savedAddress.street}, {savedAddress.city}, {savedAddress.state}</span>
+                      </label>
                     </div>
+                  )}
+
+                  <div className={useSavedAddress ? "hidden" : "space-y-6"}>
                     <div className="space-y-2">
-                      <Label>City / L.G.A</Label>
-                      <Input required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+                      <Label>Delivery Address</Label>
+                      <Input required={!useSavedAddress} placeholder="Street address, apartment, suite, etc." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                    </div>
+                    
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label>State</Label>
+                        <select required={!useSavedAddress} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}>
+                          <option value="">Select State</option>
+                          <option value="Lagos">Lagos</option>
+                          <option value="Abuja">Abuja (FCT)</option>
+                          <option value="Rivers">Rivers</option>
+                          <option value="Oyo">Oyo</option>
+                          <option value="Kano">Kano</option>
+                          <option value="Enugu">Enugu</option>
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label>City / L.G.A</Label>
+                        <Input required={!useSavedAddress} value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
+                      </div>
                     </div>
                   </div>
 
