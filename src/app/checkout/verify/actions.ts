@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@supabase/supabase-js";
+import { sendEmailTo, sendAdminNotification } from "@/lib/email";
 
 export async function verifyPaymentAndCompleteOrder(reference: string) {
   try {
@@ -183,39 +184,34 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
       try {
         if (addr.email) {
           const { data: orderTotal } = await supabaseAdmin.from("orders").select("total_amount").eq("id", orderId).single();
-          await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              from: "ICONJ Store <noreply@iconj.com.ng>",
-              to: addr.email,
-              subject: `🎉 Order Confirmed! #${orderId.split('-')[0].toUpperCase()}`,
-              html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                  <div style="background: #2563eb; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
-                    <h1 style="margin: 0; font-size: 24px;">Thank you for your order!</h1>
-                    <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">Order #${orderId.split('-')[0].toUpperCase()}</p>
+          await sendEmailTo(
+            addr.email,
+            `🎉 Order Confirmed! #${orderId.split('-')[0].toUpperCase()}`,
+            `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #2563eb; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+                  <h1 style="margin: 0; font-size: 24px;">Thank you for your order!</h1>
+                  <p style="margin: 8px 0 0; opacity: 0.9; font-size: 14px;">Order #${orderId.split('-')[0].toUpperCase()}</p>
+                </div>
+                <div style="padding: 30px 20px; border: 1px solid #e2e8f0; border-top: none;">
+                  <h2 style="margin: 0 0 16px; font-size: 18px; color: #1e293b;">Hi ${addr.name?.split(' ')[0] || 'there'},</h2>
+                  <p style="margin: 0 0 20px; font-size: 15px; color: #475569; line-height: 1.5;">We've received your order and payment of <strong>₦${orderTotal?.total_amount?.toLocaleString()}</strong>. We're currently processing it and will notify you as soon as it ships.</p>
+                  
+                  <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
+                    <h3 style="margin: 0 0 8px; font-size: 13px; color: #64748b; text-transform: uppercase;">Shipping To</h3>
+                    <p style="margin: 0; font-size: 14px; color: #334155;"><strong>${addr.name || ''}</strong></p>
+                    <p style="margin: 2px 0 0; font-size: 14px; color: #475569;">${addr.street || ''}<br/>${addr.city || ''}, ${addr.state || ''}</p>
                   </div>
-                  <div style="padding: 30px 20px; border: 1px solid #e2e8f0; border-top: none;">
-                    <h2 style="margin: 0 0 16px; font-size: 18px; color: #1e293b;">Hi ${addr.name?.split(' ')[0] || 'there'},</h2>
-                    <p style="margin: 0 0 20px; font-size: 15px; color: #475569; line-height: 1.5;">We've received your order and payment of <strong>₦${orderTotal?.total_amount?.toLocaleString()}</strong>. We're currently processing it and will notify you as soon as it ships.</p>
-                    
-                    <div style="background: #f8fafc; padding: 16px; border-radius: 6px; margin-bottom: 24px;">
-                      <h3 style="margin: 0 0 8px; font-size: 13px; color: #64748b; text-transform: uppercase;">Shipping To</h3>
-                      <p style="margin: 0; font-size: 14px; color: #334155;"><strong>${addr.name || ''}</strong></p>
-                      <p style="margin: 2px 0 0; font-size: 14px; color: #475569;">${addr.street || ''}<br/>${addr.city || ''}, ${addr.state || ''}</p>
-                    </div>
 
-                    <div style="text-align: center;">
-                      <a href="https://iconj-web-rust.vercel.app/account/orders" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
-                        View Order Status
-                      </a>
-                    </div>
+                  <div style="text-align: center;">
+                    <a href="https://iconj-web-rust.vercel.app/account/orders" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 14px;">
+                      View Order Status
+                    </a>
                   </div>
                 </div>
-              `
-            })
-          });
+              </div>
+            `
+          );
         }
       } catch (e) { console.error("Customer email error:", e); }
 
@@ -260,43 +256,38 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
             `;
           }).join('');
 
-          await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              from: "ICONJ Fulfillment <noreply@iconj.com.ng>",
-              to: group.email,
-              subject: `📦 New Fulfillment Order #${orderId.split('-')[0].toUpperCase()} from ICONJ`,
-              html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-                  <div style="background: #0f172a; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-                    <h1 style="margin: 0; font-size: 20px;">New Order for Fulfillment</h1>
-                    <p style="margin: 4px 0 0; opacity: 0.7; font-size: 14px;">Order #${orderId.split('-')[0].toUpperCase()}</p>
-                  </div>
-                  <div style="padding: 20px; border: 1px solid #e2e8f0; border-top: none;">
-                    <p>Hello ${group.name},</p>
-                    <p>Please fulfill the following items for a new order:</p>
-                    
-                    <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 20px;">
-                      <thead>
-                        <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
-                          <th style="padding: 8px; text-align: left;">Product</th>
-                          <th style="padding: 8px; text-align: center;">Quantity</th>
-                        </tr>
-                      </thead>
-                      <tbody>${supplierItemRows}</tbody>
-                    </table>
-                    
-                    <h3 style="margin: 20px 0 8px; font-size: 14px; color: #64748b;">SHIPPING DETAILS</h3>
-                    <p style="margin: 0;"><strong>${addr.name || 'N/A'}</strong></p>
-                    <p style="margin: 2px 0; color: #475569; font-size: 14px;">${addr.phone || ''}</p>
-                    <p style="margin: 2px 0; color: #475569; font-size: 14px;">${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''}</p>
-                    <p style="margin: 2px 0; color: #475569; font-size: 14px;">Nigeria</p>
-                  </div>
+          await sendEmailTo(
+            group.email,
+            `📦 New Fulfillment Order #${orderId.split('-')[0].toUpperCase()} from ICONJ`,
+            `
+              <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+                <div style="background: #0f172a; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                  <h1 style="margin: 0; font-size: 20px;">New Order for Fulfillment</h1>
+                  <p style="margin: 4px 0 0; opacity: 0.7; font-size: 14px;">Order #${orderId.split('-')[0].toUpperCase()}</p>
                 </div>
-              `
-            })
-          });
+                <div style="padding: 20px; border: 1px solid #e2e8f0; border-top: none;">
+                  <p>Hello ${group.name},</p>
+                  <p>Please fulfill the following items for a new order:</p>
+                  
+                  <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 20px;">
+                    <thead>
+                      <tr style="background: #f1f5f9; border-bottom: 2px solid #e2e8f0;">
+                        <th style="padding: 8px; text-align: left;">Product</th>
+                        <th style="padding: 8px; text-align: center;">Quantity</th>
+                      </tr>
+                    </thead>
+                    <tbody>${supplierItemRows}</tbody>
+                  </table>
+                  
+                  <h3 style="margin: 20px 0 8px; font-size: 14px; color: #64748b;">SHIPPING DETAILS</h3>
+                  <p style="margin: 0;"><strong>${addr.name || 'N/A'}</strong></p>
+                  <p style="margin: 2px 0; color: #475569; font-size: 14px;">${addr.phone || ''}</p>
+                  <p style="margin: 2px 0; color: #475569; font-size: 14px;">${addr.street || ''}, ${addr.city || ''}, ${addr.state || ''}</p>
+                  <p style="margin: 2px 0; color: #475569; font-size: 14px;">Nigeria</p>
+                </div>
+              </div>
+            `
+          );
         }
       } catch (supplierErr) {
         console.error("Failed to automate supplier emails:", supplierErr);
@@ -357,18 +348,11 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
           </div>
         `;
 
-        // Send to the admin email (using sendAdminNotification or direct fetch)
-        // Since sendAdminNotification is in @/lib/email, we can import it or just use fetch here to avoid changing imports.
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-          body: JSON.stringify({
-            from: "ICONJ Admin <noreply@iconj.com.ng>",
-            to: "ezeilodavid292@gmail.com", // Send to admin email directly
-            subject: `🚨 [ADMIN] New Order: #${orderId.split('-')[0].toUpperCase()}`,
-            html: adminEmailHtml
-          })
-        });
+        // Send to the admin email using our configured Nodemailer transport
+        await sendAdminNotification(
+          `🚨 [ADMIN] New Order: #${orderId.split('-')[0].toUpperCase()}`,
+          adminEmailHtml
+        );
       } catch (adminErr) {
         console.error("Failed to send admin notification:", adminErr);
       }
