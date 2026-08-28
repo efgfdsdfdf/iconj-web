@@ -130,33 +130,42 @@ export default function AddProductPage() {
       }
 
       // 2. Insert Product
-      const finalCost = productCost + shippingCost;
+      const finalCost = (productCost || 0) + (shippingCost || 0);
+      const safeSellingPrice = parseFloat(formData.selling_price) || 0;
+      const safeMoq = (typeof moq === "number" && !isNaN(moq)) ? moq : 1;
       
-      const createResult = await createProduct({
-        name: formData.name,
-        sku: formData.sku,
-        category: formData.category,
+      // Deep clone and sanitize pricingTiers to remove any hidden React event proxies or NaNs
+      const safePricingTiers = JSON.parse(JSON.stringify(pricingTiers, (k, v) => 
+        (typeof v === 'number' && isNaN(v)) ? null : v
+      ));
+      
+      const payload = {
+        name: String(formData.name || ""),
+        sku: String(formData.sku || ""),
+        category: String(formData.category || ""),
         base_supplier_cost: finalCost,
-        base_selling_price: parseFloat(formData.selling_price),
-        moq: moq === "" ? 1 : moq,
-        pricing_tiers: pricingTiers,
+        base_selling_price: safeSellingPrice,
+        moq: safeMoq,
+        pricing_tiers: safePricingTiers,
         is_configurable: false,
         requires_quote: false,
         images: uploadedUrls,
         variants: {
-          supplier_product_url: formData.supplier_product_url || null
+          supplier_product_url: formData.supplier_product_url ? String(formData.supplier_product_url) : null
         },
-        description: formData.description,
-        supplier_id: formData.supplier_id || null,
-        supplier_sku: formData.supplier_sku || null,
-        brand: formData.brand || null,
-        age_range: formData.age_range || null,
-        safety_info: formData.safety_info || null,
-        is_bundle: formData.is_bundle,
-        stock_status: formData.stock_status,
+        description: formData.description ? String(formData.description) : "",
+        supplier_id: formData.supplier_id ? String(formData.supplier_id) : null,
+        supplier_sku: formData.supplier_sku ? String(formData.supplier_sku) : null,
+        brand: formData.brand ? String(formData.brand) : null,
+        age_range: formData.age_range ? String(formData.age_range) : null,
+        safety_info: formData.safety_info ? String(formData.safety_info) : null,
+        is_bundle: Boolean(formData.is_bundle),
+        stock_status: String(formData.stock_status || "In Stock"),
         features: [],
         specifications: []
-      });
+      };
+
+      const createResult = await createProduct(payload);
 
       if (!createResult.success) {
         throw new Error(createResult.error || "Failed to create product");
