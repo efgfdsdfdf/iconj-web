@@ -3,13 +3,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
-import { ChevronLeft, Truck, ArrowDownRight, ArrowUpRight, Plus, RefreshCw } from "lucide-react";
+import { ChevronLeft, Truck, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/admin";
-import { RecordPaymentDialog } from "./RecordPaymentDialog";
-import { AddFundsDialog } from "./AddFundsDialog";
 import { DeleteSupplierButton } from "./DeleteSupplierButton";
-import { AdjustmentDialog } from "./AdjustmentDialog";
 
 export const revalidate = 0;
 
@@ -43,9 +40,10 @@ export default async function SupplierLedgerPage({ params }: { params: Promise<{
   // Fetch already paid order IDs from ledger
   const { data: paidTxs } = await supabaseAdmin
     .from("supplier_transactions")
-    .select("order_id")
+    .select("id, order_id, amount, created_at")
     .eq("transaction_type", "SUPPLIER_PAYMENT")
-    .eq("supplier_id", supplier.id);
+    .eq("supplier_id", supplier.id)
+    .order("created_at", { ascending: false });
     
   const paidOrderIds = new Set(paidTxs?.filter(t => t.order_id).map(t => t.order_id) || []);
 
@@ -105,151 +103,129 @@ export default async function SupplierLedgerPage({ params }: { params: Promise<{
           <div>
             <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
               <Truck className="w-6 h-6 text-slate-400" />
-              {supplier.name} Ledger
+              {supplier.name} Orders
               <DeleteSupplierButton supplierId={supplier.id} supplierName={supplier.name} />
             </h1>
-            <p className="text-sm text-slate-500">Immutable Financial Transaction Ledger</p>
-          </div>
-          <div className="flex gap-2">
-            <AdjustmentDialog supplier={supplier} />
-            <AddFundsDialog supplier={supplier} />
-            <RecordPaymentDialog supplier={supplier} currentBalance={currentBalance} pendingOrders={pendingOrders || []} />
+            <p className="text-sm text-slate-500">Track which orders you have paid the supplier for.</p>
           </div>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-6 mb-8">
-        <Card className="border-none shadow-sm bg-slate-900 text-white">
-          <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-400 mb-1">Available Balance</p>
-            <h3 className={`text-3xl font-bold ${currentBalance < 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-              {supplier.currency} {currentBalance.toLocaleString()}
-            </h3>
-          </CardContent>
-        </Card>
+      <div className="grid lg:grid-cols-2 gap-8">
         
+        {/* Pending Orders */}
         <Card className="border-none shadow-sm">
-          <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-500 mb-1">Total Funds Added</p>
-            <h3 className="text-2xl font-bold text-slate-900">{supplier.currency} {totalFundsAdded.toLocaleString()}</h3>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm">
-          <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-500 mb-1">Total Paid (Debits)</p>
-            <h3 className="text-2xl font-bold text-rose-600">{supplier.currency} {totalPayments.toLocaleString()}</h3>
-          </CardContent>
-        </Card>
-
-        <Card className="border-none shadow-sm ring-1 ring-amber-500/20 bg-amber-50/30">
-          <CardContent className="p-6">
-            <p className="text-sm font-medium text-amber-700 mb-1">Pending Supplier Cost</p>
-            <h3 className="text-2xl font-bold text-amber-700">{supplier.currency} {totalPendingCost.toLocaleString()}</h3>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        
-        {/* Ledger Table */}
-        <div className="lg:col-span-2">
-          <Card className="border-none shadow-sm">
-            <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg">Immutable Transaction Ledger</CardTitle>
-            </CardHeader>
-            <CardContent className="p-0">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-slate-50">
-                    <TableRow>
-                      <TableHead className="pl-6">Seq #</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Type</TableHead>
-                      <TableHead>Reference</TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                      <TableHead className="text-right pr-6">Balance</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {txs.length > 0 ? (
-                      txs.map((tx: any) => (
-                        <TableRow key={tx.id} className="hover:bg-slate-50">
-                          <TableCell className="pl-6 text-xs text-slate-400 font-mono">{tx.sequence_num}</TableCell>
-                          <TableCell className="text-xs text-slate-500 whitespace-nowrap">
-                            {new Date(tx.created_at).toLocaleString()}
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-xs font-bold uppercase tracking-wider text-slate-700">
-                              {tx.transaction_type.replace(/_/g, ' ')}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            {tx.order_id ? (
-                              <Link href={`/admin/orders/${tx.order_id}`} className="text-blue-600 hover:underline text-sm font-bold">
-                                #{tx.order_id.split("-")[0].toUpperCase()}
-                              </Link>
-                            ) : (
-                              <span className="text-sm text-slate-500">{tx.description || tx.reference || "Manual"}</span>
-                            )}
-                          </TableCell>
-                          <TableCell className={`text-right font-bold ${tx.credit_debit === 'CREDIT' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                            <div className="flex items-center justify-end gap-1">
-                              {tx.credit_debit === 'CREDIT' ? <ArrowUpRight className="w-3 h-3"/> : <ArrowDownRight className="w-3 h-3"/>}
-                              {supplier.currency} {Number(tx.amount).toLocaleString()}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-right pr-6 font-bold text-slate-900">
-                            {supplier.currency} {Number(tx.new_balance).toLocaleString()}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={6} className="h-32 text-center text-slate-500">
-                          No transactions recorded. Ledger is empty.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Pending Orders Sidebar */}
-        <div className="space-y-6">
-          <Card className="border-none shadow-sm">
-            <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg">Orders Awaiting Payment</CardTitle>
-            </CardHeader>
-            <CardContent className="pt-6">
-              {pendingOrders && pendingOrders.length > 0 ? (
-                <div className="space-y-4">
-                  {pendingOrders.map((o: any) => (
-                    <div key={o.id} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                      <div>
-                        <Link href={`/admin/orders/${o.id}`} className="text-sm font-bold text-blue-600 hover:underline block">
-                          #{o.id.split("-")[0].toUpperCase()}
-                        </Link>
-                        <span className="text-[10px] uppercase font-bold text-amber-600 bg-amber-100 px-2 py-0.5 rounded mt-1 inline-block">
-                          {o.supplier_order_status}
-                        </span>
-                      </div>
-                      <div className="text-right font-bold text-slate-900 text-sm">
+          <CardHeader className="border-b pb-4 bg-amber-50 rounded-t-xl">
+            <CardTitle className="text-lg text-amber-800">Orders Awaiting Payment</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-6">
+            {pendingOrders && pendingOrders.length > 0 ? (
+              <div className="space-y-4">
+                {pendingOrders.map((o: any) => (
+                  <div key={o.id} className="flex justify-between items-center p-4 bg-white rounded-lg border shadow-sm">
+                    <div>
+                      <Link href={`/admin/orders/${o.id}`} className="text-sm font-bold text-blue-600 hover:underline block">
+                        Order #{o.id.split("-")[0].toUpperCase()}
+                      </Link>
+                      <span className="text-xs text-slate-500 block mt-1">
+                        Placed on {new Date(o.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right font-bold text-slate-900 text-lg">
                         {supplier.currency} {Number(o.supplier_cost).toLocaleString()}
                       </div>
+                      <form action={async () => {
+                        "use server";
+                        const { createServerClient } = await import("@supabase/ssr");
+                        const { cookies } = await import("next/headers");
+                        const adminId = (await (await import("@/lib/auth/admin")).requireAdmin());
+                        
+                        const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!, { cookies: { get() { return undefined; } } });
+                        
+                        // Auto-fund and pay in one step
+                        await supabase.from("supplier_transactions").insert({
+                          supplier_id: supplier.id,
+                          transaction_type: "FUNDS_ADDED",
+                          credit_debit: "CREDIT",
+                          amount: o.supplier_cost,
+                          reference: "AUTO-FUND",
+                          description: `Funding for order #${o.id.split("-")[0].toUpperCase()}`,
+                          admin_id: adminId
+                        });
+                        
+                        await supabase.from("supplier_transactions").insert({
+                          supplier_id: supplier.id,
+                          order_id: o.id,
+                          transaction_type: "SUPPLIER_PAYMENT",
+                          credit_debit: "DEBIT",
+                          amount: o.supplier_cost,
+                          reference: "PAID",
+                          description: `Payment for order #${o.id.split("-")[0].toUpperCase()}`,
+                          admin_id: adminId
+                        });
+                        
+                        const { revalidatePath } = await import("next/cache");
+                        revalidatePath(`/admin/supplier/${supplier.id}`);
+                        revalidatePath(`/admin/supplier`);
+                      }}>
+                        <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">Mark as Paid</Button>
+                      </form>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-slate-500 text-center py-4">No pending orders.</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-500">
+                <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-400 mb-3" />
+                <p>All orders have been paid!</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
+        {/* Paid Orders */}
+        <Card className="border-none shadow-sm">
+          <CardHeader className="border-b pb-4 bg-slate-50 rounded-t-xl">
+            <CardTitle className="text-lg text-slate-800">Recently Paid Orders</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Order</TableHead>
+                  <TableHead>Date Paid</TableHead>
+                  <TableHead className="text-right">Amount</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {paidTxs && paidTxs.length > 0 ? (
+                  paidTxs.slice(0, 20).map((tx: any) => (
+                    <TableRow key={tx.id}>
+                      <TableCell>
+                        <Link href={`/admin/orders/${tx.order_id}`} className="text-sm font-bold text-blue-600 hover:underline">
+                          #{tx.order_id?.split("-")[0].toUpperCase()}
+                        </Link>
+                      </TableCell>
+                      <TableCell className="text-xs text-slate-500">
+                        {new Date(tx.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right font-bold text-slate-700">
+                        {supplier.currency} {Number(tx.amount).toLocaleString()}
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8 text-slate-500">
+                      No payments recorded yet.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </main>
   );
