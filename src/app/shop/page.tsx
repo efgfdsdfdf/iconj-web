@@ -14,6 +14,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const q = params.q;
   const category = params.category;
   const filter = params.filter; // e.g. "wholesale"
+  const page = parseInt(params.page || "1");
+  const itemsPerPage = 20;
+  const from = (page - 1) * itemsPerPage;
+  const to = from + itemsPerPage - 1;
 
   // Fetch dynamic categories
   const { data: dbCategories } = await supabase.from("categories").select("*").eq("is_active", true).order("name");
@@ -30,10 +34,11 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   let query = supabase
     .from("products")
-    .select("*, stores(store_name, slug)")
+    .select("*, stores(store_name, slug)", { count: "exact" })
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .limit(100);
+    .range(from, to)
+    .order('created_at', { ascending: false });
 
   if (category) {
     const selectedCat = categories?.find(c => c.id === category);
@@ -54,8 +59,22 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     query = query.or(`name.ilike.%${q}%,description.ilike.%${q}%`);
   }
   
-  const { data: rawProducts } = await query;
-  const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5) : [];
+  const { data: rawProducts, count } = await query;
+  const products = rawProducts || [];
+  const totalItems = count || 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
+
+  // Preserve existing query params for pagination links
+  const buildPageUrl = (newPage: number) => {
+    const searchParams = new URLSearchParams();
+    if (q) searchParams.set("q", q);
+    if (category) searchParams.set("category", category);
+    if (filter) searchParams.set("filter", filter);
+    searchParams.set("page", newPage.toString());
+    return `/shop?${searchParams.toString()}`;
+  };
 
   const getProductImage = (catName: string) => {
     return "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&q=80";
@@ -184,10 +203,31 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
                   
                   {(!products || products.length === 0) && (
                     <div className="col-span-full py-12 text-center text-slate-500">
-                      No products found. Add some from the Admin Dashboard!
+                      No products found. Try adjusting your filters.
                     </div>
                   )}
                 </div>
+
+                {/* Pagination Controls */}
+                {(hasPrevPage || hasNextPage) && (
+                  <div className="flex justify-center items-center gap-4 mt-8 pb-4">
+                    {hasPrevPage ? (
+                      <Link href={buildPageUrl(page - 1)}><Button variant="outline">Previous</Button></Link>
+                    ) : (
+                      <Button variant="outline" disabled>Previous</Button>
+                    )}
+                    
+                    <span className="text-sm font-medium text-slate-500">
+                      Page {page} of {totalPages}
+                    </span>
+
+                    {hasNextPage ? (
+                      <Link href={buildPageUrl(page + 1)}><Button variant="outline">Next</Button></Link>
+                    ) : (
+                      <Button variant="outline" disabled>Next</Button>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

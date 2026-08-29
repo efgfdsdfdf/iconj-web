@@ -8,19 +8,28 @@ import { AutoScrollingCategories } from "@/components/AutoScrollingCategories";
 
 export const revalidate = 0;
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
   const supabase = await createClient();
+  const params = await searchParams;
+  const page = parseInt(params.page || "1");
+  const itemsPerPage = 20;
+  const from = (page - 1) * itemsPerPage;
+  const to = from + itemsPerPage - 1;
 
-  const { data: rawProducts } = await supabase
+  const { data: rawProducts, count } = await supabase
     .from("products")
-    .select("*")
+    .select("*", { count: "exact" })
     .eq('approval_status', 'approved')
     .eq('is_active', true)
     .order('is_featured', { ascending: false })
     .order('created_at', { ascending: false })
-    .limit(100);
+    .range(from, to);
     
   const products = rawProducts || [];
+  const totalItems = count || 0;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const hasNextPage = page < totalPages;
+  const hasPrevPage = page > 1;
 
   const { data: dbCategories } = await supabase.from("categories").select("*").order("created_at");
   const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
@@ -148,6 +157,27 @@ export default async function Home() {
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
+            
+            {/* Pagination Controls */}
+            {(hasPrevPage || hasNextPage) && (
+              <div className="flex justify-center items-center gap-4 mt-8">
+                {hasPrevPage ? (
+                  <Link href={`/?page=${page - 1}`}><Button variant="outline">Previous</Button></Link>
+                ) : (
+                  <Button variant="outline" disabled>Previous</Button>
+                )}
+                
+                <span className="text-sm font-medium text-slate-500">
+                  Page {page} of {totalPages}
+                </span>
+
+                {hasNextPage ? (
+                  <Link href={`/?page=${page + 1}`}><Button variant="outline">Next</Button></Link>
+                ) : (
+                  <Button variant="outline" disabled>Next</Button>
+                )}
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
