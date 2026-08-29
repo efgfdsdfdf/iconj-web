@@ -12,9 +12,13 @@ export async function deleteProduct(productId: string) {
   if (error) {
     // 23503 is Foreign Key Violation in Postgres
     if (error.code === "23503") {
+      const { data: prod } = await supabaseAdmin.from("products").select("name").eq("id", productId).single();
+      const newName = prod ? `[DELETED] ${prod.name}` : `[DELETED] ${productId}`;
+
       const { error: softErr } = await supabaseAdmin.from("products").update({
         is_active: false,
-        approval_status: "deleted"
+        approval_status: "rejected",
+        name: newName
       }).eq("id", productId);
       if (softErr) return { success: false, error: softErr.message };
     } else {

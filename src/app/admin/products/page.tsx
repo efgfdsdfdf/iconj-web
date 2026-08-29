@@ -13,7 +13,7 @@ export default async function AdminProductsPage() {
   const { data: products } = await supabase
     .from("products")
     .select("*")
-    .neq("approval_status", "deleted")
+    .not("name", "ilike", "[DELETED]%")
     .order("created_at", { ascending: false });
 
   return (

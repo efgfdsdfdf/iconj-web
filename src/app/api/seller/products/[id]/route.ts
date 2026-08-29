@@ -143,9 +143,13 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   if (error) {
     if (error.code === "23503") {
+      const { data: prod } = await supabaseAdmin.from("products").select("name").eq("id", id).single();
+      const newName = prod ? `[DELETED] ${prod.name}` : `[DELETED] ${id}`;
+
       const { error: softErr } = await supabaseAdmin.from("products").update({
         is_active: false,
-        approval_status: "deleted"
+        approval_status: "rejected",
+        name: newName
       }).eq("id", id).eq("seller_id", seller.id);
       
       if (softErr) {
