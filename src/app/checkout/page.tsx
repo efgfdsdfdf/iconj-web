@@ -29,6 +29,7 @@ export default function CheckoutPage() {
   });
 
   const [step, setStep] = useState<"address" | "payment">("address");
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     setMounted(true);
@@ -63,11 +64,20 @@ export default function CheckoutPage() {
             setUseSavedAddress(true);
           }
         });
+        setCheckingAuth(false);
+      } else {
+        router.push("/login?redirect=/checkout");
       }
     });
-  }, [supabase]);
+  }, [supabase, router]);
 
-  if (!mounted) return null;
+  if (!mounted || checkingAuth) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="w-8 h-8 border-4 border-slate-200 border-t-rose-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   if (items.length === 0) {
     return (
