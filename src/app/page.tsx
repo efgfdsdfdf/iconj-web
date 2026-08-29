@@ -16,9 +16,11 @@ export default async function Home() {
     .select("*")
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .limit(50);
+    .order('is_featured', { ascending: false })
+    .order('created_at', { ascending: false })
+    .limit(100);
     
-  const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 5) : [];
+  const products = rawProducts || [];
 
   const { data: dbCategories } = await supabase.from("categories").select("*").order("created_at");
   const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
