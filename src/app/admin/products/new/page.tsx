@@ -16,7 +16,7 @@ export default function AddProductPage() {
   const supabase = createClient();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [categoriesList, setCategoriesList] = useState<string[]>(["Nursery & Furniture", "Baby Feeding & Nursing", "Baby Care & Bath", "Baby Clothing & Accessories", "Baby Travel", "Toys & Development", "Maternity & Mother Care", "Gifts & Bundles"]);
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
 
   const [suppliersList, setSuppliersList] = useState<any[]>([]);
 
@@ -40,7 +40,7 @@ export default function AddProductPage() {
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
-    name: "", sku: "", category: "Newborn Essentials",
+    name: "", sku: "", category: "",
     product_cost: "", shipping_cost: "", selling_price: "",
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
@@ -63,7 +63,7 @@ export default function AddProductPage() {
 
   useEffect(() => {
     if (totalCost > 0 && calculatedSellingPrice === 0) {
-      // Default auto-calc for ~40% margin for baby goods
+      // Default auto-calc for ~40% margin
       const recommendedPrice = Math.round(totalCost / 0.6);
       setFormData(prev => ({ ...prev, selling_price: recommendedPrice.toString() }));
     }
@@ -202,8 +202,8 @@ export default function AddProductPage() {
           <Button variant="ghost" size="icon"><ChevronLeft className="w-5 h-5" /></Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Add New Baby Product</h1>
-          <p className="text-slate-500">Create a new item in your Mother & Baby catalog.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Add New Product</h1>
+          <p className="text-slate-500">Create a new item for your catalog.</p>
         </div>
       </div>
 
@@ -300,16 +300,16 @@ export default function AddProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2 md:col-span-2">
                   <Label>Product Name</Label>
-                  <Input required placeholder="e.g. Premium Newborn Swaddle Set" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                  <Input required placeholder="e.g. Premium Blackout Roller Blind 120x200cm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <Label>Brand</Label>
-                  <Input placeholder="e.g. ICONJ Baby" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
+                  <Input placeholder="e.g. ICONJ" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <Label>Product ID (SKU)</Label>
                   <Input readOnly value="Will be auto-generated" className="bg-slate-50 text-slate-500 cursor-not-allowed" />
-                  <p className="text-[10px] text-slate-400">Unique ID generated on save (e.g. ICONJ-BABY-001)</p>
+                  <p className="text-[10px] text-slate-400">Unique ID generated on save (e.g. ICONJ-BLIND-001)</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
@@ -329,16 +329,16 @@ export default function AddProductPage() {
           </Card>
 
           <Card className="border-none shadow-sm">
-            <CardHeader><CardTitle>Baby & Mother Specifications</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Product Specifications</CardTitle></CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Age Range</Label>
-                  <Input placeholder="e.g. 0-6 Months, Toddler" value={formData.age_range} onChange={e => setFormData({...formData, age_range: e.target.value})} />
+                  <Label>Variant / Size (optional)</Label>
+                  <Input placeholder="e.g. 120x200cm, King Size" value={formData.age_range} onChange={e => setFormData({...formData, age_range: e.target.value})} />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Safety Information & Warnings</Label>
-                  <Textarea placeholder="e.g. BPA-Free, FDA Approved. Always supervise baby during use." className="h-20 bg-amber-50" value={formData.safety_info} onChange={e => setFormData({...formData, safety_info: e.target.value})} />
+                  <Label>Additional Notes / Warnings</Label>
+                  <Textarea placeholder="e.g. Installation included. Suitable for all wall types." className="h-20 bg-amber-50" value={formData.safety_info} onChange={e => setFormData({...formData, safety_info: e.target.value})} />
                 </div>
               </div>
             </CardContent>
@@ -468,7 +468,7 @@ export default function AddProductPage() {
               
               <div className="flex items-center gap-2 pt-2">
                 <input type="checkbox" id="featured" className="w-4 h-4 rounded text-blue-600" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
-                <Label htmlFor="featured" className="font-normal cursor-pointer">Mother's Pick (Featured)</Label>
+                <Label htmlFor="featured" className="font-normal cursor-pointer">Featured Product</Label>
               </div>
               
               <div className="flex items-center gap-2">
