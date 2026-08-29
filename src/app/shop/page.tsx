@@ -118,7 +118,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         </>
       )}
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-0 sm:px-4">
         <div className="flex flex-col lg:flex-row gap-6">
           
           {/* Desktop Sidebar Filters */}
@@ -164,9 +164,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
           {/* Main Product Grid */}
           <div className="flex-1">
-            <Card className="border-none shadow-sm bg-white mb-4">
-              <CardContent className="p-2 sm:p-4 pt-4 sm:pt-6">
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
+            <Card className="border-none shadow-none sm:shadow-sm bg-transparent sm:bg-white mb-4 rounded-none sm:rounded-xl">
+              <CardContent className="p-0 sm:p-4 pt-2 sm:pt-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-1 sm:gap-6">
                   {products?.map((product: any) => {
                     const p = { ...product, images: product.images || [getProductImage(product.category)] };
                     return <ProductCard key={product.id} product={p} />;

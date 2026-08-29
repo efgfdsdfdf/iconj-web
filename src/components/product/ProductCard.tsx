@@ -36,9 +36,9 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
 
   return (
     <div 
-      className={`group flex flex-col h-full bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-3 border border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''} ${isOutOfStock ? 'opacity-75 grayscale-[0.2]' : ''}`}
+      className={`group flex flex-col h-full bg-white rounded-none sm:rounded-lg shadow-sm hover:shadow-md transition-shadow p-2 sm:p-3 border sm:border-slate-100 ${hideOnLg ? 'hidden lg:flex' : ''} ${isOutOfStock ? 'opacity-75 grayscale-[0.2]' : ''}`}
     >
-      <Link href={`/shop/${product.id}`} className="block relative aspect-[4/5] bg-slate-100 rounded mb-3 overflow-hidden">
+      <Link href={`/shop/${product.id}`} className="block relative aspect-[4/5] bg-slate-100 rounded-none sm:rounded mb-2 sm:mb-3 overflow-hidden">
         <Image 
           src={product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"} 
           alt={product.name}
