@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ProductDetailsClient } from "./ProductDetailsClient";
 import { Reviews } from "./Reviews";
 import { ProductCard } from "@/components/product/ProductCard";
+import { ProductDescription } from "./ProductDescription";
 
 export const revalidate = 0;
 
@@ -118,46 +119,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         {/* Rich Content Below The Fold */}
         <div className="mt-8 grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h2 className="text-xl font-bold text-slate-900 mb-4 pb-4 border-b">Product Description</h2>
-              <div className="text-slate-700 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
-                {product.description || "No description provided."}
-              </div>
-            </div>
-
-            {(product.features?.length > 0 || product.specifications?.length > 0) && (
-              <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h2 className="text-xl font-bold text-slate-900 mb-4 pb-4 border-b">Product Details</h2>
-                
-                {product.features?.length > 0 && (
-                  <div className="mb-6">
-                    <h3 className="font-semibold text-slate-900 mb-3">Key Features</h3>
-                    <ul className="grid sm:grid-cols-2 gap-3">
-                      {product.features.map((feature: string, idx: number) => (
-                        <li key={idx} className="flex items-start gap-2 text-sm text-slate-700">
-                          <Check className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {product.specifications?.length > 0 && (
-                  <div>
-                    <h3 className="font-semibold text-slate-900 mb-3">Specifications</h3>
-                    <div className="border rounded-md overflow-hidden">
-                      {product.specifications.map((spec: any, idx: number) => (
-                        <div key={idx} className={`flex text-sm ${idx % 2 === 0 ? "bg-slate-50" : "bg-white"} border-b last:border-0`}>
-                          <div className="w-1/3 py-2 px-4 font-medium text-slate-700 border-r">{spec.key}</div>
-                          <div className="w-2/3 py-2 px-4 text-slate-600">{spec.value}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
+            <ProductDescription product={product} />
           </div>
 
           {/* Trust Sidebar & Seller Info */}
@@ -168,45 +130,32 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
               {product.stores ? (
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center border shrink-0 overflow-hidden">
+                    <div className="w-12 h-12 rounded-full bg-slate-100 border overflow-hidden shrink-0">
                       {product.stores.logo_url ? (
                         <img src={product.stores.logo_url} alt={product.stores.store_name} className="w-full h-full object-cover" />
                       ) : (
-                        <span className="text-lg font-bold text-slate-400">{product.stores.store_name.charAt(0).toUpperCase()}</span>
+                        <div className="w-full h-full flex items-center justify-center text-slate-400 font-bold text-lg">
+                          {product.stores.store_name.charAt(0)}
+                        </div>
                       )}
                     </div>
                     <div>
-                      <Link href={`/store/${product.stores.slug}`} className="font-bold text-base text-blue-600 hover:underline line-clamp-1">
+                      <Link href={`/store/${product.stores.slug}`} className="font-bold text-base text-blue-600 hover:underline">
                         {product.stores.store_name}
                       </Link>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${product.is_wholesale_enabled ? 'bg-amber-100 text-amber-700' : 'bg-blue-100 text-blue-700'}`}>
-                          {product.is_wholesale_enabled ? 'Wholesale Seller' : 'Retail Seller'}
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase bg-emerald-100 text-emerald-700">
+                          Verified Seller
                         </span>
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="flex justify-between items-center text-sm border-t pt-3 mt-1">
-                    <div className="text-slate-500">
-                      Joined {new Date(product.stores.created_at).getFullYear()}
-                    </div>
-                    <div className="flex items-center gap-1 text-emerald-600 font-medium text-xs">
-                      <ShieldCheck className="w-4 h-4" /> Verified
-                    </div>
-                  </div>
-                  
-                  <Link href={`/store/${product.stores.slug}`} className="w-full">
-                    <button className="w-full py-2 bg-slate-50 hover:bg-slate-100 border text-slate-700 text-sm font-bold rounded-md transition-colors">
-                      Visit Store
-                    </button>
-                  </Link>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center border shrink-0">
-                      <Star className="w-6 h-6 fill-white text-white" />
+                    <div className="w-12 h-12 rounded-full bg-orange-100 border overflow-hidden shrink-0 flex items-center justify-center">
+                      <span className="font-bold text-orange-600">IC</span>
                     </div>
                     <div>
                       <div className="font-bold text-base text-slate-900">ICONJ Official</div>
@@ -257,10 +206,14 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
             <h2 className="text-2xl font-bold text-slate-900">You Might Also Like</h2>
             <Link href="/shop" className="text-blue-600 hover:underline text-sm font-medium">View All</Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {recommended?.map((rec: any, idx: number) => {
-              const p = { ...rec, images: rec.images || [getProductImage(rec.category)] };
-              return <ProductCard key={rec.id} product={p} hideOnLg={idx === 4} />;
+          <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory no-scrollbar">
+            {recommended?.map((rec: any) => {
+              const p = { ...rec, images: rec.images || [] };
+              return (
+                <div key={rec.id} className="w-[160px] md:w-[220px] lg:w-[240px] shrink-0 snap-start">
+                  <ProductCard product={p} />
+                </div>
+              );
             })}
           </div>
         </div>

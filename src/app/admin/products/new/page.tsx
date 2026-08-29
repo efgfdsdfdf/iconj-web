@@ -29,6 +29,19 @@ export default function AddProductPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
+  // Specifications
+  const [specifications, setSpecifications] = useState<{key: string, value: string}[]>([]);
+
+  const addSpecification = () => setSpecifications([...specifications, { key: "", value: "" }]);
+  const updateSpecification = (index: number, field: "key" | "value", val: string) => {
+    const newSpecs = [...specifications];
+    newSpecs[index][field] = val;
+    setSpecifications(newSpecs);
+  };
+  const removeSpecification = (index: number) => {
+    setSpecifications(specifications.filter((_, i) => i !== index));
+  };
+
   // 1. Basic Info
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
@@ -149,7 +162,7 @@ export default function AddProductPage() {
         is_wholesale_enabled: formData.is_wholesale_enabled,
         stock_status: formData.stock_status || "In Stock",
         features: [],
-        specifications: [],
+        specifications: specifications.filter(s => s.key && s.value),
       };
 
       // 3. Create product via API route
@@ -346,6 +359,25 @@ export default function AddProductPage() {
                   <Input placeholder="e.g. https://alibaba.com/..." value={formData.supplier_product_url} onChange={e => setFormData({...formData, supplier_product_url: e.target.value})} />
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm">
+            <CardHeader><CardTitle>Product Specifications (Table Format)</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-500 mb-2">Add details here to automatically generate a clean specifications table on the product page.</p>
+              {specifications.map((spec, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <Input placeholder="e.g. Material" value={spec.key} onChange={e => updateSpecification(i, 'key', e.target.value)} className="w-1/3" />
+                  <Input placeholder="e.g. 100% Cotton" value={spec.value} onChange={e => updateSpecification(i, 'value', e.target.value)} className="flex-1" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeSpecification(i)} className="text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" variant="outline" size="sm" onClick={addSpecification} className="mt-2 text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100">
+                <Plus className="w-4 h-4 mr-1" /> Add Specification Row
+              </Button>
             </CardContent>
           </Card>
 
