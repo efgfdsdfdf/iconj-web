@@ -18,9 +18,10 @@ export function ProductDescription({ product }: { product: any }) {
 
   const FullContent = () => (
     <div className="space-y-8">
-      <div className="text-slate-700 leading-relaxed whitespace-pre-wrap text-sm md:text-base">
-        {descriptionText}
-      </div>
+      <div 
+        className="text-slate-700 leading-relaxed text-sm md:text-base prose prose-sm max-w-none"
+        dangerouslySetInnerHTML={{ __html: descriptionText }}
+      />
 
       {(hasFeatures || hasSpecs) && (
         <div className="pt-6 border-t mt-6">

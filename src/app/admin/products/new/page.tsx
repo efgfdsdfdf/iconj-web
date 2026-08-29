@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 } from "lucide-react";
@@ -310,8 +311,12 @@ export default function AddProductPage() {
                   </select>
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Product Description</Label>
-                  <Textarea placeholder="Describe the materials, comfort, and benefits..." className="h-32" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
+                  <RichTextEditor 
+                    label="Product Description"
+                    placeholder="Paste directly from supplier here (retains bold, bullets, tables...)" 
+                    value={formData.description} 
+                    onChange={val => setFormData({...formData, description: val})} 
+                  />
                 </div>
               </div>
             </CardContent>
