@@ -127,7 +127,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                       <div className="text-right flex flex-col items-end gap-2">
                         <div className="font-bold text-slate-900">₦{(item.unit_price * item.quantity).toLocaleString()}</div>
                         <div className="text-sm text-slate-500">Qty: {item.quantity} × ₦{item.unit_price.toLocaleString()}</div>
-                        <CopyToSupplierButton item={item} />
+                        <CopyToSupplierButton item={item} address={address} />
                       </div>
                     </div>
                 ))}

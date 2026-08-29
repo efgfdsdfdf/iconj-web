@@ -5,7 +5,7 @@ import { Copy, Check } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-export function CopyToSupplierButton({ item }: { item: any }) {
+export function CopyToSupplierButton({ item, address }: { item: any, address?: any }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -20,13 +20,22 @@ export function CopyToSupplierButton({ item }: { item: any }) {
     if (config.variant_string) specs.push(`Variant: ${config.variant_string}`);
     if (config.custom_notes) specs.push(`Notes: ${config.custom_notes}`);
 
+    let addressBlock = "";
+    if (address) {
+      addressBlock = `\n\nShipping Address:
+Name: ${address.name || "N/A"}
+Phone: ${address.phone || "N/A"}
+Street: ${address.street || "N/A"}
+City/State: ${address.city || ""}${address.state ? `, ${address.state}` : ""}, Nigeria`;
+    }
+
     const textToCopy = `Order Request
 Product: ${config.product_name || item.product?.name}
 SKU: ${sku}
 Quantity: ${item.quantity}
 ${url ? `URL: ${url}\n` : ''}
 Details:
-${specs.join('\n')}`;
+${specs.join('\n')}${addressBlock}`;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
