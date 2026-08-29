@@ -118,12 +118,12 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         
         {/* Rich Content Below The Fold */}
         <div className="mt-8 grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-8 min-w-0 w-full overflow-hidden">
             <ProductDescription product={product} />
           </div>
 
           {/* Trust Sidebar & Seller Info */}
-          <div className="space-y-4">
+          <div className="space-y-4 min-w-0">
             {/* Jumia-style Sold By Card */}
             <div className="bg-white rounded-lg shadow-sm border p-5">
               <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-wider">Sold By</h3>
