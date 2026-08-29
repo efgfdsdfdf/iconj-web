@@ -26,17 +26,22 @@ export const viewport: Viewport = {
 };
 
 import { PwaInstallBanner } from "@/components/layout/PwaInstallBanner";
+import { createClient } from "@/lib/supabase/server";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: dbCategories } = await supabase.from("categories").select("id, name").order("created_at");
+  const categories = dbCategories || [];
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
         <PwaInstallBanner />
-        <Navbar />
+        <Navbar categories={categories} />
         <main className="flex-1">
           {children}
         <Toaster position="top-center" />

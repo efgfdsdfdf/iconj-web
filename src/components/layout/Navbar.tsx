@@ -10,7 +10,11 @@ import { useEffect, useState, useRef } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function Navbar() {
+interface NavbarProps {
+  categories?: { id: string; name: string }[];
+}
+
+export function Navbar({ categories = [] }: NavbarProps) {
   const [mounted, setMounted] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
@@ -267,17 +271,17 @@ export function Navbar() {
 
       {/* Category Navigation Bar (Desktop) */}
       <nav className="hidden lg:flex w-full bg-slate-800 text-white shadow-md relative z-40">
-        <div className="container mx-auto px-4 h-12 flex items-center gap-8 text-sm font-medium">
-          <button className="flex items-center hover:text-orange-400 transition-colors">
+        <div className="container mx-auto px-4 h-12 flex items-center gap-8 text-sm font-medium overflow-x-auto whitespace-nowrap scrollbar-hide">
+          <Link href="/shop" className="flex items-center hover:text-orange-400 transition-colors">
             <Menu className="w-5 h-5 mr-2" />
             All Categories
-          </button>
-          <div className="w-px h-6 bg-slate-600"></div>
-          <Link href="/shop?category=roller-blinds" className="hover:text-blue-400 transition-colors">Roller Blinds</Link>
-          <Link href="/shop?category=zebra-blinds" className="hover:text-blue-400 transition-colors">Zebra Blinds</Link>
-          <Link href="/shop?category=venetian-blinds" className="hover:text-blue-400 transition-colors">Venetian Blinds</Link>
-          <Link href="/shop?category=motorized" className="hover:text-blue-400 transition-colors">Motorized Blinds</Link>
-          <Link href="/shop?category=curtains" className="hover:text-blue-400 transition-colors">Curtains</Link>
+          </Link>
+          <div className="w-px h-6 bg-slate-600 shrink-0"></div>
+          {categories.slice(0, 7).map(cat => (
+            <Link key={cat.id} href={`/shop?category=${cat.id}`} className="hover:text-blue-400 transition-colors">
+              {cat.name}
+            </Link>
+          ))}
         </div>
       </nav>
 
@@ -320,10 +324,14 @@ export function Navbar() {
               <Link href="/contact" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Contact Us</Link>
               
               <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Our Categories</p>
-              <Link href="/shop?category=roller-blinds" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Roller Blinds</Link>
-              <Link href="/shop?category=zebra-blinds" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Zebra Blinds</Link>
-              <Link href="/shop?category=venetian-blinds" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Venetian Blinds</Link>
-              <Link href="/shop?category=curtains" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Curtains</Link>
+              {categories.slice(0, 7).map(cat => (
+                <Link key={cat.id} href={`/shop?category=${cat.id}`} className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">
+                  {cat.name}
+                </Link>
+              ))}
+              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-blue-600 border-b border-slate-100">
+                See All Categories &rarr;
+              </Link>
               
               <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">My Account</p>
               <Link href="/account" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Dashboard</Link>
