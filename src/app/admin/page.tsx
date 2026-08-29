@@ -62,6 +62,30 @@ export default async function AdminDashboardPage() {
     .select("total_amount")
     .eq("payment_status", "PAID");
   const totalRevenue = paidOrders?.reduce((sum, o) => sum + Number(o.total_amount), 0) || 0;
+
+  // Calculate Net Profit
+  // Profit = Total Revenue - Total Supplier Cost - Total Seller Commissions
+  const { data: allCommissions } = await supabaseAdmin
+    .from("commissions")
+    .select("seller_net_amount");
+  const totalCommissions = allCommissions?.reduce((sum, c) => sum + Number(c.seller_net_amount), 0) || 0;
+
+  const { data: rawPaidItems } = await supabaseAdmin
+    .from("order_items")
+    .select("quantity, unit_price, orders!inner(payment_status), products!inner(base_supplier_cost, base_selling_price)")
+    .eq("orders.payment_status", "PAID");
+
+  let totalSupplierCost = 0;
+  rawPaidItems?.forEach((item: any) => {
+    let cp = item.products?.base_supplier_cost || 0;
+    const sp = item.products?.base_selling_price || 0;
+    if (sp > 0 && cp > 0) {
+      cp = item.unit_price * (cp / sp);
+    }
+    totalSupplierCost += (cp * item.quantity);
+  });
+
+  const netProfit = totalRevenue - totalSupplierCost - totalCommissions;
   
   // Total Sellers
   const { count: totalSellers } = await supabaseAdmin
@@ -131,7 +155,20 @@ export default async function AdminDashboardPage() {
       {/* KPI Cards */}
       <div className="mt-8 mb-8">
         <h2 className="text-sm font-bold text-slate-800 mb-4 uppercase tracking-wider">Platform Statistics</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Card className="border-none shadow-sm bg-gradient-to-br from-emerald-500 to-teal-600 text-white">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-2">
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+                  <BadgeCheck className="w-5 h-5" />
+                </div>
+              </div>
+              <p className="text-sm font-medium text-emerald-50 mb-1">Net Platform Profit</p>
+              <h3 className="text-2xl font-bold text-white">₦{netProfit.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
+              <p className="text-xs text-emerald-100 mt-1">Total revenue minus all costs</p>
+            </CardContent>
+          </Card>
+
           <Card className="border-none shadow-sm">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-2">
@@ -139,7 +176,7 @@ export default async function AdminDashboardPage() {
                   <Wallet className="w-5 h-5" />
                 </div>
               </div>
-              <p className="text-sm font-medium text-slate-500 mb-1">Total Platform Revenue (Paid)</p>
+              <p className="text-sm font-medium text-slate-500 mb-1">Total Revenue (Gross)</p>
               <h3 className="text-2xl font-bold text-slate-900">₦{totalRevenue.toLocaleString()}</h3>
             </CardContent>
           </Card>
@@ -170,7 +207,6 @@ export default async function AdminDashboardPage() {
           </Card>
         </div>
       </div>
-
     </main>
   );
 }
