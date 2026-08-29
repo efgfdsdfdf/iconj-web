@@ -60,6 +60,8 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
       width: customConfig ? `${customConfig.width}cm` : (selectedSize || "Standard"),
       height: customConfig ? `${customConfig.height}cm` : (selectedSize || "Standard"),
       motorType: customConfig?.isMotorized ? "Motorized" : (selectedMotor || "Manual"),
+      fabric: selectedFabric || "",
+      selectedVariant: selectedFabric || "",
       image: images[0],
       requiresInstall: customConfig?.requiresInstall || false,
     });

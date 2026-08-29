@@ -14,6 +14,7 @@ export interface CartItem {
   height?: number;
   motorType?: string;
   fabric?: string;
+  selectedVariant?: string;
   configuration?: any;
   storeName?: string;
   requiresInstall?: boolean;
