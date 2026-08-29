@@ -72,60 +72,104 @@ export default async function SellerDashboard() {
 
       {/* Welcome Banner (shown for newly approved sellers) */}
       {!setupComplete && (
-        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl p-8 shadow-lg">
-          <div className="flex items-start gap-4">
-            <div className="w-14 h-14 bg-white/20 rounded-full flex items-center justify-center shrink-0">
-              <CheckCircle2 className="w-8 h-8" />
+        <div className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-md">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 bg-white/20 rounded-xl sm:rounded-full flex items-center justify-center shrink-0 mt-0.5">
+              <CheckCircle2 className="w-5 h-5 sm:w-7 sm:h-7" />
             </div>
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl font-bold">Welcome to the ICONJ Seller Center! 🎉</h2>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2.5 mb-1 sm:mb-1.5">
+                <h2 className="text-base sm:text-xl md:text-2xl font-bold tracking-tight">
+                  Welcome to ICONJ Seller Center! 🎉
+                </h2>
                 {seller.seller_identifier && (
-                  <span className="bg-emerald-900/50 text-emerald-100 px-3 py-1 rounded-full text-xs font-mono font-bold border border-emerald-500/30">
+                  <span className="bg-emerald-950/40 text-emerald-100 px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-mono font-bold border border-emerald-400/30">
                     {seller.seller_identifier}
                   </span>
                 )}
               </div>
-              <p className="text-emerald-100 text-lg mb-6">
-                Your seller application has been approved. Complete the setup steps below to start selling on ICONJ.
+              <p className="text-emerald-100 text-xs sm:text-sm md:text-base mb-3 sm:mb-5 leading-snug">
+                Your seller application has been approved. Complete setup to start selling on ICONJ.
               </p>
               
-              <div className="grid sm:grid-cols-3 gap-4">
-                <div className={`rounded-xl p-4 ${hasStore ? 'bg-white/20' : 'bg-white/10 border-2 border-dashed border-white/30'}`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    {hasStore ? <CheckCircle2 className="w-4 h-4 text-emerald-200" /> : <span className="w-5 h-5 rounded-full border-2 border-white/50 text-center text-xs leading-5 font-bold">1</span>}
-                    <span className="font-semibold text-sm">Store Setup</span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3.5">
+                {/* Step 1: Store */}
+                <div className={`rounded-lg sm:rounded-xl p-2.5 sm:p-4 flex sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 ${hasStore ? 'bg-white/20' : 'bg-white/10 border border-dashed border-white/30'}`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    {hasStore ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+                    ) : (
+                      <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-white/60 text-center text-[10px] sm:text-xs leading-4 sm:leading-5 font-bold shrink-0">1</span>
+                    )}
+                    <div className="min-w-0">
+                      <span className="font-semibold text-xs sm:text-sm block truncate">Store Setup</span>
+                      <p className="text-[10px] sm:text-xs text-emerald-200 hidden sm:block">
+                        {hasStore ? 'Complete ✓' : 'Configure your store details'}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-emerald-200">{hasStore ? 'Complete ✓' : 'Configure your store details'}</p>
-                  {!hasStore && (
-                    <Link href="/seller/store" className="text-xs mt-2 inline-flex items-center gap-1 text-white underline">
-                      Go to Store Settings <ArrowRight className="w-3 h-3" />
+                  {hasStore ? (
+                    <span className="text-[11px] sm:hidden text-emerald-200 font-medium shrink-0">Complete ✓</span>
+                  ) : (
+                    <Link 
+                      href="/seller/store" 
+                      className="text-[11px] sm:text-xs font-medium px-2.5 py-1 sm:px-0 sm:py-0 bg-white sm:bg-transparent text-emerald-800 sm:text-white rounded sm:rounded-none shrink-0 sm:mt-2 inline-flex items-center gap-1 sm:underline"
+                    >
+                      Configure <ArrowRight className="w-3 h-3" />
                     </Link>
                   )}
                 </div>
 
-                <div className={`rounded-xl p-4 ${hasProducts ? 'bg-white/20' : 'bg-white/10 border-2 border-dashed border-white/30'}`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    {hasProducts ? <CheckCircle2 className="w-4 h-4 text-emerald-200" /> : <span className="w-5 h-5 rounded-full border-2 border-white/50 text-center text-xs leading-5 font-bold">2</span>}
-                    <span className="font-semibold text-sm">Add Products</span>
+                {/* Step 2: Products */}
+                <div className={`rounded-lg sm:rounded-xl p-2.5 sm:p-4 flex sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 ${hasProducts ? 'bg-white/20' : 'bg-white/10 border border-dashed border-white/30'}`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    {hasProducts ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+                    ) : (
+                      <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-white/60 text-center text-[10px] sm:text-xs leading-4 sm:leading-5 font-bold shrink-0">2</span>
+                    )}
+                    <div className="min-w-0">
+                      <span className="font-semibold text-xs sm:text-sm block truncate">Add Products</span>
+                      <p className="text-[10px] sm:text-xs text-emerald-200 hidden sm:block">
+                        {hasProducts ? `${productCount} listed ✓` : 'List your first product'}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-emerald-200">{hasProducts ? `${productCount} product(s) listed ✓` : 'List your first product'}</p>
-                  {!hasProducts && (
-                    <Link href="/seller/products" className="text-xs mt-2 inline-flex items-center gap-1 text-white underline">
-                      Go to Products <ArrowRight className="w-3 h-3" />
+                  {hasProducts ? (
+                    <span className="text-[11px] sm:hidden text-emerald-200 font-medium shrink-0">{productCount} listed ✓</span>
+                  ) : (
+                    <Link 
+                      href="/seller/products" 
+                      className="text-[11px] sm:text-xs font-medium px-2.5 py-1 sm:px-0 sm:py-0 bg-white sm:bg-transparent text-emerald-800 sm:text-white rounded sm:rounded-none shrink-0 sm:mt-2 inline-flex items-center gap-1 sm:underline"
+                    >
+                      Add Product <ArrowRight className="w-3 h-3" />
                     </Link>
                   )}
                 </div>
 
-                <div className={`rounded-xl p-4 ${hasPayout ? 'bg-white/20' : 'bg-white/10 border-2 border-dashed border-white/30'}`}>
-                  <div className="flex items-center gap-2 mb-1">
-                    {hasPayout ? <CheckCircle2 className="w-4 h-4 text-emerald-200" /> : <span className="w-5 h-5 rounded-full border-2 border-white/50 text-center text-xs leading-5 font-bold">3</span>}
-                    <span className="font-semibold text-sm">Payout Account</span>
+                {/* Step 3: Payout */}
+                <div className={`rounded-lg sm:rounded-xl p-2.5 sm:p-4 flex sm:flex-col items-center sm:items-start justify-between sm:justify-start gap-2 ${hasPayout ? 'bg-white/20' : 'bg-white/10 border border-dashed border-white/30'}`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    {hasPayout ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-200 shrink-0" />
+                    ) : (
+                      <span className="w-4 h-4 sm:w-5 sm:h-5 rounded-full border border-white/60 text-center text-[10px] sm:text-xs leading-4 sm:leading-5 font-bold shrink-0">3</span>
+                    )}
+                    <div className="min-w-0">
+                      <span className="font-semibold text-xs sm:text-sm block truncate">Payout Account</span>
+                      <p className="text-[10px] sm:text-xs text-emerald-200 hidden sm:block">
+                        {hasPayout ? 'Bank linked ✓' : 'Link bank account'}
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-xs text-emerald-200">{hasPayout ? 'Bank account linked ✓' : 'Link your bank for payouts'}</p>
-                  {!hasPayout && (
-                    <Link href="/seller/payouts" className="text-xs mt-2 inline-flex items-center gap-1 text-white underline">
-                      Link Bank Account <ArrowRight className="w-3 h-3" />
+                  {hasPayout ? (
+                    <span className="text-[11px] sm:hidden text-emerald-200 font-medium shrink-0">Linked ✓</span>
+                  ) : (
+                    <Link 
+                      href="/seller/payouts" 
+                      className="text-[11px] sm:text-xs font-medium px-2.5 py-1 sm:px-0 sm:py-0 bg-white sm:bg-transparent text-emerald-800 sm:text-white rounded sm:rounded-none shrink-0 sm:mt-2 inline-flex items-center gap-1 sm:underline"
+                    >
+                      Link Bank <ArrowRight className="w-3 h-3" />
                     </Link>
                   )}
                 </div>
