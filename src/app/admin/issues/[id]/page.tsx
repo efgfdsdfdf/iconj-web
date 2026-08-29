@@ -6,13 +6,15 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, User, Package, Calendar, Image as ImageIcon } from "lucide-react";
 import { IssueStatusForm } from "./IssueStatusForm";
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
 export const revalidate = 0;
 
 export default async function AdminIssueDetails({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const supabase = await createClient();
+  const supabaseAdmin = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   
-  const { data: issue } = await supabase
+  const { data: issue } = await supabaseAdmin
     .from("order_issues")
     .select("*, profiles(name, email, phone), orders(total_amount, delivery_address)")
     .eq("id", id)

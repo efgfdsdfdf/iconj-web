@@ -4,12 +4,14 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { AlertCircle, ExternalLink, Image as ImageIcon } from "lucide-react";
 
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+
 export const revalidate = 0;
 
 export default async function AdminIssues() {
-  const supabase = await createClient();
+  const supabaseAdmin = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
   
-  const { data: issues, error } = await supabase
+  const { data: issues, error } = await supabaseAdmin
     .from("order_issues")
     .select("*, profiles(name, email), orders(total_amount)")
     .order("created_at", { ascending: false });
