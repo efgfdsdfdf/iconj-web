@@ -97,7 +97,7 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
   };
 
   if (existingAccount && existingAccount.status !== 'FAILED') {
-    const isReady = existingAccount.status === 'VERIFIED' || existingAccount.paystack_subaccount_code;
+    const isReady = existingAccount.status === 'VERIFIED';
     return (
       <Card className="border-slate-200 shadow-sm max-w-2xl">
         <CardHeader>
@@ -126,26 +126,6 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
               <p className="font-mono text-sm text-slate-500 mt-1">•••• {existingAccount.account_number.slice(-4)}</p>
             </div>
           </div>
-
-          {!isReady && (
-            <div className="bg-amber-50 text-amber-800 p-4 rounded-lg text-sm border border-amber-200">
-              <p className="font-bold mb-1">Marketplace Payouts Pending</p>
-              <p className="mb-4">Your bank details are saved, but the marketplace payout automation is awaiting platform upgrade (Starter Business limitation). Your funds will accumulate securely in the ledger in the meantime.</p>
-              <Button 
-                variant="outline" 
-                className="bg-white border-amber-300 text-amber-900 hover:bg-amber-100"
-                onClick={async () => {
-                  if (confirm("Re-attempt Paystack Subaccount creation?")) {
-                    handleConfirm();
-                  }
-                }}
-                disabled={verifying}
-              >
-                {verifying ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                Retry Paystack Connection
-              </Button>
-            </div>
-          )}
         </CardContent>
       </Card>
     );

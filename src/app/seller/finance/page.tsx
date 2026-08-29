@@ -17,45 +17,24 @@ export default async function SellerFinancePage() {
 
   if (!seller) return redirect("/account");
 
-  // Fetch Ledger
+  // Fetch Wallet (Source of Truth)
+  const { data: wallet } = await supabase
+    .from("seller_wallets")
+    .select("*")
+    .eq("seller_id", seller.id)
+    .maybeSingle();
+
+  // Fetch Ledger (Wallet Transactions)
   const { data: ledgerEntries } = await supabase
-    .from("financial_ledger")
+    .from("wallet_transactions")
     .select("*")
     .eq("seller_id", seller.id)
     .order("created_at", { ascending: false });
 
-  // Calculate stats
-  let totalGross = 0;
-  let totalCommission = 0;
-  let netEarnings = 0;
-  let pendingSettlement = 0;
-  let settledAmount = 0;
-
-  ledgerEntries?.forEach((entry) => {
-    const amt = Number(entry.amount);
-    switch (entry.transaction_type) {
-      case 'SALE_GROSS':
-        totalGross += amt;
-        break;
-      case 'ICONJ_COMMISSION':
-        totalCommission += Math.abs(amt);
-        break;
-      case 'SELLER_EARNING':
-        netEarnings += amt;
-        break;
-      case 'SETTLEMENT_PENDING':
-        pendingSettlement += amt;
-        break;
-      case 'SETTLEMENT_SUCCESSFUL':
-        settledAmount += amt;
-        pendingSettlement -= amt; // Reduce pending
-        break;
-    }
-  });
-
-  if (netEarnings === 0 && (totalGross > 0 || pendingSettlement > 0)) {
-    netEarnings = (pendingSettlement + settledAmount) || Math.max(0, totalGross - totalCommission);
-  }
+  const totalEarned = wallet?.total_earned || 0;
+  const availableBalance = wallet?.available_balance || 0;
+  const pendingBalance = wallet?.pending_balance || 0;
+  const totalWithdrawn = wallet?.total_withdrawn || 0;
 
   const formatCurrency = (val: number) => `₦${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -69,21 +48,23 @@ export default async function SellerFinancePage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Gross Sales</CardTitle>
+            <CardTitle className="text-sm font-medium text-slate-500">Total Earned</CardTitle>
             <DollarSign className="w-4 h-4 text-slate-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">{formatCurrency(totalGross)}</div>
+            <div className="text-2xl font-bold text-slate-900">{formatCurrency(totalEarned)}</div>
+            <p className="text-xs text-slate-500 mt-1">All-time net earnings</p>
           </CardContent>
         </Card>
         
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Platform Commission</CardTitle>
-            <ArrowDownRight className="w-4 h-4 text-red-400" />
+            <CardTitle className="text-sm font-medium text-slate-500">Available Balance</CardTitle>
+            <Wallet className="w-4 h-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">-{formatCurrency(totalCommission)}</div>
+            <div className="text-2xl font-bold text-emerald-600">{formatCurrency(availableBalance)}</div>
+            <p className="text-xs text-emerald-600/70 mt-1">Ready for withdrawal</p>
           </CardContent>
         </Card>
 
@@ -93,19 +74,19 @@ export default async function SellerFinancePage() {
             <Wallet className="w-4 h-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600">{formatCurrency(pendingSettlement)}</div>
-            <p className="text-xs text-amber-600/70 mt-1">Held by Paystack until transfer</p>
+            <div className="text-2xl font-bold text-amber-600">{formatCurrency(pendingBalance)}</div>
+            <p className="text-xs text-amber-600/70 mt-1">On hold (clearing)</p>
           </CardContent>
         </Card>
 
         <Card className="border-slate-200 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">Settled to Bank</CardTitle>
-            <ArrowUpRight className="w-4 h-4 text-emerald-500" />
+            <CardTitle className="text-sm font-medium text-slate-500">Total Withdrawn</CardTitle>
+            <ArrowUpRight className="w-4 h-4 text-slate-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">{formatCurrency(settledAmount)}</div>
-            <p className="text-xs text-emerald-600/70 mt-1">Successfully transferred</p>
+            <div className="text-2xl font-bold text-slate-600">{formatCurrency(totalWithdrawn)}</div>
+            <p className="text-xs text-slate-500 mt-1">Successfully transferred to bank</p>
           </CardContent>
         </Card>
       </div>
@@ -122,8 +103,8 @@ export default async function SellerFinancePage() {
                   <th className="px-6 py-3">Date</th>
                   <th className="px-6 py-3">Type</th>
                   <th className="px-6 py-3">Description</th>
-                  <th className="px-6 py-3">Reference</th>
                   <th className="px-6 py-3 text-right">Amount</th>
+                  <th className="px-6 py-3 text-right">Balance After</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -135,18 +116,20 @@ export default async function SellerFinancePage() {
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                          entry.transaction_type === 'SETTLEMENT_SUCCESSFUL' ? 'bg-emerald-100 text-emerald-800' :
-                          entry.transaction_type === 'ICONJ_COMMISSION' ? 'bg-red-100 text-red-800' :
-                          entry.transaction_type.includes('PENDING') ? 'bg-amber-100 text-amber-800' :
+                          ['HOLD_RELEASED', 'WITHDRAWAL_COMPLETED'].includes(entry.type) ? 'bg-emerald-100 text-emerald-800' :
+                          ['WITHDRAWAL_REVERSED', 'REFUND_DEBIT'].includes(entry.type) ? 'bg-red-100 text-red-800' :
+                          ['SALE_CREDIT', 'WITHDRAWAL_RESERVED'].includes(entry.type) ? 'bg-amber-100 text-amber-800' :
                           'bg-blue-100 text-blue-800'
                         }`}>
-                          {entry.transaction_type.replace('_', ' ')}
+                          {entry.type.replace('_', ' ')}
                         </span>
                       </td>
                       <td className="px-6 py-4 text-slate-600">{entry.description}</td>
-                      <td className="px-6 py-4 font-mono text-xs text-slate-400">{entry.paystack_reference || '-'}</td>
-                      <td className={`px-6 py-4 text-right font-medium ${Number(entry.amount) < 0 ? 'text-red-600' : 'text-slate-900'}`}>
+                      <td className={`px-6 py-4 text-right font-medium ${Number(entry.amount) < 0 ? 'text-red-600' : 'text-emerald-600'}`}>
                         {Number(entry.amount) > 0 ? '+' : ''}{formatCurrency(Number(entry.amount))}
+                      </td>
+                      <td className="px-6 py-4 text-right font-medium text-slate-600">
+                        {formatCurrency(Number(entry.available_balance_after))}
                       </td>
                     </tr>
                   ))

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { createClient } from "@supabase/supabase-js";
+import { createTransferRecipient } from "@/lib/paystack-transfers";
 
 export async function POST(request: Request) {
   try {
@@ -39,33 +40,17 @@ export async function POST(request: Request) {
     const businesses = seller.businesses as any;
     const businessName = (Array.isArray(businesses) ? businesses[0]?.business_name : businesses?.business_name) || account_name;
 
-    // Create Paystack Subaccount
-    const paystackRes = await fetch("https://api.paystack.co/subaccount", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        business_name: businessName,
-        settlement_bank: bank_code,
-        account_number: account_number,
-        percentage_charge: 10.0 // ICONJ takes 10%. Wait, we are doing flat splits so this doesn't actually matter for flat splits, but required for subaccount creation.
-      })
-    });
-
-    const data = await paystackRes.json();
-    let subaccountCode = null;
+    // Create Paystack Transfer Recipient
+    let recipientCode = null;
     let status = 'VERIFIED';
-    let errorMessage = null;
 
-    if (data.status) {
-      subaccountCode = data.data.subaccount_code;
+    const recipientRes = await createTransferRecipient(bank_code, account_number, account_name);
+    if (recipientRes.success && recipientRes.recipient_code) {
+      recipientCode = recipientRes.recipient_code;
     } else {
-      // It failed, likely because the platform is a Starter Business
-      console.warn("Paystack Subaccount Creation Failed (Likely Starter Business Limitation):", data);
-      status = 'PLATFORM_UPGRADE_REQUIRED';
-      errorMessage = "Your payout account was saved but payouts are pending platform upgrade. " + (data.message || "");
+      console.warn("Failed to create Paystack Transfer Recipient. Will fall back to manual payouts.", recipientRes.error);
+      // We still mark it as VERIFIED because the bank resolution worked, meaning the account is valid.
+      // We just won't be able to use Paystack automated transfers until this is resolved, but manual transfers work.
     }
 
     // Save to database
@@ -84,19 +69,12 @@ export async function POST(request: Request) {
         account_number: account_number,
         account_name: account_name,
         verified_name: account_name,
-        paystack_subaccount_code: subaccountCode,
+        paystack_subaccount_code: recipientCode, // Reusing column for recipient code
         status: status,
         is_primary: true
       });
 
     if (insertError) throw insertError;
-
-    if (status === 'PLATFORM_UPGRADE_REQUIRED') {
-      return NextResponse.json({ 
-        success: true, 
-        message: "Account verified, but automated payouts are currently queued until marketplace upgrades are complete." 
-      });
-    }
 
     return NextResponse.json({ success: true, message: "Payout account successfully connected!" });
 

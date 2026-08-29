@@ -226,38 +226,42 @@ export default async function SellerDashboard() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
-              <DollarSign className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Net Earnings</p>
-              <h3 className="text-2xl font-bold text-slate-900">{formatCurrency(totalEarnings)}</h3>
-            </div>
-          </CardContent>
-        </Card>
+        <Link href="/seller/wallet">
+          <Card className="hover:border-emerald-500 transition-colors cursor-pointer">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center shrink-0">
+                <Wallet className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Available Balance</p>
+                <h3 className="text-2xl font-bold text-emerald-600">{formatCurrency(wallet?.available_balance || 0)}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+
+        <Link href="/seller/wallet">
+          <Card className="hover:border-amber-500 transition-colors cursor-pointer">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
+                <DollarSign className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-slate-500">Pending (Clearing)</p>
+                <h3 className="text-2xl font-bold text-amber-600">{formatCurrency(wallet?.pending_balance || 0)}</h3>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         <Card>
           <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-lg flex items-center justify-center shrink-0">
+            <div className="w-12 h-12 bg-slate-100 text-slate-600 rounded-lg flex items-center justify-center shrink-0">
               <Package className="w-6 h-6" />
             </div>
             <div>
               <p className="text-sm font-medium text-slate-500">Products</p>
               <h3 className="text-2xl font-bold text-slate-900">{productCount || 0}</h3>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-lg flex items-center justify-center shrink-0">
-              <Wallet className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-slate-500">Pending Payout</p>
-              <h3 className="text-2xl font-bold text-slate-900">{formatCurrency(pendingSettlement)}</h3>
             </div>
           </CardContent>
         </Card>
