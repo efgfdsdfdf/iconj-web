@@ -19,7 +19,7 @@ export function ProductDescription({ product }: { product: any }) {
   const FullContent = () => (
     <div className="space-y-8">
       <div 
-        className="text-slate-700 leading-relaxed text-sm md:text-base prose prose-slate prose-sm md:prose-base max-w-none overflow-x-auto [&_*]:!max-w-full [&_table]:!w-full [&_img]:!h-auto break-words"
+        className="text-slate-700 leading-relaxed text-sm md:text-base prose prose-slate prose-sm md:prose-base max-w-none w-full overflow-x-auto no-scrollbar [&_img]:!h-auto [&_table]:min-w-[600px] md:[&_table]:min-w-full"
         dangerouslySetInnerHTML={{ __html: descriptionText }}
       />
 

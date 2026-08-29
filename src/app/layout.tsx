@@ -41,7 +41,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen flex flex-col`}>
+      <body className={`${inter.className} min-h-screen flex flex-col overflow-x-hidden w-full`}>
         <SplashScreen />
         <PwaInstallBanner />
         <Navbar categories={categories} />
