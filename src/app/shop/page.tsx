@@ -4,6 +4,7 @@ import { ChevronRight, Filter, SlidersHorizontal, ChevronDown, Star, CheckCircle
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/product/ProductCard";
+import { AutoScrollingCategories } from "@/components/AutoScrollingCategories";
 
 export const revalidate = 0;
 
@@ -15,7 +16,17 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const filter = params.filter; // e.g. "wholesale"
 
   // Fetch dynamic categories
-  const { data: categories } = await supabase.from("categories").select("*").eq("is_active", true).order("name");
+  const { data: dbCategories } = await supabase.from("categories").select("*").eq("is_active", true).order("name");
+  const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
+  const adminCategories: { name: string, icon: string }[] = settings?.value || [];
+  
+  const categories = (dbCategories || []).map(cat => {
+    const customMatch = adminCategories.find(ac => ac.name.toLowerCase().trim() === cat.name.toLowerCase().trim() || ac.name.toLowerCase().includes(cat.name.toLowerCase()));
+    return {
+      ...cat,
+      icon: customMatch?.icon || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
+    };
+  });
 
   let query = supabase
     .from("products")
@@ -48,26 +59,31 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     <div className="bg-slate-50 min-h-screen pb-12">
       {/* Breadcrumb Header / Wholesale Hero */}
       {filter === 'wholesale' ? (
-        <div className="bg-gradient-to-r from-blue-900 via-sky-800 to-blue-900 text-white mb-8 border-b-4 border-amber-500">
-          <div className="container mx-auto px-4 py-12 md:py-16 flex flex-col items-center text-center">
-            <span className="bg-amber-500 text-amber-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4">B2B Marketplace</span>
-            <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
-              {category && categories?.find(c => c.id === category) 
-                ? `${categories.find(c => c.id === category)?.name} (Wholesale)`
-                : "ICONJ Wholesale Center"}
-            </h1>
-            <p className="text-blue-100 max-w-2xl text-lg mb-6">
-              {category && categories?.find(c => c.id === category) 
-                ? `Source premium ${categories.find(c => c.id === category)?.name.toLowerCase()} in bulk directly from manufacturers and official distributors. Enjoy massive discounts and secure payments.`
-                : "Source premium custom blinds, curtains & window treatments directly from manufacturers and official distributors. Enjoy massive bulk discounts, verified sellers, and secure escrow payments."}
-            </p>
-            <div className="flex gap-4 items-center text-sm font-medium text-sky-200">
-              <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-amber-400"/> Verified Suppliers</span>
-              <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-amber-400"/> Volume Discounts</span>
-              <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-amber-400"/> Logistics Support</span>
+        <>
+          <div className="bg-gradient-to-r from-blue-900 via-sky-800 to-blue-900 text-white border-b-4 border-amber-500">
+            <div className="container mx-auto px-4 py-12 md:py-16 flex flex-col items-center text-center">
+              <span className="bg-amber-500 text-amber-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4">B2B Marketplace</span>
+              <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+                {category && categories?.find(c => c.id === category) 
+                  ? `${categories.find(c => c.id === category)?.name} (Wholesale)`
+                  : "ICONJ Wholesale Center"}
+              </h1>
+              <p className="text-blue-100 max-w-2xl text-lg mb-6">
+                {category && categories?.find(c => c.id === category) 
+                  ? `Source premium ${categories.find(c => c.id === category)?.name.toLowerCase()} in bulk directly from manufacturers and official distributors. Enjoy massive discounts and secure payments.`
+                  : "Source premium custom blinds, curtains & window treatments directly from manufacturers and official distributors. Enjoy massive bulk discounts, verified sellers, and secure escrow payments."}
+              </p>
+              <div className="flex gap-4 items-center text-sm font-medium text-sky-200">
+                <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-amber-400"/> Verified Suppliers</span>
+                <span className="hidden md:flex items-center gap-1"><ShieldCheck className="w-4 h-4 text-amber-400"/> Secure Escrow</span>
+                <span className="flex items-center gap-1"><Truck className="w-4 h-4 text-amber-400"/> Bulk Shipping</span>
+              </div>
             </div>
           </div>
-        </div>
+          <div className="mb-8 border-b shadow-sm bg-white">
+            <AutoScrollingCategories categories={categories} filter="wholesale" />
+          </div>
+        </>
       ) : (
         <>
           {/* Retail Hero */}

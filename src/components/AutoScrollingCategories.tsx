@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-export function AutoScrollingCategories({ categories }: { categories: { id: string, name: string, icon: string }[] }) {
+export function AutoScrollingCategories({ categories, filter }: { categories: { id: string, name: string, icon: string }[], filter?: string }) {
   // Multiply categories enough times to fill any screen and loop smoothly
   const multipliers = Array.from({ length: 20 });
   const displayCategories = multipliers.flatMap(() => categories);
@@ -32,7 +32,7 @@ export function AutoScrollingCategories({ categories }: { categories: { id: stri
           {displayCategories.map((cat, idx) => (
             <Link 
               key={idx} 
-              href={`/shop?category=${cat.id}`} 
+              href={`/shop?category=${cat.id}${filter ? `&filter=${filter}` : ''}`} 
               className="flex flex-col items-center gap-2 group shrink-0 w-[72px] md:w-[80px]"
             >
               <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border border-slate-100 group-hover:border-blue-500 group-hover:shadow-md transition-all">
