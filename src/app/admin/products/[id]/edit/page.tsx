@@ -85,7 +85,7 @@ export default function EditProductPage() {
     setError(null);
 
     try {
-      const result = await updateProduct(id, {
+      const payload = {
         name: formData.name,
         sku: formData.sku,
         category: formData.category,
@@ -103,7 +103,16 @@ export default function EditProductPage() {
         },
         supplier_id: formData.supplier_id || null,
         supplier_sku: formData.supplier_sku || null
-      });
+      };
+
+      const sanitizedPayload = JSON.parse(JSON.stringify(payload, (key, value) => {
+        if (typeof value === 'number' && isNaN(value)) {
+          return null;
+        }
+        return value;
+      }));
+
+      const result = await updateProduct(id as string, sanitizedPayload);
 
       if (result?.error) throw new Error(result.error);
 

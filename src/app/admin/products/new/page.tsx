@@ -169,7 +169,15 @@ export default function AddProductPage() {
         specifications: []
       };
 
-      const createResult = await createProduct(payload);
+      const sanitizedPayload = JSON.parse(JSON.stringify(payload, (key, value) => {
+        // Sanitize NaN to null
+        if (typeof value === 'number' && isNaN(value)) {
+          return null;
+        }
+        return value;
+      }));
+
+      const createResult = await createProduct(sanitizedPayload);
 
       if (!createResult.success) {
         throw new Error(createResult.error || "Failed to create product");
