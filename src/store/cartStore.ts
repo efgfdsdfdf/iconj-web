@@ -10,8 +10,8 @@ export interface CartItem {
   image: string;
   moq?: number;
   pricingTiers?: any[];
-  width?: number;
-  height?: number;
+  width?: string | number;
+  height?: string | number;
   motorType?: string;
   fabric?: string;
   selectedVariant?: string;
