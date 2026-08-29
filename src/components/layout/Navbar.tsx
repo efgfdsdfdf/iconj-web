@@ -272,7 +272,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
       {/* Category Navigation Bar (Desktop) */}
       <nav className="hidden lg:flex w-full bg-slate-800 text-white shadow-md relative z-40">
         <div className="container mx-auto px-4 h-12 flex items-center gap-8 text-sm font-medium overflow-x-auto whitespace-nowrap scrollbar-hide">
-          <Link href="/shop" className="flex items-center hover:text-orange-400 transition-colors">
+          <Link href="/categories" className="flex items-center hover:text-orange-400 transition-colors">
             <Menu className="w-5 h-5 mr-2" />
             All Categories
           </Link>
@@ -329,7 +329,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
                   {cat.name}
                 </Link>
               ))}
-              <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-blue-600 border-b border-slate-100">
+              <Link href="/categories" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-blue-600 border-b border-slate-100">
                 See All Categories &rarr;
               </Link>
               

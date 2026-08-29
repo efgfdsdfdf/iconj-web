@@ -69,7 +69,7 @@ export default async function Home() {
               ))}
 
               <div className="px-4 py-3 mt-1 border-t">
-                <Link href="/shop" className="text-blue-600 font-bold text-sm flex items-center justify-between hover:underline group">
+                <Link href="/categories" className="text-blue-600 font-bold text-sm flex items-center justify-between hover:underline group">
                   See All Categories <ChevronRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"/>
                 </Link>
               </div>
