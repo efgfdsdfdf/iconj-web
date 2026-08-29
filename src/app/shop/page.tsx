@@ -165,23 +165,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           {/* Main Product Grid */}
           <div className="flex-1">
             <Card className="border-none shadow-sm bg-white mb-4">
-              <div className="p-4 flex items-center justify-between border-b">
-                <h1 className="text-lg md:text-xl font-bold text-slate-900">Products ({products?.length || 0} items)</h1>
-                
-                {/* Mobile Filter Buttons */}
-                <div className="flex lg:hidden gap-2">
-                  <Button variant="outline" size="sm" className="text-xs h-8"><SlidersHorizontal className="w-3 h-3 mr-1"/> Sort</Button>
-                  <Button variant="outline" size="sm" className="text-xs h-8"><Filter className="w-3 h-3 mr-1"/> Filter</Button>
-                </div>
-
-                {/* Desktop Sort */}
-                <div className="hidden lg:flex items-center gap-2 text-sm">
-                  <span className="text-slate-500">Sort by:</span>
-                  <Button variant="outline" size="sm" className="h-8">Popularity <ChevronDown className="w-3 h-3 ml-2"/></Button>
-                </div>
-              </div>
-
-              <CardContent className="p-2 sm:p-4">
+              <CardContent className="p-2 sm:p-4 pt-4 sm:pt-6">
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
                   {products?.map((product: any) => {
                     const p = { ...product, images: product.images || [getProductImage(product.category)] };
