@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, Plus } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
 export const revalidate = 0;
@@ -15,8 +16,10 @@ export default async function CustomerIssues() {
     redirect("/login");
   }
 
-  // Attempt to fetch issues. If the table doesn't exist yet, this will fail gracefully.
-  const { data: issues, error } = await supabase
+  const supabaseAdmin = createSupabaseClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+
+  // Attempt to fetch issues. By using admin client, we bypass RLS.
+  const { data: issues, error } = await supabaseAdmin
     .from("order_issues")
     .select("*, orders(created_at, total_amount)")
     .eq("customer_id", user.id)
