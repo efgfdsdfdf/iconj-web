@@ -75,7 +75,7 @@ export default function PrivacyPolicyPage() {
 
         {/* Support CTAs */}
         <div className="mt-8 grid sm:grid-cols-2 gap-4">
-          <Link href="/contact" className="bg-white p-6 rounded-xl border shadow-sm hover:border-blue-500 hover:shadow-md transition-all group">
+          <Link href="/account/support" className="bg-white p-6 rounded-xl border shadow-sm hover:border-blue-500 hover:shadow-md transition-all group">
             <h3 className="font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Still need help?</h3>
             <p className="text-sm text-slate-500 mt-1">Contact ICONJ Support</p>
           </Link>

@@ -25,7 +25,7 @@ export function Footer() {
             <li><Link href="/returns" className="hover:text-orange-500 transition-colors">Returns & Replacements</Link></li>
             <li><Link href="/report-issue" className="hover:text-orange-500 transition-colors">Report an Issue</Link></li>
             <li><Link href="/track" className="hover:text-orange-500 transition-colors">Track Order</Link></li>
-            <li><Link href="/contact" className="hover:text-orange-500 transition-colors">Contact Us</Link></li>
+            <li><Link href="/account/support" className="hover:text-orange-500 transition-colors">Contact Us</Link></li>
           </ul>
         </div>
 

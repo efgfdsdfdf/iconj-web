@@ -321,7 +321,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               )}
               <Link href="/shop?filter=wholesale" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-blue-600 border-b border-slate-100">Wholesale Center</Link>
               <Link href="/about" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">About Us</Link>
-              <Link href="/contact" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Contact Us</Link>
+              <Link href="/account/support" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Contact Us</Link>
               
               <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Our Categories</p>
               {categories.slice(0, 7).map(cat => (

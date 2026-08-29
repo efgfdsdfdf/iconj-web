@@ -92,7 +92,7 @@ export default function FAQPage() {
           {filteredData.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-slate-500 mb-4">We couldn't find any answers matching "{search}".</p>
-              <Link href="/contact" className="text-blue-600 font-bold hover:underline">Contact Support</Link>
+              <Link href="/account/support" className="text-blue-600 font-bold hover:underline">Contact Support</Link>
             </div>
           ) : (
             <div className="space-y-10">
