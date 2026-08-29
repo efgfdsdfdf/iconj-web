@@ -10,7 +10,11 @@ export const revalidate = 0;
 
 export default async function AdminProductsPage() {
   const supabase = await createClient();
-  const { data: products } = await supabase.from("products").select("*").order("created_at", { ascending: false });
+  const { data: products } = await supabase
+    .from("products")
+    .select("*")
+    .neq("approval_status", "deleted")
+    .order("created_at", { ascending: false });
 
   return (
     <main className="flex-1 p-4 md:p-8 min-h-[calc(100vh-130px)] overflow-x-hidden">

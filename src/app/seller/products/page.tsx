@@ -21,6 +21,7 @@ export default async function SellerProductsPage() {
     .from("products")
     .select("*")
     .eq("seller_id", seller?.id)
+    .neq("approval_status", "deleted")
     .order("created_at", { ascending: false });
 
   return (

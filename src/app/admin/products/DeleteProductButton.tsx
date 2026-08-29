@@ -14,7 +14,7 @@ export function DeleteProductButton({ productId }: { productId: string }) {
     try {
       const res = await deleteProduct(productId);
       if (res?.error) {
-        alert("Failed to delete product: " + res.error + "\n\nTip: If a customer has already ordered this product, you cannot delete it because it would break their order receipt. Please 'Edit' the product and mark it 'Out of Stock' instead.");
+        alert("Failed to delete product: " + res.error);
       }
     } catch (error: any) {
       alert("Failed to delete product: " + error.message);

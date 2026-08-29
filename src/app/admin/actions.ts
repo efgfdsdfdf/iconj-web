@@ -9,7 +9,18 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 export async function deleteProduct(productId: string) {
   const { error } = await supabaseAdmin.from("products").delete().eq("id", productId);
-  if (error) return { success: false, error: error.message };
+  if (error) {
+    // 23503 is Foreign Key Violation in Postgres
+    if (error.code === "23503") {
+      const { error: softErr } = await supabaseAdmin.from("products").update({
+        is_active: false,
+        approval_status: "deleted"
+      }).eq("id", productId);
+      if (softErr) return { success: false, error: softErr.message };
+    } else {
+      return { success: false, error: error.message };
+    }
+  }
   revalidatePath("/admin/products");
   revalidatePath("/shop");
   return { success: true };

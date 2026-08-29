@@ -139,12 +139,22 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
   if (!seller) return NextResponse.json({ error: "Not a seller" }, { status: 403 });
 
-  // Delete product (cascade deletes should handle related tables, or we can soft delete)
   const { error } = await supabaseAdmin.from("products").delete().eq("id", id).eq("seller_id", seller.id);
 
   if (error) {
-    console.error("Delete error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error.code === "23503") {
+      const { error: softErr } = await supabaseAdmin.from("products").update({
+        is_active: false,
+        approval_status: "deleted"
+      }).eq("id", id).eq("seller_id", seller.id);
+      
+      if (softErr) {
+        return NextResponse.json({ error: softErr.message }, { status: 500 });
+      }
+    } else {
+      console.error("Delete error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
   }
 
   return NextResponse.json({ success: true });
