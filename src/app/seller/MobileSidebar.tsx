@@ -39,6 +39,9 @@ export function MobileSidebar({ storeName }: { storeName: string }) {
             <Link onClick={closeSidebar} href="/seller/finance" className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-800 hover:text-white transition-colors ${pathname?.startsWith('/seller/finance') ? 'bg-slate-800 text-white' : ''}`}>
               <DollarSign className="w-5 h-5 text-slate-400" /> Finance Ledger
             </Link>
+            <Link onClick={closeSidebar} href="/seller/wallet" className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-800 hover:text-white transition-colors ${pathname?.startsWith('/seller/wallet') ? 'bg-slate-800 text-white' : ''}`}>
+              <DollarSign className="w-5 h-5 text-emerald-400" /> Wallet
+            </Link>
             <Link onClick={closeSidebar} href="/seller/payouts" className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md hover:bg-slate-800 hover:text-white transition-colors ${pathname?.startsWith('/seller/payouts') ? 'bg-slate-800 text-white' : ''}`}>
               <DollarSign className="w-5 h-5 text-slate-400" /> Payout Account
             </Link>
