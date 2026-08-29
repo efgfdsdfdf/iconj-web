@@ -256,20 +256,32 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
 
       // Automate sending orders to respective suppliers
       try {
-        const { data: allItems } = await supabaseAdmin.from("order_items").select("*, products(name, supplier_id, suppliers(email, name))").eq("order_id", orderId);
+        const { data: allItems } = await supabaseAdmin.from("order_items").select("*, products(name, supplier_id)").eq("order_id", orderId);
         
         // Group items by supplier
         const supplierGroups: Record<string, { email: string, name: string, items: any[] }> = {};
         
-        (allItems || []).forEach(item => {
-          const supplier = item.products?.suppliers;
-          if (supplier && supplier.email) {
-            if (!supplierGroups[supplier.email]) {
-              supplierGroups[supplier.email] = { email: supplier.email, name: supplier.name, items: [] };
-            }
-            supplierGroups[supplier.email].items.push(item);
+        if (allItems && allItems.length > 0) {
+          const supplierIds = Array.from(new Set(allItems.map(i => i.products?.supplier_id).filter(Boolean)));
+          let supplierMap = new Map();
+          if (supplierIds.length > 0) {
+            const { data: suppliers } = await supabaseAdmin.from("suppliers").select("id, email, name").in("id", supplierIds);
+            supplierMap = new Map(suppliers?.map((s: any) => [s.id, s]));
           }
-        });
+          
+          allItems.forEach(item => {
+            const supplierId = item.products?.supplier_id;
+            if (supplierId) {
+              const supplier = supplierMap.get(supplierId);
+              if (supplier && supplier.email) {
+                if (!supplierGroups[supplier.email]) {
+                  supplierGroups[supplier.email] = { email: supplier.email, name: supplier.name, items: [] };
+                }
+                supplierGroups[supplier.email].items.push(item);
+              }
+            }
+          });
+        }
 
         // Send email to each supplier
         for (const supplierEmail of Object.keys(supplierGroups)) {

@@ -10,6 +10,7 @@ import { requireAdmin } from "@/lib/auth/admin";
 import { EmailHistory } from "./components/EmailHistory";
 import { SellerSubOrdersPanel } from "./components/SellerSubOrdersPanel";
 import { getActiveForwarder, getLogisticsIssues } from "@/lib/logistics";
+import { CopyToSupplierButton } from "./CopyToSupplierButton";
 
 export const revalidate = 0;
 
@@ -29,7 +30,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
 
   const { data: items } = await supabaseAdmin.from("order_items").select(`
     *,
-    product:products(name, sku, images)
+    product:products(name, sku, images, variants, supplier_sku)
   `).eq("order_id", order.id);
 
   const { data: timelineEvents } = await supabaseAdmin.from("order_events").select("*").eq("order_id", order.id).order("created_at", { ascending: true });
@@ -123,11 +124,12 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
-                      <div className="font-bold text-slate-900">₦{(item.unit_price * item.quantity).toLocaleString()}</div>
-                      <div className="text-sm text-slate-500">Qty: {item.quantity} × ₦{item.unit_price.toLocaleString()}</div>
+                      <div className="text-right flex flex-col items-end gap-2">
+                        <div className="font-bold text-slate-900">₦{(item.unit_price * item.quantity).toLocaleString()}</div>
+                        <div className="text-sm text-slate-500">Qty: {item.quantity} × ₦{item.unit_price.toLocaleString()}</div>
+                        <CopyToSupplierButton item={item} />
+                      </div>
                     </div>
-                  </div>
                 ))}
               </div>
             </CardContent>
