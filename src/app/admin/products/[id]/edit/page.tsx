@@ -434,43 +434,58 @@ export default function EditProductPage() {
               <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 space-y-2 mb-4">
                 <Label className="text-blue-900 font-bold">Smart Paste</Label>
                 <p className="text-xs text-blue-700">Copy table rows or lists directly from Alibaba and paste them below. We will automatically extract the keys and values into the table format!</p>
-                <Textarea 
-                  placeholder="Paste raw specifications here..." 
-                  className="h-20 bg-white"
-                  onChange={(e) => {
-                    const text = e.target.value;
-                    if (!text.trim()) return;
+                <div 
+                  contentEditable
+                  data-placeholder="Paste raw specifications or HTML table here..." 
+                  className="min-h-[80px] max-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 overflow-y-auto empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400"
+                  onInput={(e) => {
+                    const el = e.currentTarget;
+                    const html = el.innerHTML;
+                    if (!html.trim() || html === '<br>') return;
                     
-                    // Smart parser: tries to find Key / Value pairs separated by tabs, colons, or multiple spaces
-                    const lines = text.split('\n');
                     const newSpecs: {key: string, value: string}[] = [];
                     
-                    lines.forEach(line => {
-                      const cleanLine = line.trim();
-                      if (!cleanLine) return;
-                      
-                      // Match "Key: Value" or "Key \t Value" or "Key    Value"
-                      const match = cleanLine.match(/^([^:\t]+)(?::|\t|\s{2,})(.*)$/);
-                      if (match && match[1] && match[2]) {
-                        newSpecs.push({ key: match[1].trim(), value: match[2].trim() });
-                      } else {
-                        // If no clear delimiter, but there are exactly 2 words/phrases separated by space, we can try
-                        const parts = cleanLine.split(/\s+/);
-                        if (parts.length === 2) {
-                          newSpecs.push({ key: parts[0], value: parts[1] });
-                        } else if (parts.length > 2) {
-                          // Fallback: put first word as key, rest as value
-                          newSpecs.push({ key: parts[0], value: parts.slice(1).join(' ') });
+                    // Parse HTML to find tables
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    const rows = doc.querySelectorAll('tr');
+                    if (rows.length > 0) {
+                      rows.forEach(row => {
+                        const cells = row.querySelectorAll('td, th');
+                        if (cells.length >= 2) {
+                          newSpecs.push({
+                            key: cells[0].textContent?.trim() || "",
+                            value: cells[1].textContent?.trim() || ""
+                          });
                         }
-                      }
-                    });
+                      });
+                    } else {
+                      // Fallback: parse plain text if they just pasted text
+                      const text = el.innerText;
+                      const lines = text.split('\n');
+                      lines.forEach(line => {
+                        const cleanLine = line.trim();
+                        if (!cleanLine) return;
+                        const match = cleanLine.match(/^([^:\t]+)(?::|\t|\s{2,})(.*)$/);
+                        if (match && match[1] && match[2]) {
+                          newSpecs.push({ key: match[1].trim(), value: match[2].trim() });
+                        } else {
+                          const parts = cleanLine.split(/\s+/);
+                          if (parts.length === 2) {
+                            newSpecs.push({ key: parts[0], value: parts[1] });
+                          } else if (parts.length > 2) {
+                            newSpecs.push({ key: parts[0], value: parts.slice(1).join(' ') });
+                          }
+                        }
+                      });
+                    }
                     
                     if (newSpecs.length > 0) {
                       setSpecifications(prev => [...prev.filter(s => s.key || s.value), ...newSpecs]);
                     }
                     
-                    // Clear the textarea after processing
-                    setTimeout(() => { e.target.value = ''; }, 100);
+                    setTimeout(() => { el.innerHTML = ''; }, 100);
                   }}
                 />
               </div>
