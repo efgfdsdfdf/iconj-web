@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+import { getUserOrdersForIssues, submitOrderIssue } from "./actions";
+
 export default function ReportIssuePage() {
   const [supabase] = useState(() => createClient());
   const [loading, setLoading] = useState(false);
@@ -27,23 +29,18 @@ export default function ReportIssuePage() {
 
   useEffect(() => {
     async function loadOrders() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      const res = await getUserOrdersForIssues();
+      
+      if (res.error === "Not logged in") {
         window.location.href = "/login?redirect=/report-issue";
         return;
       }
-      setUserId(user.id);
       
-      const { data } = await supabase
-        .from("orders")
-        .select("id, created_at, order_status")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
-        
-      if (data) setUserOrders(data);
+      if (res.userId) setUserId(res.userId);
+      if (res.orders) setUserOrders(res.orders);
     }
     loadOrders();
-  }, [supabase]);
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -83,29 +80,19 @@ export default function ReportIssuePage() {
         evidence_urls.push(publicUrl);
       }
 
-      // 2. Create Issue record
-      const { data: issueData, error: insertError } = await supabase
-        .from("order_issues")
-        .insert({
-          order_id: formData.order_id,
-          customer_id: userId,
-          issue_type: formData.issue_type,
-          description: formData.description,
-          evidence_urls,
-          status: "Submitted"
-        })
-        .select("id")
-        .single();
+      // 2. Create Issue record via Server Action
+      const res = await submitOrderIssue({
+        order_id: formData.order_id,
+        issue_type: formData.issue_type,
+        description: formData.description,
+        evidence_urls
+      });
 
-      if (insertError) {
-        // Fallback for when the user hasn't run the SQL script yet
-        if (insertError.code === "42P01") {
-           throw new Error("The order_issues database table does not exist yet. Please ask the administrator to run the setup script.");
-        }
-        throw insertError;
+      if (res.error) {
+        throw new Error(res.error);
       }
 
-      setReference(issueData.id.split("-")[0].toUpperCase());
+      setReference(res.id.split("-")[0].toUpperCase());
       setSuccess(true);
       
       // Send email notification
