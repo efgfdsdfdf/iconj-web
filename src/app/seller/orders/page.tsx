@@ -31,7 +31,7 @@ export default async function SellerOrdersPage() {
 
   const { data: orders } = await supabaseAdmin
     .from("seller_orders")
-    .select("*, orders(delivery_address, payment_status, created_at)")
+    .select("*, orders(id, delivery_address, payment_status, created_at, user_id, profiles:user_id(name, email, phone))")
     .eq("seller_id", seller.id)
     .order("created_at", { ascending: false });
 
@@ -83,6 +83,15 @@ export default async function SellerOrdersPage() {
         const addr = order.orders?.delivery_address || {};
         const payStatus = order.orders?.payment_status;
         
+        const customerName =
+          (addr.name && addr.name.trim().length > 0 ? addr.name.trim() : null) ||
+          order.orders?.profiles?.name ||
+          (addr.email && addr.email.trim().length > 0 ? addr.email.trim() : null) ||
+          order.orders?.profiles?.email ||
+          "Customer";
+        const customerEmail = (addr.email && addr.email.trim().length > 0 ? addr.email.trim() : null) || order.orders?.profiles?.email;
+        const customerPhone = (addr.phone && addr.phone.trim().length > 0 ? addr.phone.trim() : null) || order.orders?.profiles?.phone;
+        
         return (
           <Card key={order.id} className="border-none shadow-sm overflow-hidden">
             {/* Order Header */}
@@ -120,9 +129,9 @@ export default async function SellerOrdersPage() {
                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <User className="w-3.5 h-3.5" /> Customer
                     </h4>
-                    <p className="font-semibold text-slate-900">{addr.name || "N/A"}</p>
-                    {addr.email && <p className="text-sm text-slate-500">{addr.email}</p>}
-                    {addr.phone && <p className="text-sm text-slate-500">{addr.phone}</p>}
+                    <p className="font-semibold text-slate-900">{customerName}</p>
+                    {customerEmail && <p className="text-sm text-slate-500">{customerEmail}</p>}
+                    {customerPhone && <p className="text-sm text-slate-500">{customerPhone}</p>}
                   </div>
                   <div>
                     <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">

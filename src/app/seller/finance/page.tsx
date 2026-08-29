@@ -53,6 +53,10 @@ export default async function SellerFinancePage() {
     }
   });
 
+  if (netEarnings === 0 && (totalGross > 0 || pendingSettlement > 0)) {
+    netEarnings = (pendingSettlement + settledAmount) || Math.max(0, totalGross - totalCommission);
+  }
+
   const formatCurrency = (val: number) => `₦${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   return (

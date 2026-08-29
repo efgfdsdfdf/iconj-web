@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, ShoppingCart, DollarSign, TrendingUp, CheckCircle2, ArrowRight, Wallet, Store, AlertTriangle } from "lucide-react";
 import Link from "next/link";
@@ -7,7 +8,12 @@ export default async function SellerDashboard() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: seller } = await supabase
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: seller } = await supabaseAdmin
     .from("sellers")
     .select("id, status, created_at, seller_identifier, stores(store_name)")
     .eq("profile_id", user?.id)
@@ -18,7 +24,7 @@ export default async function SellerDashboard() {
   if (!seller) return <div>Seller not found.</div>;
 
   // Check payout account
-  const { data: payoutAccount } = await supabase
+  const { data: payoutAccount } = await supabaseAdmin
     .from("seller_payout_accounts")
     .select("id, status, paystack_subaccount_code")
     .eq("seller_id", seller.id)
@@ -26,37 +32,63 @@ export default async function SellerDashboard() {
     .maybeSingle();
 
   // Fetch stats
-  const { count: orderCount } = await supabase
+  const { count: orderCount } = await supabaseAdmin
     .from("seller_orders")
     .select("*", { count: 'exact', head: true })
     .eq("seller_id", seller.id);
 
-  const { count: productCount } = await supabase
+  const { count: productCount } = await supabaseAdmin
     .from("products")
     .select("*", { count: 'exact', head: true })
     .eq("seller_id", seller.id);
 
-  // Fetch financial summary from ledger
-  const { data: ledger } = await supabase
+  // Fetch financial summary from ledger and wallet
+  const { data: ledger } = await supabaseAdmin
     .from("financial_ledger")
     .select("transaction_type, amount")
     .eq("seller_id", seller.id);
 
-  let totalEarnings = 0;
+  const { data: wallet } = await supabaseAdmin
+    .from("seller_wallets")
+    .select("available_balance, pending_balance, reserved_balance, total_earned")
+    .eq("seller_id", seller.id)
+    .maybeSingle();
+
+  let totalGross = 0;
+  let totalCommission = 0;
+  let netFromLedger = 0;
   let pendingSettlement = 0;
+
   ledger?.forEach(entry => {
     const amt = Number(entry.amount);
-    if (entry.transaction_type === 'SELLER_EARNING') totalEarnings += amt;
-    if (entry.transaction_type === 'SETTLEMENT_PENDING') pendingSettlement += amt;
-    if (entry.transaction_type === 'SETTLEMENT_SUCCESSFUL') pendingSettlement -= amt;
+    if (entry.transaction_type === 'SALE_GROSS') totalGross += amt;
+    if (entry.transaction_type === 'ICONJ_COMMISSION') totalCommission += Math.abs(amt);
+    if (entry.transaction_type === 'SELLER_EARNING') netFromLedger += amt;
+    if (entry.transaction_type === 'SETTLEMENT_PENDING') {
+      netFromLedger += amt;
+      pendingSettlement += amt;
+    }
+    if (entry.transaction_type === 'SETTLEMENT_SUCCESSFUL') {
+      pendingSettlement -= amt;
+    }
   });
+
+  // Calculate true net earnings (using wallet, or ledger settlements, or gross minus commission)
+  const totalEarnings = wallet && Number(wallet.total_earned) > 0
+    ? Number(wallet.total_earned)
+    : (netFromLedger > 0 ? netFromLedger : Math.max(0, totalGross - totalCommission));
+
+  // If wallet exists with funds, use wallet balances for pending payout
+  if (wallet && (Number(wallet.available_balance) > 0 || Number(wallet.pending_balance) > 0)) {
+    pendingSettlement = Number(wallet.available_balance) + Number(wallet.pending_balance);
+  }
 
   const formatCurrency = (val: number) => `₦${val.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-  // Fetch recent orders
-  const { data: recentOrders } = await supabase
+  // Fetch recent orders with customer profile join
+  const { data: recentOrders } = await supabaseAdmin
     .from("seller_orders")
-    .select("*, orders(delivery_address, payment_status, created_at)")
+    .select("*, orders(id, delivery_address, payment_status, created_at, user_id, profiles:user_id(name, email, phone))")
     .eq("seller_id", seller.id)
     .order("created_at", { ascending: false })
     .limit(5);
@@ -250,23 +282,38 @@ export default async function SellerDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {recentOrders.map((order: any) => (
-                    <tr key={order.id} className="hover:bg-slate-50">
-                      <td className="px-4 py-3 font-medium text-slate-900">{order.id.split('-')[0]}</td>
-                      <td className="px-4 py-3 text-slate-500">{new Date(order.created_at).toLocaleDateString()}</td>
-                      <td className="px-4 py-3">{order.orders?.delivery_address?.name || 'Unknown'}</td>
-                      <td className="px-4 py-3 font-medium">₦{order.total_amount?.toLocaleString()}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-1 rounded text-xs font-bold ${
-                          order.status === 'PAID' || order.status === 'PROCESSING' ? 'bg-emerald-100 text-emerald-700' :
-                          order.status === 'PENDING_PAYMENT' ? 'bg-amber-100 text-amber-700' :
-                          'bg-blue-100 text-blue-700'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                  {recentOrders.map((order: any) => {
+                    const addr = order.orders?.delivery_address || {};
+                    const customerName =
+                      (addr.name && addr.name.trim().length > 0 ? addr.name.trim() : null) ||
+                      order.orders?.profiles?.name ||
+                      (addr.email && addr.email.trim().length > 0 ? addr.email.trim() : null) ||
+                      order.orders?.profiles?.email ||
+                      'Customer';
+
+                    const customerSub = addr.city || (addr.email && addr.email !== customerName ? addr.email : null);
+
+                    return (
+                      <tr key={order.id} className="hover:bg-slate-50">
+                        <td className="px-4 py-3 font-medium text-slate-900">{order.id.split('-')[0].toUpperCase()}</td>
+                        <td className="px-4 py-3 text-slate-500">{new Date(order.created_at).toLocaleDateString()}</td>
+                        <td className="px-4 py-3">
+                          <div className="font-semibold text-slate-900">{customerName}</div>
+                          {customerSub && <div className="text-xs text-slate-500">{customerSub}</div>}
+                        </td>
+                        <td className="px-4 py-3 font-medium">₦{order.total_amount?.toLocaleString()}</td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 rounded text-xs font-bold ${
+                            order.status === 'PAID' || order.status === 'PROCESSING' ? 'bg-emerald-100 text-emerald-700' :
+                            order.status === 'PENDING_PAYMENT' ? 'bg-amber-100 text-amber-700' :
+                            'bg-blue-100 text-blue-700'
+                          }`}>
+                            {order.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
