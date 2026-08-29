@@ -13,11 +13,16 @@ export function CopyToSupplierButton({ item, address }: { item: any, address?: a
     const url = item.product?.variants?.supplier_product_url || "";
     const sku = item.product?.supplier_sku || item.product?.sku || config.store_sku || "";
     
-    let specs = [];
+    let specs: string[] = [];
     if (config.width && config.width !== '0cm' && config.width !== 'Standard') specs.push(`Width: ${config.width}`);
     if (config.height && config.height !== '0cm' && config.height !== 'Standard') specs.push(`Height: ${config.height}`);
     if (config.motorType) specs.push(`Motor: ${config.motorType}`);
-    if (config.variant_string) specs.push(`Variant: ${config.variant_string}`);
+    
+    const variant = config.selected_variant || config.variant_string;
+    if (variant) {
+      specs.push(`Variant: ${typeof variant === 'object' ? JSON.stringify(variant) : variant}`);
+    }
+    
     if (config.custom_notes) specs.push(`Notes: ${config.custom_notes}`);
 
     let addressBlock = "";
@@ -29,13 +34,13 @@ Street: ${address.street || "N/A"}
 City/State: ${address.city || ""}${address.state ? `, ${address.state}` : ""}, Nigeria`;
     }
 
+    const detailsBlock = specs.length > 0 ? `\nDetails:\n${specs.join('\n')}` : "";
+
     const textToCopy = `Order Request
 Product: ${config.product_name || item.product?.name}
 SKU: ${sku}
 Quantity: ${item.quantity}
-${url ? `URL: ${url}\n` : ''}
-Details:
-${specs.join('\n')}${addressBlock}`;
+${url ? `URL: ${url}` : ''}${detailsBlock}${addressBlock}`;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
