@@ -26,6 +26,7 @@ export const viewport: Viewport = {
 };
 
 import { PwaInstallBanner } from "@/components/layout/PwaInstallBanner";
+import { SplashScreen } from "@/components/layout/SplashScreen";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function RootLayout({
@@ -40,6 +41,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col`}>
+        <SplashScreen />
         <PwaInstallBanner />
         <Navbar categories={categories} />
         <main className="flex-1">
