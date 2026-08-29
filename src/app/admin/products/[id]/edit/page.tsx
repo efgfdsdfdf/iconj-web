@@ -5,162 +5,281 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useState, useEffect, use } from "react";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { ChevronLeft, Info, Plus, Trash2 } from "lucide-react";
+
 import Link from "next/link";
-import { updateProduct } from "../../../actions";
 
 export default function EditProductPage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
   const supabase = createClient();
-  const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [categoriesList, setCategoriesList] = useState<string[]>(["Nursery & Furniture", "Baby Feeding & Nursing", "Baby Care & Bath", "Baby Clothing & Accessories", "Baby Travel", "Toys & Development", "Maternity & Mother Care", "Gifts & Bundles"]);
+  const [loading, setLoading] = useState(false);
+  const [categoriesList, setCategoriesList] = useState<string[]>([]);
+  const [suppliersList, setSuppliersList] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const { data } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
-      if (data?.value && Array.isArray(data.value)) {
-        setCategoriesList(data.value.map((c: any) => c.name));
-      }
-    };
-    fetchCategories();
-  }, [supabase]);
+    // Fetch categories from admin settings
+    fetch("/api/suppliers").then(r => r.json()).then(sups => setSuppliersList(sups)).catch(() => {});
+    // Fetch category list from store settings
+    fetch("/api/store-settings/categories").then(r => r.json()).then(cats => {
+      if (Array.isArray(cats)) setCategoriesList(cats.map((c: any) => typeof c === "string" ? c : c.name));
+    }).catch(() => {});
+  }, []);
 
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  // Specifications
+  const [specifications, setSpecifications] = useState<{key: string, value: string}[]>([]);
+
+  const addSpecification = () => setSpecifications([...specifications, { key: "", value: "" }]);
+  const updateSpecification = (index: number, field: "key" | "value", val: string) => {
+    const newSpecs = [...specifications];
+    newSpecs[index][field] = val;
+    setSpecifications(newSpecs);
+  };
+  const removeSpecification = (index: number) => {
+    setSpecifications(specifications.filter((_, i) => i !== index));
+  };
+
+  // 1. Basic Info
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
     name: "", sku: "", category: "",
-    base_supplier_cost: "", base_selling_price: "",
-    description: "", stock_status: "", is_featured: false, requires_quote: false,
-    supplier_id: "", supplier_sku: "", supplier_product_url: ""
+    product_cost: "", shipping_cost: "", selling_price: "",
+    stock_status: "In Stock", description: "",
+    supplier_id: "", supplier_sku: "", supplier_product_url: "",
+    brand: "", age_range: "", safety_info: "",
+    is_featured: false, is_bundle: false,
+    is_retail_enabled: true, is_wholesale_enabled: false
   });
 
-  const [suppliersList, setSuppliersList] = useState<any[]>([]);
-  const [existingMetadata, setExistingMetadata] = useState<any>({});
-
-  const [variants, setVariants] = useState<{sizes: string[], motors: string[], fabrics: string[]}>({
-    sizes: [], motors: [], fabrics: []
-  });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [existingVariants, setExistingVariants] = useState<any>({});
 
   useEffect(() => {
-    async function fetchProduct() {
-      const supRes = await fetch("/api/suppliers");
-      const sups = await supRes.json();
-      setSuppliersList(sups);
-
+    if (!id) return;
+    const fetchProduct = async () => {
       const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
       if (data) {
-        setExistingMetadata(data.metadata || {});
         setFormData({
           name: data.name || "",
           sku: data.sku || "",
           category: data.category || "",
-          base_supplier_cost: data.base_supplier_cost?.toString() || "",
-          base_selling_price: data.base_selling_price?.toString() || "",
-          description: data.description || "",
+          product_cost: data.base_supplier_cost?.toString() || "",
+          shipping_cost: "0", // Stored generally as product_cost internally or ignored
+          selling_price: data.base_selling_price?.toString() || "",
           stock_status: data.stock_status || "In Stock",
-          is_featured: data.is_featured || false,
-          requires_quote: data.requires_quote || false,
+          description: data.description || "",
           supplier_id: data.supplier_id || "",
           supplier_sku: data.supplier_sku || "",
-          supplier_product_url: data.variants?.supplier_product_url || ""
+          supplier_product_url: data.variants?.supplier_product_url || "",
+          brand: data.brand || "",
+          age_range: data.age_range || "",
+          safety_info: data.safety_info || "",
+          is_featured: !!data.is_featured,
+          is_bundle: !!data.is_bundle,
+          is_retail_enabled: data.is_retail_enabled !== false,
+          is_wholesale_enabled: !!data.is_wholesale_enabled
         });
-        setVariants(data.variants || { sizes: [], motors: [], fabrics: [] });
-        setMoq(data.moq || 1);
-        setPricingTiers(data.pricing_tiers || []);
+        if (data.specifications && Array.isArray(data.specifications)) {
+          setSpecifications(data.specifications);
+        }
+        if (data.images && Array.isArray(data.images)) {
+          setImagePreviews(data.images);
+          setImageFiles(new Array(data.images.length).fill(null) as any);
+        }
+        if (data.variants) {
+          setExistingVariants(data.variants);
+        }
+        if (data.pricing_tiers && Array.isArray(data.pricing_tiers)) {
+          setPricingTiers(data.pricing_tiers);
+        }
+        if (data.moq) {
+          setMoq(data.moq);
+        }
       }
       setFetching(false);
-    }
+    };
     fetchProduct();
-  }, [id]);
+  }, [id, supabase]);
 
-  const handleUpdateProduct = async (e: React.FormEvent) => {
+  // Pricing Logic
+  const productCost = parseFloat(formData.product_cost) || 0;
+  const shippingCost = parseFloat(formData.shipping_cost) || 0;
+  const totalCost = productCost + shippingCost;
+  const calculatedSellingPrice = parseFloat(formData.selling_price) || 0;
+  const grossProfit = Math.max(0, calculatedSellingPrice - totalCost);
+  const marginPercentage = calculatedSellingPrice > 0 ? Math.round((grossProfit / calculatedSellingPrice) * 100) : 0;
+
+  useEffect(() => {
+    if (totalCost > 0 && calculatedSellingPrice === 0) {
+      // Default auto-calc for ~40% margin
+      const recommendedPrice = Math.round(totalCost / 0.6);
+      setFormData(prev => ({ ...prev, selling_price: recommendedPrice.toString() }));
+    }
+  }, [formData.product_cost, formData.shipping_cost]);
+
+  // Image Handling
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      setImageFiles(prev => [...prev, ...filesArray]);
+      
+      const previews = filesArray.map(file => URL.createObjectURL(file));
+      setImagePreviews(prev => [...prev, ...previews]);
+    }
+  };
+
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      const filesArray: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) filesArray.push(file);
+        }
+      }
+      
+      if (filesArray.length > 0) {
+        setImageFiles(prev => [...prev, ...filesArray]);
+        const previews = filesArray.map(file => URL.createObjectURL(file));
+        setImagePreviews(prev => [...prev, ...previews]);
+      }
+    };
+
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, []);
+
+  const removeImage = (index: number) => {
+    setImageFiles(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
+      // 1. Upload images via API route
+      const uploadedUrls: string[] = [];
+      for (let i = 0; i < imageFiles.length; i++) {
+        const file = imageFiles[i];
+        if (!file) {
+          // It's an existing image, keep its URL
+          uploadedUrls.push(imagePreviews[i]);
+        } else {
+          // It's a new file, upload it
+          const fd = new FormData();
+          fd.append("file", file);
+          const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+          const result = await res.json();
+          if (!res.ok || !result.url) throw new Error("Image upload failed: " + (result.error || "Unknown error"));
+          uploadedUrls.push(result.url);
+        }
+      }
+
+      // 2. Build product payload
+      const productCost = parseFloat(formData.product_cost) || 0;
+      const shippingCost = parseFloat(formData.shipping_cost) || 0;
       const payload = {
-        name: formData.name,
-        sku: formData.sku,
-        category: formData.category,
-        base_supplier_cost: parseFloat(formData.base_supplier_cost),
-        base_selling_price: parseFloat(formData.base_selling_price),
-        moq: moq === "" ? 1 : moq,
-        pricing_tiers: pricingTiers,
-        description: formData.description,
-        stock_status: formData.stock_status,
-        is_featured: formData.is_featured,
-        requires_quote: formData.requires_quote,
-        variants: {
-          ...variants,
-          supplier_product_url: formData.supplier_product_url || null
-        },
+        name: formData.name || "",
+        category: formData.category || "",
+        base_supplier_cost: productCost + shippingCost,
+        base_selling_price: parseFloat(formData.selling_price) || 0,
+        moq: typeof moq === "number" && !isNaN(moq) ? moq : 1,
+        pricing_tiers: pricingTiers.map(t => ({
+          minQty: Number(t.minQty) || 1,
+          maxQty: t.maxQty ? Number(t.maxQty) : null,
+          price: Number(t.price) || 0,
+        })),
+        is_configurable: false,
+        requires_quote: false,
+        images: uploadedUrls,
+        variants: { ...existingVariants, supplier_product_url: formData.supplier_product_url || null },
+        description: formData.description || "",
         supplier_id: formData.supplier_id || null,
-        supplier_sku: formData.supplier_sku || null
+        supplier_sku: formData.supplier_sku || null,
+        brand: formData.brand || null,
+        age_range: formData.age_range || null,
+        safety_info: formData.safety_info || null,
+        is_bundle: formData.is_bundle,
+        is_retail_enabled: formData.is_retail_enabled,
+        is_wholesale_enabled: formData.is_wholesale_enabled,
+        stock_status: formData.stock_status || "In Stock",
+        features: [],
+        specifications: specifications.filter(s => s.key && s.value),
       };
 
-      const sanitizedPayload = JSON.parse(JSON.stringify(payload, (key, value) => {
-        if (typeof value === 'number' && isNaN(value)) {
-          return null;
-        }
-        return value;
-      }));
+      // 3. Update product via API route
+      const res = await fetch(`/api/admin/products/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.error || "Failed to update product");
 
-      const result = await updateProduct(id as string, sanitizedPayload);
-
-      if (result?.error) throw new Error(result.error);
-
-      router.push("/admin/products");
-      router.refresh();
+      setSuccess(true);
+      setTimeout(() => router.push("/admin/products"), 1500);
     } catch (err: any) {
-      setError(err.message || "Failed to update product.");
+      console.error(err);
+      setError(err.message || "An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleArrayChange = (type: "sizes" | "motors" | "fabrics", index: number, value: string) => {
-    const newArr = [...variants[type]];
-    newArr[index] = value;
-    setVariants({ ...variants, [type]: newArr });
-  };
-
-  const addArrayItem = (type: "sizes" | "motors" | "fabrics") => {
-    setVariants({ ...variants, [type]: [...(variants[type] || []), ""] });
-  };
-
-  const removeArrayItem = (type: "sizes" | "motors" | "fabrics", index: number) => {
-    setVariants({ ...variants, [type]: variants[type].filter((_, i) => i !== index) });
-  };
-
-  if (fetching) return <div className="p-8">Loading product details...</div>;
+  if (fetching) return <div className="p-12 text-center text-slate-500 font-medium">Loading product data...</div>;
 
   return (
-    <main className="flex-1 p-8 bg-slate-50 min-h-screen">
-      <div className="mb-8 max-w-5xl mx-auto">
-        <Link href="/admin/products" className="text-sm font-medium text-blue-600 flex items-center mb-4 hover:underline">
-          <ChevronLeft className="w-4 h-4 mr-1" /> Back to Products
+    <div className="space-y-6 pb-12">
+      <div className="flex items-center gap-4">
+        <Link href="/admin/products">
+          <Button variant="ghost" size="icon"><ChevronLeft className="w-5 h-5" /></Button>
         </Link>
-        <h1 className="text-3xl font-bold text-slate-900">Edit Product & Variants</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Edit Product</h1>
+          <p className="text-slate-500">Modify existing product details.</p>
+        </div>
       </div>
 
-      <form onSubmit={handleUpdateProduct} className="max-w-5xl mx-auto grid lg:grid-cols-3 gap-8">
-        
-        <div className="xl:col-span-2 space-y-8">
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm font-medium">
+          {error}
+        </div>
+      )}
 
-          {/* WHOLESALE PRICING BUILDER */}
+      {success && (
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2">
+          <CheckCircle2 className="w-5 h-5" /> Product successfully updated! Redirecting...
+        </div>
+      )}
+
+      <form onSubmit={handleAddProduct} className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        
+        {/* LEFT COLUMN: Basic Info, Details, Images */}
+        <div className="xl:col-span-2 space-y-8">
+          
           <Card className="border-none shadow-sm ring-1 ring-blue-100 mb-8">
             <CardHeader className="bg-blue-50/50">
               <CardTitle className="text-blue-900 flex justify-between items-center">
                 Wholesale Pricing Tiers
-                <Button type="button" variant="outline" size="sm" onClick={() => setPricingTiers([...pricingTiers, { minQty: moq, maxQty: null, price: formData.base_selling_price ? parseFloat(formData.base_selling_price) : 0 }])}>
+                <Button type="button" variant="outline" size="sm" onClick={() => setPricingTiers([...pricingTiers, { minQty: moq, maxQty: null, price: formData.selling_price ? parseFloat(formData.selling_price) : 0 }])}>
                   <Plus className="w-4 h-4 mr-2" /> Add Tier
                 </Button>
               </CardTitle>
@@ -192,7 +311,7 @@ export default function EditProductPage() {
                         }} />
                       </div>
                       <div className="col-span-3">
-                        <Input type="number" placeholder="e.g. 5, or empty" value={tier.maxQty || ''} onChange={(e) => {
+                        <Input type="number" placeholder="e.g. 5, or leave empty" value={tier.maxQty || ''} onChange={(e) => {
                           const newTiers = [...pricingTiers];
                           newTiers[index].maxQty = e.target.value ? parseInt(e.target.value) : null;
                           setPricingTiers(newTiers);
@@ -205,8 +324,8 @@ export default function EditProductPage() {
                           setPricingTiers(newTiers);
                         }} />
                         <div className="text-xs mt-1 text-slate-500">
-                          Margin vs Base Cost: <span className={tier.price - parseFloat(formData.base_supplier_cost || '0') > 0 ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}>
-                            ₦{((tier.price || 0) - parseFloat(formData.base_supplier_cost || '0')).toLocaleString()}
+                          Margin vs Base Cost: <span className={tier.price - parseFloat(formData.product_cost || '0') > 0 ? 'text-emerald-600 font-bold' : 'text-red-600 font-bold'}>
+                            ₦{((tier.price || 0) - parseFloat(formData.product_cost || '0')).toLocaleString()}
                           </span>
                         </div>
                       </div>
@@ -229,132 +348,215 @@ export default function EditProductPage() {
           <Card className="border-none shadow-sm">
             <CardHeader><CardTitle>Basic Information</CardTitle></CardHeader>
             <CardContent className="space-y-6">
-              {error && <div className="p-3 text-sm text-red-600 bg-red-50 rounded-md">{error}</div>}
-              <div className="space-y-2"><Label>Product Name</Label><Input required value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} /></div>
-              <div className="space-y-2"><Label>Full Description</Label><Textarea className="h-32" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} /></div>
-              <div className="grid sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Product Name</Label>
+                  <Input required placeholder="e.g. Premium Blackout Roller Blind 120x200cm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Brand</Label>
+                  <Input placeholder="e.g. ICONJ" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
+                </div>
                 <div className="space-y-2">
                   <Label>Product ID (SKU)</Label>
-                  <Input readOnly value={formData.sku} className="bg-slate-50 text-slate-700 cursor-text select-all font-mono" title="Product IDs are immutable and auto-generated." />
+                  <Input readOnly value="Will be auto-generated" className="bg-slate-50 text-slate-500 cursor-not-allowed" />
+                  <p className="text-[10px] text-slate-400">Unique ID generated on save (e.g. ICONJ-BLIND-001)</p>
                 </div>
                 <div className="space-y-2">
                   <Label>Category</Label>
-                  <select required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
+                  <select className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})}>
                     <option value="">Select Category...</option>
                     {categoriesList.map(cat => (
                       <option key={cat} value={cat}>{cat}</option>
                     ))}
                   </select>
                 </div>
-              </div>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label>Primary Supplier</Label>
-                    <select 
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
-                      value={formData.supplier_id || ""} 
-                      onChange={e => setFormData({...formData, supplier_id: e.target.value})}
-                    >
-                      <option value="">No Supplier Assigned</option>
-                      {suppliersList.map(sup => (
-                        <option key={sup.id} value={sup.id}>{sup.name}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Supplier SKU</Label>
-                    <Input placeholder="e.g. BBY-SWAD-01" value={formData.supplier_sku} onChange={e => setFormData({...formData, supplier_sku: e.target.value})} />
-                  </div>
-                  <div className="space-y-2 sm:col-span-2">
-                    <Label>Supplier Product URL</Label>
-                    <Input placeholder="e.g. https://alibaba.com/..." value={formData.supplier_product_url} onChange={e => setFormData({...formData, supplier_product_url: e.target.value})} />
-                  </div>
+                <div className="space-y-2 md:col-span-2">
+                  <RichTextEditor 
+                    label="Product Description"
+                    placeholder="Paste directly from supplier here (retains bold, bullets, tables...)" 
+                    value={formData.description} 
+                    onChange={val => setFormData({...formData, description: val})} 
+                  />
                 </div>
+              </div>
             </CardContent>
           </Card>
 
-          {/* VARIANT MANAGER */}
           <Card className="border-none shadow-sm">
-            <CardHeader><CardTitle>Variant Configurator Options</CardTitle></CardHeader>
-            <CardContent className="space-y-8">
-              {/* Sizes */}
-              <div>
-                <Label className="text-base font-semibold mb-3 block">Available Sizes / Dimensions</Label>
+            <CardHeader><CardTitle>Product Specifications</CardTitle></CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  {(variants.sizes || []).map((val, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input placeholder="e.g. 150cm x 200cm" value={val} onChange={e => handleArrayChange("sizes", i, e.target.value)} />
-                      <Button type="button" variant="ghost" className="text-red-500" onClick={() => removeArrayItem("sizes", i)}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" size="sm" onClick={() => addArrayItem("sizes")}><Plus className="w-4 h-4 mr-2" /> Add Size Option</Button>
+                  <Label>Variant / Size (optional)</Label>
+                  <Input placeholder="e.g. 120x200cm, King Size" value={formData.age_range} onChange={e => setFormData({...formData, age_range: e.target.value})} />
                 </div>
-              </div>
-              
-              {/* Motors */}
-              <div className="pt-6 border-t">
-                <Label className="text-base font-semibold mb-3 block">Available Motor Types</Label>
-                <div className="space-y-2">
-                  {(variants.motors || []).map((val, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input placeholder="e.g. Smart WiFi Motor (Tuya/Alexa)" value={val} onChange={e => handleArrayChange("motors", i, e.target.value)} />
-                      <Button type="button" variant="ghost" className="text-red-500" onClick={() => removeArrayItem("motors", i)}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" size="sm" onClick={() => addArrayItem("motors")}><Plus className="w-4 h-4 mr-2" /> Add Motor Option</Button>
-                </div>
-              </div>
-
-              {/* Fabrics */}
-              <div className="pt-6 border-t">
-                <Label className="text-base font-semibold mb-3 block">Available Fabrics</Label>
-                <div className="space-y-2">
-                  {(variants.fabrics || []).map((val, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input placeholder="e.g. 100% Blackout (Bedrooms)" value={val} onChange={e => handleArrayChange("fabrics", i, e.target.value)} />
-                      <Button type="button" variant="ghost" className="text-red-500" onClick={() => removeArrayItem("fabrics", i)}><Trash2 className="w-4 h-4" /></Button>
-                    </div>
-                  ))}
-                  <Button type="button" variant="outline" size="sm" onClick={() => addArrayItem("fabrics")}><Plus className="w-4 h-4 mr-2" /> Add Fabric Option</Button>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Additional Notes / Warnings</Label>
+                  <Textarea placeholder="e.g. Installation included. Suitable for all wall types." className="h-20 bg-amber-50" value={formData.safety_info} onChange={e => setFormData({...formData, safety_info: e.target.value})} />
                 </div>
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        <div className="space-y-8">
-          <Card className="border-none shadow-sm sticky top-24">
-            <CardHeader><CardTitle>Pricing & Status</CardTitle></CardHeader>
+          <Card className="border-none shadow-sm">
+            <CardHeader><CardTitle>Supplier Information (Internal)</CardTitle></CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label>Total Supplier Cost (?)</Label>
-                <Input type="number" required value={formData.base_supplier_cost} onChange={e => setFormData({...formData, base_supplier_cost: e.target.value})} />
-              </div>
-              <div className="space-y-2">
-                <Label>Selling Price (?)</Label>
-                <Input type="number" required className="font-bold border-emerald-500" value={formData.base_selling_price} onChange={e => setFormData({...formData, base_selling_price: e.target.value})} />
-              </div>
-
-              <div className="pt-4 border-t space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label>Stock Status</Label>
-                  <select value={formData.stock_status} onChange={e => setFormData({...formData, stock_status: e.target.value})} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-                    <option>In Stock</option><option>Out of Stock</option><option>Pre-order (14-21 Days)</option>
+                  <Label>Primary Supplier</Label>
+                  <select 
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" 
+                    value={formData.supplier_id} 
+                    onChange={e => setFormData({...formData, supplier_id: e.target.value})}
+                  >
+                    <option value="">No Supplier Assigned</option>
+                    {suppliersList.map(sup => (
+                      <option key={sup.id} value={sup.id}>{sup.name}</option>
+                    ))}
                   </select>
                 </div>
-                <div className="flex items-center gap-2">
-                  <input type="checkbox" id="featured" className="w-4 h-4 rounded text-blue-600" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
-                  <Label htmlFor="featured">Feature on Homepage</Label>
+                <div className="space-y-2">
+                  <Label>Supplier SKU</Label>
+                  <Input placeholder="e.g. BBY-SWAD-01" value={formData.supplier_sku} onChange={e => setFormData({...formData, supplier_sku: e.target.value})} />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Supplier Product URL</Label>
+                  <Input placeholder="e.g. https://alibaba.com/..." value={formData.supplier_product_url} onChange={e => setFormData({...formData, supplier_product_url: e.target.value})} />
                 </div>
               </div>
-              <Button type="submit" disabled={loading} size="lg" className="w-full bg-blue-600 hover:bg-blue-700 h-14">
-                {loading ? "Saving..." : "Save All Changes"}
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm">
+            <CardHeader><CardTitle>Product Specifications (Table Format)</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-slate-500 mb-2">Add details here to automatically generate a clean specifications table on the product page.</p>
+              {specifications.map((spec, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <Input placeholder="e.g. Material" value={spec.key} onChange={e => updateSpecification(i, 'key', e.target.value)} className="w-1/3" />
+                  <Input placeholder="e.g. 100% Cotton" value={spec.value} onChange={e => updateSpecification(i, 'value', e.target.value)} className="flex-1" />
+                  <Button type="button" variant="ghost" size="icon" onClick={() => removeSpecification(i)} className="text-red-500 hover:text-red-700 hover:bg-red-50 shrink-0">
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button type="button" variant="outline" size="sm" onClick={addSpecification} className="mt-2 text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100">
+                <Plus className="w-4 h-4 mr-1" /> Add Specification Row
               </Button>
             </CardContent>
           </Card>
+
+          <Card className="border-none shadow-sm">
+            <CardHeader><CardTitle>Images & Gallery</CardTitle></CardHeader>
+            <CardContent>
+              <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer relative">
+                <input type="file" multiple accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-4" />
+                <p className="font-medium text-slate-700">Drag & drop or Paste lifestyle and product images here</p>
+                <p className="text-xs text-slate-500 mt-2">Supports JPG, PNG (Max 5MB each)</p>
+                <p className="text-[10px] text-slate-400 mt-1">(You can simply press Ctrl+V / Cmd+V anywhere on this page)</p>
+              </div>
+              
+              {imagePreviews.length > 0 && (
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 mt-6">
+                  {imagePreviews.map((src, i) => (
+                    <div key={i} className="relative aspect-square rounded-md overflow-hidden border group">
+                      <img src={src} alt="Preview" className="w-full h-full object-cover" />
+                      <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
         </div>
 
+        {/* RIGHT COLUMN: Pricing & Publish */}
+        <div className="space-y-8">
+          <Card className="border-none shadow-sm sticky top-24">
+            <CardHeader><CardTitle>Pricing & Profit Margin</CardTitle></CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <Label>Original Supplier Cost (?)</Label>
+                <Input type="number" required placeholder="0.00" value={formData.product_cost} onChange={e => setFormData({...formData, product_cost: e.target.value})} />
+              </div>
+              <div className="space-y-2">
+                <Label>Shipping/Freight Cost (?)</Label>
+                <Input type="number" required placeholder="0.00" value={formData.shipping_cost} onChange={e => setFormData({...formData, shipping_cost: e.target.value})} />
+              </div>
+              
+              <div className="pt-4 border-t space-y-2">
+                <Label>Customer Selling Price (?)</Label>
+                <Input type="number" required className="font-bold text-lg border-emerald-500 bg-emerald-50/30" value={formData.selling_price} onChange={e => setFormData({...formData, selling_price: e.target.value})} />
+              </div>
+
+              <div className="bg-slate-50 p-4 rounded-lg space-y-3 text-sm border">
+                <div className="flex justify-between text-slate-500">
+                  <span>Total Landed Cost:</span>
+                  <span>?{totalCost.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between font-bold text-emerald-600 border-t pt-2 mt-2">
+                  <span>Gross Profit per Sale:</span>
+                  <span>?{grossProfit.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between font-bold text-blue-600">
+                  <span>Margin Percentage:</span>
+                  <span>{marginPercentage}%</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+            <Card className="border-none shadow-sm">
+              <CardHeader><CardTitle>Status & Visibility</CardTitle></CardHeader>
+              <CardContent className="space-y-6">
+                
+                {/* LISTING TYPE SELECTION */}
+                <div className="p-4 bg-slate-50 border rounded-lg space-y-4">
+                  <Label className="text-base font-bold">Where should this product be listed?</Label>
+                  <p className="text-sm text-slate-500 mb-2">You can list products in Retail, Wholesale, or both.</p>
+                  
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="isRetail" checked={formData.is_retail_enabled !== false} onChange={e => setFormData({...formData, is_retail_enabled: e.target.checked})} className="w-5 h-5 accent-blue-600" />
+                    <Label htmlFor="isRetail" className="cursor-pointer">Retail Marketplace (B2C)</Label>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <input type="checkbox" id="isWholesale" checked={formData.is_wholesale_enabled === true} onChange={e => setFormData({...formData, is_wholesale_enabled: e.target.checked})} className="w-5 h-5 accent-blue-600" />
+                    <Label htmlFor="isWholesale" className="cursor-pointer">Wholesale Center (B2B)</Label>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                <Label>Stock Status</Label>
+                <select value={formData.stock_status} onChange={e => setFormData({...formData, stock_status: e.target.value})} className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                  <option>In Stock</option>
+                  <option>Out of Stock</option>
+                  <option>Pre-order</option>
+                </select>
+              </div>
+              
+              <div className="flex items-center gap-2 pt-2">
+                <input type="checkbox" id="featured" className="w-4 h-4 rounded text-blue-600" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
+                <Label htmlFor="featured" className="font-normal cursor-pointer">Featured Product</Label>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="bundle" className="w-4 h-4 rounded text-blue-600" checked={formData.is_bundle} onChange={e => setFormData({...formData, is_bundle: e.target.checked})} />
+                <Label htmlFor="bundle" className="font-normal cursor-pointer">This is a Gift Bundle</Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Button type="submit" disabled={loading} size="lg" className="w-full bg-blue-600 hover:bg-blue-700 h-14 text-lg shadow-lg">
+            {loading ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
       </form>
-    </main>
+    </div>
   );
 }
