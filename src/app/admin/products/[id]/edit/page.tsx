@@ -444,41 +444,64 @@ export default function EditProductPage() {
                     if (!html.trim() || html === '<br>') return;
                     
                     const newSpecs: {key: string, value: string}[] = [];
-                    
-                    // Parse HTML to find tables
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(html, 'text/html');
                     
                     const rows = doc.querySelectorAll('tr');
                     if (rows.length > 0) {
                       rows.forEach(row => {
-                        const cells = row.querySelectorAll('td, th');
-                        if (cells.length >= 2) {
-                          newSpecs.push({
-                            key: cells[0].textContent?.trim() || "",
-                            value: cells[1].textContent?.trim() || ""
-                          });
-                        }
-                      });
-                    } else {
-                      // Fallback: parse plain text if they just pasted text
-                      const text = el.innerText;
-                      const lines = text.split('\n');
-                      lines.forEach(line => {
-                        const cleanLine = line.trim();
-                        if (!cleanLine) return;
-                        const match = cleanLine.match(/^([^:\t]+)(?::|\t|\s{2,})(.*)$/);
-                        if (match && match[1] && match[2]) {
-                          newSpecs.push({ key: match[1].trim(), value: match[2].trim() });
-                        } else {
-                          const parts = cleanLine.split(/\s+/);
-                          if (parts.length === 2) {
-                            newSpecs.push({ key: parts[0], value: parts[1] });
-                          } else if (parts.length > 2) {
-                            newSpecs.push({ key: parts[0], value: parts.slice(1).join(' ') });
+                        const cells = Array.from(row.querySelectorAll('td, th')).map(c => c.textContent?.trim().replace(/:$/, '') || "");
+                        for (let i = 0; i < cells.length - 1; i += 2) {
+                          if (cells[i] || cells[i+1]) {
+                            newSpecs.push({ key: cells[i], value: cells[i+1] });
                           }
                         }
                       });
+                    } else {
+                      // Node walker for Div grids and non-table layouts
+                      const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
+                      let node;
+                      let rawTokens: string[] = [];
+                      
+                      while ((node = walker.nextNode())) {
+                        const val = node.nodeValue?.trim();
+                        if (val && val !== ":" && val !== "-") {
+                          rawTokens.push(val);
+                        }
+                      }
+                      
+                      // Fallback if walker found almost nothing
+                      if (rawTokens.length <= 1) {
+                        rawTokens = el.innerText.split('\n').map(s => s.trim()).filter(Boolean);
+                      }
+                      
+                      const processedTokens: string[] = [];
+                      rawTokens.forEach(t => {
+                        if (t.includes(':')) {
+                           const parts = t.split(':');
+                           if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
+                              processedTokens.push(parts[0].trim());
+                              processedTokens.push(parts[1].trim());
+                              return;
+                           }
+                        }
+                        
+                        const spaceParts = t.split(/\s{2,}|\t/);
+                        if (spaceParts.length > 1) {
+                           spaceParts.forEach(p => {
+                              if (p.trim()) processedTokens.push(p.trim());
+                           });
+                           return;
+                        }
+                        
+                        processedTokens.push(t);
+                      });
+                      
+                      for (let i = 0; i < processedTokens.length - 1; i += 2) {
+                        let k = processedTokens[i].replace(/:$/, '').trim();
+                        let v = processedTokens[i+1].trim();
+                        newSpecs.push({ key: k, value: v });
+                      }
                     }
                     
                     if (newSpecs.length > 0) {
