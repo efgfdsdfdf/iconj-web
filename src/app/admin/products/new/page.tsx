@@ -8,31 +8,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 } from "lucide-react";
+
 import Link from "next/link";
-import { createProduct, uploadProductImageBase64 } from "../../actions";
-import { createClient } from "@/lib/supabase/client";
 
 export default function AddProductPage() {
-  const supabase = createClient();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
-
   const [suppliersList, setSuppliersList] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      const { data: catData } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
-      if (catData?.value && Array.isArray(catData.value)) {
-        setCategoriesList(catData.value.map((c: any) => c.name));
-      }
-      
-      const res = await fetch("/api/suppliers");
-      const sups = await res.json();
-      setSuppliersList(sups);
-    };
-    fetchSettings();
-  }, [supabase]);
+    // Fetch categories from admin settings
+    fetch("/api/suppliers").then(r => r.json()).then(sups => setSuppliersList(sups)).catch(() => {});
+    // Fetch category list from store settings
+    fetch("/api/store-settings/categories").then(r => r.json()).then(cats => {
+      if (Array.isArray(cats)) setCategoriesList(cats.map((c: any) => typeof c === "string" ? c : c.name));
+    }).catch(() => {});
+  }, []);
+
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
@@ -116,77 +109,60 @@ export default function AddProductPage() {
     setSuccess(false);
 
     try {
-      // 1. Upload Images using Base64 to avoid FormData/File serialization errors (Error 441)
+      // 1. Upload images via API route (no Server Action — avoids serialization issues)
       const uploadedUrls: string[] = [];
       for (const file of imageFiles) {
-        const base64: string = await new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.readAsDataURL(file);
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = error => reject(error);
-        });
-        
-        const result = await uploadProductImageBase64(base64, file.name, file.type);
-        if (result.success && result.url) {
-          uploadedUrls.push(result.url);
-        } else {
-          throw new Error("Image upload failed: " + (result.error || "Unknown error"));
-        }
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+        const result = await res.json();
+        if (!res.ok || !result.url) throw new Error("Image upload failed: " + (result.error || "Unknown error"));
+        uploadedUrls.push(result.url);
       }
 
-      // 2. Insert Product
-      const finalCost = (productCost || 0) + (shippingCost || 0);
-      const safeSellingPrice = parseFloat(formData.selling_price) || 0;
-      const safeMoq = (typeof moq === "number" && !isNaN(moq)) ? moq : 1;
-      
-      // Deep clone and sanitize pricingTiers to remove any hidden React event proxies or NaNs
-      const safePricingTiers = JSON.parse(JSON.stringify(pricingTiers, (k, v) => 
-        (typeof v === 'number' && isNaN(v)) ? null : v
-      ));
-      
+      // 2. Build product payload
+      const productCost = parseFloat(formData.product_cost) || 0;
+      const shippingCost = parseFloat(formData.shipping_cost) || 0;
       const payload = {
-        name: String(formData.name || ""),
-        sku: String(formData.sku || ""),
-        category: String(formData.category || ""),
-        base_supplier_cost: finalCost,
-        base_selling_price: safeSellingPrice,
-        moq: safeMoq,
-        pricing_tiers: safePricingTiers,
+        name: formData.name || "",
+        category: formData.category || "",
+        base_supplier_cost: productCost + shippingCost,
+        base_selling_price: parseFloat(formData.selling_price) || 0,
+        moq: typeof moq === "number" && !isNaN(moq) ? moq : 1,
+        pricing_tiers: pricingTiers.map(t => ({
+          minQty: Number(t.minQty) || 1,
+          maxQty: t.maxQty ? Number(t.maxQty) : null,
+          price: Number(t.price) || 0,
+        })),
         is_configurable: false,
         requires_quote: false,
         images: uploadedUrls,
-        variants: {
-          supplier_product_url: formData.supplier_product_url ? String(formData.supplier_product_url) : null
-        },
-        description: formData.description ? String(formData.description) : "",
-        supplier_id: formData.supplier_id ? String(formData.supplier_id) : null,
-        supplier_sku: formData.supplier_sku ? String(formData.supplier_sku) : null,
-        brand: formData.brand ? String(formData.brand) : null,
-        age_range: formData.age_range ? String(formData.age_range) : null,
-        safety_info: formData.safety_info ? String(formData.safety_info) : null,
-        is_bundle: Boolean(formData.is_bundle),
-        stock_status: String(formData.stock_status || "In Stock"),
+        variants: { supplier_product_url: formData.supplier_product_url || null },
+        description: formData.description || "",
+        supplier_id: formData.supplier_id || null,
+        supplier_sku: formData.supplier_sku || null,
+        brand: formData.brand || null,
+        age_range: formData.age_range || null,
+        safety_info: formData.safety_info || null,
+        is_bundle: formData.is_bundle,
+        is_retail_enabled: formData.is_retail_enabled,
+        is_wholesale_enabled: formData.is_wholesale_enabled,
+        stock_status: formData.stock_status || "In Stock",
         features: [],
-        specifications: []
+        specifications: [],
       };
 
-      const sanitizedPayload = JSON.parse(JSON.stringify(payload, (key, value) => {
-        // Sanitize NaN to null
-        if (typeof value === 'number' && isNaN(value)) {
-          return null;
-        }
-        return value;
-      }));
-
-      const createResult = await createProduct(sanitizedPayload);
-
-      if (!createResult.success) {
-        throw new Error(createResult.error || "Failed to create product");
-      }
+      // 3. Create product via API route
+      const res = await fetch("/api/admin/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const result = await res.json();
+      if (!res.ok || !result.success) throw new Error(result.error || "Failed to create product");
 
       setSuccess(true);
       setTimeout(() => router.push("/admin/products"), 1500);
-
     } catch (err: any) {
       console.error(err);
       setError(err.message || "An unexpected error occurred");
