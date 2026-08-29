@@ -41,7 +41,7 @@ City/State: ${address.city || ""}${address.state ? `, ${address.state}` : ""}, N
 Product: ${config.product_name || item.product?.name || "Unknown Product"}
 SKU: ${sku}
 Quantity: ${item.quantity}
-${url ? `URL: ${url}` : ''}${detailsBlock}${addressBlock}`;
+${url ? `Product URL: ${url}` : ''}${detailsBlock}${addressBlock}`;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
