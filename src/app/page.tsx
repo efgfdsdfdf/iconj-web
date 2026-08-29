@@ -42,7 +42,7 @@ export default async function Home() {
       <section className="bg-white border-b shadow-sm mb-4">
         <Card className="border-none shadow-none rounded-none w-full overflow-hidden">
           <CardContent className="p-0">
-            <AutoScrollingCategories categories={categories} />
+            <AutoScrollingCategories categories={categories.filter(c => c.icon !== 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80')} />
           </CardContent>
         </Card>
       </section>
