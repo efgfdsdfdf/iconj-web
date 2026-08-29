@@ -54,6 +54,17 @@ export default function CartPage() {
                               ))}
                             </div>
                           )}
+                          <div className="text-sm text-slate-500 mt-1 space-y-0.5">
+                            {item.width && item.width !== '0cm' && item.width !== 'Standard' && <p><span className="font-medium">Width:</span> {item.width}</p>}
+                            {item.height && item.height !== '0cm' && item.height !== 'Standard' && <p><span className="font-medium">Height:</span> {item.height}</p>}
+                            {item.motorType && <p><span className="font-medium">Motor:</span> {item.motorType}</p>}
+                            {item.selectedVariant && <p><span className="font-medium">Variant:</span> {typeof item.selectedVariant === 'object' ? JSON.stringify(item.selectedVariant) : item.selectedVariant}</p>}
+                          </div>
+                          {item.customNotes && (
+                            <div className="text-sm text-slate-500 mt-2 bg-amber-50 p-2 rounded-md border border-amber-100">
+                              <span className="font-medium text-amber-700">Notes:</span> {item.customNotes}
+                            </div>
+                          )}
                           <div className="text-sm text-emerald-600 mt-2 font-medium bg-emerald-50 px-2 py-1 rounded-md inline-block">
                             Wholesale Unit Price: ₦{item.price.toLocaleString()}
                           </div>

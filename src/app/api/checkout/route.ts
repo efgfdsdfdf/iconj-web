@@ -171,7 +171,8 @@ export async function POST(request: Request) {
           height: item.height,
           motorType: item.motorType,
           requiresInstall: item.requiresInstall,
-          selected_variant: item.selectedVariant
+          selected_variant: item.selectedVariant,
+          custom_notes: item.customNotes
         }
       }));
 

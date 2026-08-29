@@ -133,7 +133,8 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
             if (config.height && config.height !== '0cm') specs += `Height: ${config.height} | `;
             if (config.motorType) specs += `Motor: ${config.motorType} | `;
             if (config.requiresInstall) specs += `Installation: Yes | `;
-            if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant}`;
+            if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant} | `;
+            if (config.custom_notes) specs += `Notes: ${config.custom_notes} | `;
             
             return `
               <tr style="border-bottom: 1px solid #e2e8f0;">
@@ -280,8 +281,9 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
             if (config.width && config.width !== '0cm') specs += `Width: ${config.width} | `;
             if (config.height && config.height !== '0cm') specs += `Height: ${config.height} | `;
             if (config.motorType) specs += `Motor: ${config.motorType} | `;
-            if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant}`;
+            if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant} | `;
             if (config.supplier_sku) specs += `Supplier SKU: ${config.supplier_sku} | `;
+            if (config.custom_notes) specs += `Notes: ${config.custom_notes} | `;
             
             return `
               <tr style="border-bottom: 1px solid #e2e8f0;">
@@ -349,7 +351,8 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
           if (config.height && config.height !== '0cm') specs += `Height: ${config.height} | `;
           if (config.motorType) specs += `Motor: ${config.motorType} | `;
           if (config.requiresInstall) specs += `Installation: Yes | `;
-          if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant}`;
+          if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant} | `;
+          if (config.custom_notes) specs += `Notes: ${config.custom_notes} | `;
           
           return `
             <tr style="border-bottom: 1px solid #e2e8f0;">

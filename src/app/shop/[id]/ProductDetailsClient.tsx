@@ -45,6 +45,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");
   const [customConfig, setCustomConfig] = useState<any>(null);
+  const [customNotes, setCustomNotes] = useState("");
 
   const handleAddToCart = () => {
     setAdding(true);
@@ -62,6 +63,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
       motorType: customConfig?.isMotorized ? "Motorized" : (selectedMotor || "Manual"),
       fabric: selectedFabric || "",
       selectedVariant: selectedFabric || "",
+      customNotes: customNotes || "",
       image: images[0],
       requiresInstall: customConfig?.requiresInstall || false,
     });
@@ -225,6 +227,16 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
               </div>
             </div>
           )}
+
+          <div className="space-y-3">
+            <Label className="text-base font-bold text-slate-900">Customization / Delivery Notes (Optional)</Label>
+            <textarea 
+              value={customNotes}
+              onChange={(e) => setCustomNotes(e.target.value)}
+              placeholder="e.g. Please ensure proper packaging, or specific customization request..."
+              className="w-full border rounded-md p-3 text-sm min-h-[80px] focus:ring-1 focus:ring-orange-500 focus:outline-none"
+            />
+          </div>
 
           <div className="space-y-3">
             <Label className="text-base font-bold text-slate-900">Quantity</Label>

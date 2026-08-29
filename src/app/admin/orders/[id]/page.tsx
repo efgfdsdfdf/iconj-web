@@ -92,9 +92,34 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                           Variant: {item.configuration_details.variant_string}
                         </p>
                       )}
+                      {item.configuration_details?.width && item.configuration_details?.width !== '0cm' && item.configuration_details?.width !== 'Standard' && (
+                        <p className="text-sm text-slate-600">
+                          Width: {item.configuration_details.width}
+                        </p>
+                      )}
+                      {item.configuration_details?.height && item.configuration_details?.height !== '0cm' && item.configuration_details?.height !== 'Standard' && (
+                        <p className="text-sm text-slate-600">
+                          Height: {item.configuration_details.height}
+                        </p>
+                      )}
+                      {item.configuration_details?.motorType && (
+                        <p className="text-sm text-slate-600">
+                          Motor: {item.configuration_details.motorType}
+                        </p>
+                      )}
+                      {item.configuration_details?.selected_variant && (
+                        <p className="text-sm text-slate-600">
+                          Selected Variant: {typeof item.configuration_details.selected_variant === 'object' ? JSON.stringify(item.configuration_details.selected_variant) : item.configuration_details.selected_variant}
+                        </p>
+                      )}
                       {item.configuration_details?.supplier_sku && (
                         <p className="text-sm text-slate-600">
                           Supplier SKU: {item.configuration_details.supplier_sku}
+                        </p>
+                      )}
+                      {item.configuration_details?.custom_notes && (
+                        <p className="text-sm text-slate-600 mt-1 bg-amber-50 p-2 rounded border border-amber-100">
+                          <span className="font-semibold text-amber-700">Notes:</span> {item.configuration_details.custom_notes}
                         </p>
                       )}
                     </div>

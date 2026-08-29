@@ -180,7 +180,7 @@ export default async function SellerOrdersPage() {
                             </p>
                             
                             {/* Customer Specifications */}
-                            {(config.width || config.height || config.motorType || config.requiresInstall || config.selected_variant) && (
+                            {(config.width || config.height || config.motorType || config.requiresInstall || config.selected_variant || config.custom_notes) && (
                               <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded space-y-1">
                                 <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
                                   <Settings className="w-3 h-3" /> Customer Specifications
@@ -216,8 +216,15 @@ export default async function SellerOrdersPage() {
                                   )}
                                   {config.selected_variant && (
                                     <div className="flex items-center gap-1 col-span-2">
+                                      <Settings className="w-3 h-3 text-amber-600" />
                                       <span className="text-slate-600">Variant:</span>
                                       <span className="font-bold text-slate-900">{typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant}</span>
+                                    </div>
+                                  )}
+                                  {config.custom_notes && (
+                                    <div className="flex gap-1 col-span-2 mt-1 pt-1 border-t border-amber-200/50">
+                                      <span className="text-slate-600">Notes:</span>
+                                      <span className="font-bold text-slate-900">{config.custom_notes}</span>
                                     </div>
                                   )}
                                 </div>

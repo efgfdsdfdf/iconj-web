@@ -16,6 +16,7 @@ export interface CartItem {
   fabric?: string;
   selectedVariant?: string;
   configuration?: any;
+  customNotes?: string;
   storeName?: string;
   requiresInstall?: boolean;
 }
