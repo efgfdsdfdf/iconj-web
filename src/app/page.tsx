@@ -21,20 +21,20 @@ export default async function Home() {
   const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 5) : [];
 
   const { data: dbCategories } = await supabase.from("categories").select("*").order("created_at");
+  const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
   
-  const iconMap: Record<string, string> = {
-    'roller-blinds': 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80',
-    'zebra-blinds': 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80',
-    'smart-motorized': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80',
-    'venetian-blinds': 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80',
-    'roman-shades': 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=200&q=80',
-    'curtains-drapes': 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=200&q=80',
-  };
-
-  const categories = (dbCategories || []).map(cat => ({
-    ...cat,
-    icon: iconMap[cat.slug] || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
-  }));
+  // Use admin's configured images, fallback to default Unsplash only if missing
+  const adminCategories: { name: string, icon: string }[] = settings?.value || [];
+  
+  const categories = (dbCategories || []).map(cat => {
+    // Find if admin uploaded a custom image for this category name
+    const customMatch = adminCategories.find(ac => ac.name.toLowerCase().trim() === cat.name.toLowerCase().trim() || ac.name.toLowerCase().includes(cat.name.toLowerCase()));
+    
+    return {
+      ...cat,
+      icon: customMatch?.icon || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
+    };
+  });
 
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
