@@ -27,8 +27,9 @@ export function CopyToSupplierButton({ item, address }: { item: any, address?: a
 
     let addressBlock = "";
     if (address) {
+      const customerName = (address.name || "").trim() || "N/A";
       addressBlock = `\n\nShipping Address:
-Name: ${address.name || "N/A"}
+Name: ${customerName}
 Phone: ${address.phone || "N/A"}
 Street: ${address.street || "N/A"}
 City/State: ${address.city || ""}${address.state ? `, ${address.state}` : ""}, Nigeria`;
@@ -37,7 +38,7 @@ City/State: ${address.city || ""}${address.state ? `, ${address.state}` : ""}, N
     const detailsBlock = specs.length > 0 ? `\nDetails:\n${specs.join('\n')}` : "";
 
     const textToCopy = `Order Request
-Product: ${config.product_name || item.product?.name}
+Product: ${config.product_name || item.product?.name || "Unknown Product"}
 SKU: ${sku}
 Quantity: ${item.quantity}
 ${url ? `URL: ${url}` : ''}${detailsBlock}${addressBlock}`;

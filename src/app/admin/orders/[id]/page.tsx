@@ -148,7 +148,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
             <CardContent className="pt-6 space-y-4 text-sm">
               <div>
                 <p className="text-slate-500 font-medium mb-1">Name</p>
-                <p className="font-semibold text-slate-900">{address.name || "N/A"}</p>
+                <p className="font-semibold text-slate-900">{(address.name || "").trim() || "N/A"}</p>
               </div>
               <div>
                 <p className="text-slate-500 font-medium mb-1">Email</p>

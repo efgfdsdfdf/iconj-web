@@ -122,7 +122,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({ 
           email: formData.email, 
           userId: userId,
-          name: `${formData.firstName} ${formData.lastName}`,
+          name: `${formData.firstName} ${formData.lastName}`.trim(),
           phone: isNewAddress ? formData.phone : (selectedAddr?.phone || formData.phone),
           address: isNewAddress ? {
             street: formData.address,
