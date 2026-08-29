@@ -428,10 +428,54 @@ export default function EditProductPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-none shadow-sm">
+          <Card className="border-none shadow-sm ring-1 ring-blue-100">
             <CardHeader><CardTitle>Product Specifications (Table Format)</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-              <p className="text-sm text-slate-500 mb-2">Add details here to automatically generate a clean specifications table on the product page.</p>
+              <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100 space-y-2 mb-4">
+                <Label className="text-blue-900 font-bold">Smart Paste</Label>
+                <p className="text-xs text-blue-700">Copy table rows or lists directly from Alibaba and paste them below. We will automatically extract the keys and values into the table format!</p>
+                <Textarea 
+                  placeholder="Paste raw specifications here..." 
+                  className="h-20 bg-white"
+                  onChange={(e) => {
+                    const text = e.target.value;
+                    if (!text.trim()) return;
+                    
+                    // Smart parser: tries to find Key / Value pairs separated by tabs, colons, or multiple spaces
+                    const lines = text.split('\n');
+                    const newSpecs: {key: string, value: string}[] = [];
+                    
+                    lines.forEach(line => {
+                      const cleanLine = line.trim();
+                      if (!cleanLine) return;
+                      
+                      // Match "Key: Value" or "Key \t Value" or "Key    Value"
+                      const match = cleanLine.match(/^([^:\t]+)(?::|\t|\s{2,})(.*)$/);
+                      if (match && match[1] && match[2]) {
+                        newSpecs.push({ key: match[1].trim(), value: match[2].trim() });
+                      } else {
+                        // If no clear delimiter, but there are exactly 2 words/phrases separated by space, we can try
+                        const parts = cleanLine.split(/\s+/);
+                        if (parts.length === 2) {
+                          newSpecs.push({ key: parts[0], value: parts[1] });
+                        } else if (parts.length > 2) {
+                          // Fallback: put first word as key, rest as value
+                          newSpecs.push({ key: parts[0], value: parts.slice(1).join(' ') });
+                        }
+                      }
+                    });
+                    
+                    if (newSpecs.length > 0) {
+                      setSpecifications(prev => [...prev.filter(s => s.key || s.value), ...newSpecs]);
+                    }
+                    
+                    // Clear the textarea after processing
+                    setTimeout(() => { e.target.value = ''; }, 100);
+                  }}
+                />
+              </div>
+
+              <p className="text-sm text-slate-500 mb-2 font-medium">Or add them manually below:</p>
               {specifications.map((spec, i) => (
                 <div key={i} className="flex gap-2 items-center">
                   <Input placeholder="e.g. Material" value={spec.key} onChange={e => updateSpecification(i, 'key', e.target.value)} className="w-1/3" />
