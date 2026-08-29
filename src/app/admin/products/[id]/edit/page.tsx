@@ -10,7 +10,7 @@ import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ChevronLeft, Info, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
-import { updateProduct, getSuppliers } from "../../../actions";
+import { updateProduct } from "../../../actions";
 
 export default function EditProductPage() {
   const params = useParams();
@@ -50,7 +50,8 @@ export default function EditProductPage() {
 
   useEffect(() => {
     async function fetchProduct() {
-      const sups = await getSuppliers();
+      const supRes = await fetch("/api/suppliers");
+      const sups = await supRes.json();
       setSuppliersList(sups);
 
       const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
