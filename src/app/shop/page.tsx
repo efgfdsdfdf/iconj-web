@@ -107,6 +107,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             </div>
           </div>
           
+          <div className="border-b shadow-sm bg-white">
+            <AutoScrollingCategories categories={categories.filter(c => c.icon !== 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80')} />
+          </div>
+          
           {/* Breadcrumb */}
           <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
             <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500">
