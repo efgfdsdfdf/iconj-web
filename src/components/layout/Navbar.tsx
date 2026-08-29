@@ -323,14 +323,24 @@ export function Navbar({ categories = [] }: NavbarProps) {
               <Link href="/about" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">About Us</Link>
               <Link href="/account/support" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Contact Us</Link>
               
-              <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Our Categories</p>
-              {categories.slice(0, 7).map(cat => (
-                <Link key={cat.id} href={`/shop?category=${cat.id}`} className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">
+              <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Retail Categories</p>
+              {categories.slice(0, 6).map(cat => (
+                <Link key={`retail-mob-${cat.id}`} href={`/shop?category=${cat.id}`} className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">
                   {cat.name}
                 </Link>
               ))}
               <Link href="/categories" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-blue-600 border-b border-slate-100">
-                See All Categories &rarr;
+                See All Retail &rarr;
+              </Link>
+              
+              <p className="px-4 py-3 mt-4 text-xs font-bold text-amber-800 uppercase tracking-wider bg-amber-50">Wholesale Categories</p>
+              {categories.slice(0, 6).map(cat => (
+                <Link key={`wholesale-mob-${cat.id}`} href={`/shop?category=${cat.id}&filter=wholesale`} className="block px-4 py-3.5 hover:bg-amber-100 font-medium text-amber-900 border-b border-slate-100">
+                  {cat.name} (Bulk)
+                </Link>
+              ))}
+              <Link href="/shop?filter=wholesale" className="block px-4 py-3.5 hover:bg-amber-100 font-bold text-amber-600 border-b border-slate-100">
+                See All Wholesale &rarr;
               </Link>
               
               <p className="px-4 py-3 mt-4 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">My Account</p>

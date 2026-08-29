@@ -55,12 +55,12 @@ export default async function Home() {
           <Card className="hidden lg:block w-64 shrink-0 rounded-lg border-none shadow-sm h-full overflow-hidden">
             <nav className="flex flex-col py-2 h-full bg-white">
               <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b text-slate-900 font-bold text-sm tracking-wide mb-1">
-                <Menu className="w-5 h-5"/> CATEGORIES
+                <Menu className="w-5 h-5"/> RETAIL
               </div>
               
-              {categories.slice(0, 7).map((cat) => (
+              {categories.slice(0, 5).map((cat) => (
                 <Link 
-                  key={cat.id} 
+                  key={`retail-desk-${cat.id}`} 
                   href={`/shop?category=${cat.id}`} 
                   className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700"
                 >
@@ -68,9 +68,29 @@ export default async function Home() {
                 </Link>
               ))}
 
-              <div className="px-4 py-3 mt-1 border-t">
-                <Link href="/categories" className="text-blue-600 font-bold text-sm flex items-center justify-between hover:underline group">
-                  See All Categories <ChevronRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"/>
+              <div className="px-4 py-2 mt-1">
+                <Link href="/categories" className="text-blue-600 font-bold text-xs flex items-center hover:underline group">
+                  See All Retail &rarr;
+                </Link>
+              </div>
+
+              <div className="flex items-center gap-2 px-4 py-3 bg-amber-50 border-y text-amber-900 font-bold text-sm tracking-wide my-1">
+                <Truck className="w-5 h-5"/> WHOLESALE
+              </div>
+
+              {categories.slice(0, 5).map((cat) => (
+                <Link 
+                  key={`wholesale-desk-${cat.id}`} 
+                  href={`/shop?category=${cat.id}&filter=wholesale`} 
+                  className="px-4 py-2 hover:bg-amber-50 flex items-center justify-between text-sm font-medium text-slate-700"
+                >
+                  {cat.name} <ChevronRight className="w-4 h-4 text-slate-400"/>
+                </Link>
+              ))}
+
+              <div className="px-4 py-2 mt-1">
+                <Link href="/shop?filter=wholesale" className="text-amber-600 font-bold text-xs flex items-center hover:underline group">
+                  See All Wholesale &rarr;
                 </Link>
               </div>
 
