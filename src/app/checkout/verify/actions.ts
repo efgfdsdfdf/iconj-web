@@ -2,6 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { sendEmailTo, sendAdminNotification } from "@/lib/email";
+import { creditSellerWallet } from "@/lib/wallet";
 
 export async function verifyPaymentAndCompleteOrder(reference: string) {
   try {
@@ -92,6 +93,20 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
           }
           await supabaseAdmin.from("financial_ledger").insert(ledgerEntries);
           await supabaseAdmin.from("commissions").update({ status: 'AVAILABLE' }).in('id', commissions.map(c => c.id));
+
+          // Credit each seller's wallet with their net earnings
+          for (const comm of commissions) {
+            try {
+              await creditSellerWallet(
+                comm.seller_id,
+                orderId,
+                comm.seller_net_amount,
+                `Earnings from order #${orderId.split('-')[0].toUpperCase()}`
+              );
+            } catch (walletErr) {
+              console.error(`Failed to credit wallet for seller ${comm.seller_id}:`, walletErr);
+            }
+          }
         }
       }
 
