@@ -96,7 +96,9 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
     }
   };
 
-  if (existingAccount && existingAccount.status !== 'FAILED') {
+  const [isEditing, setIsEditing] = useState(false);
+
+  if (!isEditing && existingAccount && existingAccount.status !== 'FAILED') {
     const isReady = existingAccount.status === 'VERIFIED';
     return (
       <Card className="border-slate-200 shadow-sm max-w-2xl">
@@ -120,11 +122,16 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
             <div className="w-12 h-12 bg-white rounded-full shadow-sm flex items-center justify-center shrink-0">
               <Building2 className="w-6 h-6 text-slate-400" />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-bold text-slate-900 text-lg">{existingAccount.verified_name || existingAccount.account_name}</h3>
               <p className="text-slate-600">{existingAccount.bank_name}</p>
               <p className="font-mono text-sm text-slate-500 mt-1">•••• {existingAccount.account_number.slice(-4)}</p>
             </div>
+          </div>
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setIsEditing(true)}>
+              Change Bank Account
+            </Button>
           </div>
         </CardContent>
       </Card>
