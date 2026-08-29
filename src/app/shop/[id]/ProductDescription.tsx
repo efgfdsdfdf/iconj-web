@@ -19,7 +19,7 @@ export function ProductDescription({ product }: { product: any }) {
   const FullContent = () => (
     <div className="space-y-8">
       <div 
-        className="text-slate-700 leading-relaxed text-sm md:text-base prose prose-sm max-w-none"
+        className="text-slate-700 leading-relaxed text-sm md:text-base prose prose-slate prose-sm md:prose-base max-w-none overflow-x-auto [&_*]:!max-w-full [&_table]:!w-full [&_img]:!h-auto break-words"
         dangerouslySetInnerHTML={{ __html: descriptionText }}
       />
 
@@ -60,7 +60,7 @@ export function ProductDescription({ product }: { product: any }) {
   );
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6 relative">
+    <div className="bg-white rounded-lg shadow-sm border p-4 md:p-6 relative">
       <h2 className="text-xl font-bold text-slate-900 mb-4 pb-4 border-b">Product Description</h2>
       
       <div className={`relative ${isLong ? 'max-h-[400px] overflow-hidden' : ''}`}>
