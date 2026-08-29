@@ -128,6 +128,9 @@
   html {
     @apply font-sans;
   }
+  textarea {
+    resize: none;
+  }
 }
 @layer utilities {
   .hide-scrollbar {
