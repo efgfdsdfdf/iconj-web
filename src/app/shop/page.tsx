@@ -36,7 +36,13 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     .limit(100);
 
   if (category) {
-    query = query.eq('category_id', category);
+    const selectedCat = categories?.find(c => c.id === category);
+    if (selectedCat && selectedCat.name) {
+      const safeName = selectedCat.name.replace(/,/g, '');
+      query = query.or(`category_id.eq.${category},category.eq.${safeName}`);
+    } else {
+      query = query.eq('category_id', category);
+    }
   }
   if (filter === 'wholesale') {
     query = query.eq('is_wholesale_enabled', true);
