@@ -71,9 +71,13 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-transparent"></div>
             <div className="container mx-auto px-4 py-12 md:py-16 relative z-10 flex flex-col items-start">
               <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 flex items-center gap-2"><Star className="w-3 h-3 fill-white" /> Retail Center</span>
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">Premium Window Treatments</h1>
+              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
+                {category && categories?.find(c => c.id === category) ? categories.find(c => c.id === category)?.name : "Premium Window Treatments"}
+              </h1>
               <p className="text-slate-200 max-w-xl text-base md:text-lg mb-6">
-                Transform your space with our curated collection of custom blinds, elegant curtains, and smart motorization systems.
+                {category && categories?.find(c => c.id === category) 
+                  ? `Explore our premium collection of ${categories.find(c => c.id === category)?.name.toLowerCase()} tailored exactly to your space.`
+                  : "Transform your space with our curated collection of custom blinds, elegant curtains, and smart motorization systems."}
               </p>
               <div className="flex flex-wrap gap-4 items-center text-sm font-medium text-slate-300">
                 <span className="flex items-center gap-1"><ShieldCheck className="w-4 h-4 text-emerald-400"/> Buyer Protection</span>

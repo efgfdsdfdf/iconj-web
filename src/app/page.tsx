@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Truck, ShieldCheck, Star, ChevronRight, Gift, Blinds, Sun, Shield } from "lucide-react";
+import { Truck, ShieldCheck, Star, ChevronRight, Gift, Blinds, Sun, Shield, Menu } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -20,15 +20,21 @@ export default async function Home() {
     
   const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 5) : [];
 
-  const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
-  const categories: { name: string, icon: string }[] = settings?.value || [
-    { name: "Roller Blinds", icon: "https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80" },
-    { name: "Zebra Blinds", icon: "https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80" },
-    { name: "Motorized Blinds", icon: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80" },
-    { name: "Venetian Blinds", icon: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80" },
-    { name: "Roman Shades", icon: "https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=200&q=80" },
-    { name: "Curtains & Drapes", icon: "https://images.unsplash.com/photo-1505693314120-0d443867891c?w=200&q=80" }
-  ];
+  const { data: dbCategories } = await supabase.from("categories").select("*").order("created_at");
+  
+  const iconMap: Record<string, string> = {
+    'roller-blinds': 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80',
+    'zebra-blinds': 'https://images.unsplash.com/photo-1615873968403-89e068629265?w=200&q=80',
+    'smart-motorized': 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80',
+    'venetian-blinds': 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=200&q=80',
+    'roman-shades': 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=200&q=80',
+    'curtains-drapes': 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=200&q=80',
+  };
+
+  const categories = (dbCategories || []).map(cat => ({
+    ...cat,
+    icon: iconMap[cat.slug] || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
+  }));
 
   return (
     <div className="min-h-screen bg-slate-50 pb-12">
@@ -48,14 +54,27 @@ export default async function Home() {
           {/* Left Sidebar (Desktop Only) */}
           <Card className="hidden lg:block w-64 shrink-0 rounded-lg border-none shadow-sm h-full overflow-hidden">
             <nav className="flex flex-col py-2 h-full bg-white">
-              <Link href="/shop?category=roller-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Roller Blinds <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=zebra-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Zebra Blinds <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=venetian-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Venetian Blinds <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=roman-blinds" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Roman Shades <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=curtains" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Curtains & Drapes <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=motorized" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Smart / Motorized <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <Link href="/shop?category=accessories" className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700">Tracks & Accessories <ChevronRight className="w-4 h-4 text-slate-400"/></Link>
-              <div className="mt-auto border-t px-4 py-3">
+              <div className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b text-slate-900 font-bold text-sm tracking-wide mb-1">
+                <Menu className="w-5 h-5"/> CATEGORIES
+              </div>
+              
+              {categories.slice(0, 7).map((cat) => (
+                <Link 
+                  key={cat.id} 
+                  href={`/shop?category=${cat.id}`} 
+                  className="px-4 py-2 hover:bg-slate-100 flex items-center justify-between text-sm font-medium text-slate-700"
+                >
+                  {cat.name} <ChevronRight className="w-4 h-4 text-slate-400"/>
+                </Link>
+              ))}
+
+              <div className="px-4 py-3 mt-1 border-t">
+                <Link href="/shop" className="text-blue-600 font-bold text-sm flex items-center justify-between hover:underline group">
+                  See All Categories <ChevronRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition-transform"/>
+                </Link>
+              </div>
+
+              <div className="mt-auto border-t px-4 py-3 bg-slate-50">
                 <Link href="/book-measurement" className="text-blue-600 font-bold text-sm flex items-center gap-2 hover:underline"><Blinds className="w-4 h-4"/> Book Free Measurement</Link>
               </div>
             </nav>
