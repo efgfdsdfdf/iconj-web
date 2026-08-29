@@ -8,28 +8,18 @@ import { AutoScrollingCategories } from "@/components/AutoScrollingCategories";
 
 export const revalidate = 0;
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ [key: string]: string | undefined }> }) {
+export default async function Home() {
   const supabase = await createClient();
-  const params = await searchParams;
-  const page = parseInt(params.page || "1");
-  const itemsPerPage = 20;
-  const from = (page - 1) * itemsPerPage;
-  const to = from + itemsPerPage - 1;
 
-  const { data: rawProducts, count } = await supabase
+  const { data: rawProducts } = await supabase
     .from("products")
-    .select("*", { count: "exact" })
+    .select("*")
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .order('is_featured', { ascending: false })
-    .order('created_at', { ascending: false })
-    .range(from, to);
+    .limit(100);
     
-  const products = rawProducts || [];
-  const totalItems = count || 0;
-  const totalPages = Math.ceil(totalItems / itemsPerPage);
-  const hasNextPage = page < totalPages;
-  const hasPrevPage = page > 1;
+  // Randomly shuffle products and take 20 for the homepage
+  const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 20) : [];
 
   const { data: dbCategories } = await supabase.from("categories").select("*").order("created_at");
   const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
@@ -158,26 +148,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ [
               ))}
             </div>
             
-            {/* Pagination Controls */}
-            {(hasPrevPage || hasNextPage) && (
-              <div className="flex justify-center items-center gap-4 mt-8">
-                {hasPrevPage ? (
-                  <Link href={`/?page=${page - 1}`}><Button variant="outline">Previous</Button></Link>
-                ) : (
-                  <Button variant="outline" disabled>Previous</Button>
-                )}
-                
-                <span className="text-sm font-medium text-slate-500">
-                  Page {page} of {totalPages}
-                </span>
-
-                {hasNextPage ? (
-                  <Link href={`/?page=${page + 1}`}><Button variant="outline">Next</Button></Link>
-                ) : (
-                  <Button variant="outline" disabled>Next</Button>
-                )}
-              </div>
-            )}
+            {/* View All Button */}
+            <div className="flex justify-center mt-10 mb-4">
+              <Link href="/shop">
+                <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 h-12 shadow-md rounded-full flex items-center gap-2">
+                  View All Products <ChevronRight className="w-5 h-5" />
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </section>
