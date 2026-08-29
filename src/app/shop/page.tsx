@@ -60,7 +60,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   }
   
   const { data: rawProducts, count } = await query;
-  const products = rawProducts || [];
+  // Randomly shuffle the products on the current page
+  const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5) : [];
   const totalItems = count || 0;
   const totalPages = Math.ceil(totalItems / itemsPerPage);
   const hasNextPage = page < totalPages;
