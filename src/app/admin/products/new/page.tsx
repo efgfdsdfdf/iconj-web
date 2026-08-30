@@ -475,9 +475,9 @@ export default function AddProductPage() {
             <CardHeader><CardTitle>Images & Gallery</CardTitle></CardHeader>
             <CardContent>
               <div className="border-2 border-dashed border-slate-300 rounded-xl p-8 text-center bg-slate-50 hover:bg-slate-100 transition-colors cursor-pointer relative">
-                <input type="file" multiple accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                <input type="file" multiple accept="image/*,video/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
                 <UploadCloud className="w-10 h-10 text-slate-400 mx-auto mb-4" />
-                <p className="font-medium text-slate-700">Drag & drop or Paste lifestyle and product images here</p>
+                <p className="font-medium text-slate-700">Drag & drop or Paste lifestyle and product media (images/videos) here</p>
                 <p className="text-xs text-slate-500 mt-2">Supports JPG, PNG (Max 5MB each)</p>
                 <p className="text-[10px] text-slate-400 mt-1">(You can simply press Ctrl+V / Cmd+V anywhere on this page)</p>
               </div>
@@ -486,7 +486,11 @@ export default function AddProductPage() {
                 <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 mt-6">
                   {imagePreviews.map((src, i) => (
                     <div key={i} className="relative aspect-square rounded-md overflow-hidden border group">
-                      <img src={src} alt="Preview" className="w-full h-full object-cover" />
+                      {src.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
+                        <video src={src} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                      ) : (
+                        <img src={src} alt="Preview" className="w-full h-full object-cover" />
+                      )}
                       <button type="button" onClick={() => removeImage(i)} className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                         <Trash2 className="w-3 h-3" />
                       </button>

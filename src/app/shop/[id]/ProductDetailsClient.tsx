@@ -91,7 +91,11 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 {img.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
                     <video src={img} className="w-full h-full object-cover" />
                   ) : (
+                    {img.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
+                    <video src={img} className="w-full h-full object-cover" />
+                  ) : (
                     <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                  )}
                   )}
               </button>
             ))}
