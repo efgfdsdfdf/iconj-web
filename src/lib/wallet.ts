@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { sendEmailTo } from "@/lib/email";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
@@ -261,6 +262,55 @@ export async function releasePendingFunds(): Promise<number> {
     if (walletError) {
       console.error('Error updating wallet balances during release:', walletError);
       continue;
+    }
+    
+    try {
+      const { data: seller } = await supabaseAdmin.from('sellers').select('profile_id, stores(store_name)').eq('id', wallet.seller_id).single();
+      if (seller?.profile_id) {
+        const { data: authData } = await supabaseAdmin.auth.admin.getUserById(seller.profile_id);
+        const sellerEmail = authData?.user?.email;
+        if (sellerEmail) {
+          const shortOrder = creditTx.order_id ? creditTx.order_id.split('-')[0].toUpperCase() : 'Unknown';
+          const storeName = seller.stores?.[0]?.store_name || 'Seller';
+          
+          const html = `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
+              <div style="background: #10b981; color: white; padding: 20px; text-align: center;">
+                <h1 style="margin: 0; font-size: 22px;">Funds Available for Withdrawal! 🎉</h1>
+              </div>
+              <div style="padding: 30px 20px;">
+                <p style="margin: 0 0 16px; font-size: 16px; color: #334155;">Hello <strong>${storeName}</strong>,</p>
+                <p style="margin: 0 0 20px; font-size: 15px; color: #475569; line-height: 1.6;">
+                  Great news! The escrow period for Order <strong>#${shortOrder}</strong> has successfully completed.
+                </p>
+                
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; text-align: center; margin-bottom: 24px;">
+                  <span style="font-size: 14px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Amount Released</span>
+                  <div style="font-size: 28px; font-weight: 800; color: #059669; margin-top: 4px;">₦${amountToRelease.toLocaleString()}</div>
+                </div>
+                
+                <p style="margin: 0 0 24px; font-size: 15px; color: #475569; line-height: 1.6;">
+                  These funds have been moved from your Pending Balance to your Available Balance. You can now withdraw them to your bank account at any time.
+                </p>
+                
+                <div style="text-align: center;">
+                  <a href="https://iconj-web-rust.vercel.app/seller/wallet" style="display: inline-block; background: #0f172a; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 15px;">
+                    Go to Wallet →
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          await sendEmailTo(
+            sellerEmail, 
+            `💰 ₦${amountToRelease.toLocaleString()} is now available for withdrawal! (Order #${shortOrder})`, 
+            html
+          );
+        }
+      }
+    } catch (emailErr) {
+      console.error('Failed to send funds release email:', emailErr);
     }
     
     releasedCount++;
