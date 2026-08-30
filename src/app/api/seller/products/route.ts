@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     category_id: category_id || null,
     category: category || "",
     images: images || [],
-    approval_status: "pending",
+    approval_status: "approved",
     is_retail_enabled: isRetail,
     is_wholesale_enabled: isWholesale,
     moq: moq ? parseInt(moq) : 1,
