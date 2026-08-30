@@ -150,8 +150,6 @@ export async function creditSellerWallet(sellerId: string, orderId: string, amou
     wallet.pending_balance += remainingCredit;
     wallet.total_earned += remainingCredit;
     
-    const holdUntil = new Date(Date.now() + settings.hold_period_days * 24 * 60 * 60 * 1000).toISOString();
-    
     const { data: creditTx, error: creditError } = await supabaseAdmin.from('wallet_transactions').insert({
       seller_id: sellerId,
       order_id: orderId,
@@ -161,7 +159,7 @@ export async function creditSellerWallet(sellerId: string, orderId: string, amou
       pending_balance_after: wallet.pending_balance,
       reserved_balance_after: wallet.reserved_balance,
       description,
-      hold_until: holdUntil,
+      hold_until: null,
       idempotency_key: idempotencyKey
     }).select().single();
     

@@ -108,7 +108,7 @@ export default async function WalletPage() {
               ₦{wallet?.pending_balance?.toLocaleString() || 0}
             </div>
             <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
-              Funds from new orders are held in escrow for <strong>{settings?.hold_period_days || 7} days</strong> to ensure safe delivery before becoming available for withdrawal.
+              Funds from new orders are held in escrow and will become available for withdrawal <strong>{settings?.hold_period_days || 2} days</strong> after you mark the order as DELIVERED.
             </p>
           </CardContent>
         </Card>

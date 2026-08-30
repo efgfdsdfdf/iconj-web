@@ -17,7 +17,7 @@ export async function updateSellerOrderStatus(orderId: string, status: string) {
   // If the status is SHIPPED or DELIVERED, we can also add a timeline event to the parent order
   const { data: subOrder } = await supabaseAdmin
     .from("seller_orders")
-    .select("parent_order_id, sellers(businesses(business_name))")
+    .select("parent_order_id, seller_id, sellers(businesses(business_name))")
     .eq("id", orderId)
     .single();
 
@@ -33,6 +33,19 @@ export async function updateSellerOrderStatus(orderId: string, status: string) {
       event_type: eventType,
       description: `${sellerName} marked their part of the order as ${status}.`
     });
+
+
+    if (status === "DELIVERED") {
+      const { data: settings } = await supabaseAdmin.from("wallet_settings").select("hold_period_days").single();
+      const days = settings?.hold_period_days || 2;
+      const holdUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+      
+      await supabaseAdmin.from("wallet_transactions")
+         .update({ hold_until: holdUntil })
+         .eq("type", "SALE_CREDIT")
+         .eq("order_id", subOrder.parent_order_id)
+         .eq("seller_id", subOrder.seller_id);
+    }
 
     // Check if ALL sub-orders are delivered, if so, mark parent order as DELIVERED
     const { data: siblingOrders } = await supabaseAdmin
