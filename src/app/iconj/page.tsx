@@ -124,7 +124,7 @@ export default async function IconjInteriorPage() {
               </Button>
             </Link>
             <Link href="#collections">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-base font-bold border-white bg-white/10 text-white hover:bg-white hover:text-slate-900 rounded-none backdrop-blur-md transition-all">
+              <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold border-2 border-white bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-none transition-all">
                 Explore Collections
               </Button>
             </Link>
@@ -193,11 +193,13 @@ export default async function IconjInteriorPage() {
           
           <div className="grid md:grid-cols-2 gap-2 max-w-5xl mx-auto">
             <div className="relative aspect-[4/3] bg-slate-800">
-              <img src="https://images.unsplash.com/photo-1502005097973-6a7082348e28?w=1000&q=80" alt="Before" className="w-full h-full object-cover opacity-90" />
-              <div className="absolute top-4 left-4 bg-black/50 backdrop-blur text-white px-4 py-1 text-sm font-bold uppercase tracking-widest">Before</div>
+              {/* Before: plain bare window, no treatment */}
+              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1000&q=80" alt="Window with no blinds or curtains — before" className="w-full h-full object-cover" />
+              <div className="absolute top-4 left-4 bg-black/60 backdrop-blur text-white px-4 py-1 text-sm font-bold uppercase tracking-widest">Before</div>
             </div>
             <div className="relative aspect-[4/3] bg-slate-800">
-              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1000&q=80" alt="After" className="w-full h-full object-cover" />
+              {/* After: same window with elegant blinds/curtains installed */}
+              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1000&q=80" alt="Window with premium curtains installed — after" className="w-full h-full object-cover" />
               <div className="absolute top-4 left-4 bg-amber-600 text-white px-4 py-1 text-sm font-bold uppercase tracking-widest shadow-lg">After</div>
             </div>
           </div>
@@ -222,12 +224,12 @@ export default async function IconjInteriorPage() {
           
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { name: 'Living Room', desc: 'Create a warm and welcoming atmosphere.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' },
-              { name: 'Bedroom', desc: 'Add privacy, comfort and better light control.', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80' },
-              { name: 'Office', desc: 'Create a clean and professional environment.', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80' },
-              { name: 'Dining Area', desc: 'Add elegance to your interior.', img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=600&q=80' },
-              { name: 'Kids Room', desc: 'Comfortable and practical window solutions.', img: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600&q=80' },
-              { name: 'Large Windows', desc: 'Beautiful solutions for wide windows and doors.', img: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80' }
+              { name: 'Living Room', desc: 'Elegant sheers and drapes to frame your windows.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' },
+              { name: 'Bedroom', desc: 'Blackout blinds for total privacy and darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=600&q=80' },
+              { name: 'Office', desc: 'Clean roller blinds to control glare and light.', img: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80' },
+              { name: 'Dining Area', desc: 'Soft roman blinds to add warmth and elegance.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&q=80' },
+              { name: 'Kids Room', desc: 'Colourful and safe window solutions for little ones.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80' },
+              { name: 'Large Windows', desc: 'Vertical blinds and floor-to-ceiling curtain solutions.', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80' }
             ].map((room, i) => (
               <Link href={`/shop?q=${room.name.split(' ')[0]}`} key={i} className="group block relative overflow-hidden bg-slate-100 aspect-[4/3]">
                 <img src={room.img} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -271,7 +273,8 @@ export default async function IconjInteriorPage() {
               </div>
             </div>
             <div className="md:w-2/5 min-h-[300px] relative hidden md:block">
-              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80" alt="Premium Curtains" className="w-full h-full object-cover" />
+              {/* Premium zebra blinds on large window */}
+              <img src="https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=600&q=80" alt="Premium window blinds" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -352,7 +355,7 @@ export default async function IconjInteriorPage() {
               <p className="text-slate-300">Learn how to measure your windows accurately before ordering.</p>
             </div>
           </div>
-          <Link href="/about">
+          <Link href="/book-measurement">
             <Button size="lg" variant="outline" className="h-12 px-8 font-bold border-white text-white hover:bg-white hover:text-slate-900 rounded-none whitespace-nowrap">
               Measurement Guide
             </Button>
@@ -376,9 +379,9 @@ export default async function IconjInteriorPage() {
               { num: '04', title: 'Transform', desc: 'Enjoy a better-looking space.' }
             ].map((step, i) => (
               <div key={i} className="text-center relative">
-                {i < 3 && <div className="hidden md:block absolute top-10 left-[60%] w-full h-[1px] bg-slate-200"></div>}
-                <div className="w-20 h-20 bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10">
-                  <span className="text-2xl font-black text-slate-300">{step.num}</span>
+                {i < 3 && <div className="hidden md:block absolute top-10 left-[60%] w-full h-[1px] bg-amber-200"></div>}
+                <div className="w-20 h-20 bg-amber-600 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 shadow-lg shadow-amber-200">
+                  <span className="text-2xl font-black text-white">{step.num}</span>
                 </div>
                 <h3 className="text-lg font-bold text-slate-900 mb-2">{step.title}</h3>
                 <p className="text-slate-600 text-sm">{step.desc}</p>
@@ -402,26 +405,30 @@ export default async function IconjInteriorPage() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {/* Roller blinds in living room */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Roller blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Link href="/shop?q=curtain"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop This Look</Button></Link>
+                <Link href="/shop?q=roller"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Roller Blinds</Button></Link>
               </div>
             </div>
+            {/* Large hero: sheer curtains with light */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden md:col-span-2 md:row-span-2">
-              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Sheer curtains" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=sheer"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Sheer Curtains</Button></Link>
               </div>
             </div>
+            {/* Zebra blinds */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Zebra blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Link href="/shop?q=venetian"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Venetian Blinds</Button></Link>
+                <Link href="/shop?q=zebra"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Zebra Blinds</Button></Link>
               </div>
             </div>
+            {/* Blackout blinds bedroom */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Blackout blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=blackout"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Blackout</Button></Link>
               </div>
@@ -509,7 +516,7 @@ export default async function IconjInteriorPage() {
               </Button>
             </Link>
             <Link href="/shop?category=blinds">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-10 text-lg font-bold border-white text-white hover:bg-white hover:text-slate-900 rounded-none backdrop-blur-sm">
+              <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-lg font-bold bg-transparent border-2 border-white text-white hover:bg-white hover:text-slate-900 rounded-none">
                 Explore Blinds
               </Button>
             </Link>
