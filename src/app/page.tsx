@@ -33,7 +33,7 @@ export default async function Home() {
     
     return {
       ...cat,
-      icon: customMatch?.icon || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
+      icon: customMatch?.icon || '/images/curtains_hero.jpg'
     };
   });
 
@@ -43,7 +43,7 @@ export default async function Home() {
       <section className="bg-white border-b shadow-sm mb-4">
         <Card className="border-none shadow-none rounded-none w-full overflow-hidden">
           <CardContent className="p-0">
-            <AutoScrollingCategories categories={categories.filter(c => c.icon !== 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80')} />
+            <AutoScrollingCategories categories={categories.filter(c => c.icon !== '/images/curtains_hero.jpg')} />
           </CardContent>
         </Card>
       </section>
@@ -103,7 +103,7 @@ export default async function Home() {
 
           {/* Main Hero Slider */}
           <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm min-h-[350px] sm:min-h-[400px] lg:h-full group bg-slate-900">
-            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2000" alt="Premium Window Treatments" className="w-full h-full object-cover absolute inset-0 opacity-80" />
+            <img src="/images/curtains_hero.jpg" alt="Premium Window Treatments" className="w-full h-full object-cover absolute inset-0 opacity-80" />
             <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent"></div>
             <div className="relative z-10 w-full h-full flex flex-col items-start justify-center text-left p-8 md:p-12 max-w-2xl">
               <span className="bg-blue-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-widest rounded-full mb-4 flex items-center gap-1 w-max"><Star className="w-3 h-3 fill-white"/> Premium Quality</span>
