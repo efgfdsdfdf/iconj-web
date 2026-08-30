@@ -223,7 +223,7 @@ export default async function IconjInteriorPage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            [
+            {[
               { name: 'Living Room', desc: 'Elegant sheers and drapes to frame your windows.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' },
               { name: 'Bedroom', desc: 'Blackout blinds for total privacy and darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=600&q=80' },
               { name: 'Office', desc: 'Clean roller blinds to control glare and light.', img: '/images/roller_blinds_card.jpg' },
