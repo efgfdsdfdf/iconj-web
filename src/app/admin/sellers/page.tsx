@@ -3,18 +3,19 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/admin";
-import { FileText, CheckCircle, XCircle, Store, DollarSign, Users, AlertTriangle } from "lucide-react";
+import { FileText, CheckCircle, XCircle, Store, DollarSign, Users, AlertTriangle, Search } from "lucide-react";
 import { revalidatePath } from "next/cache";
 import { ClearAllSellersButton } from "@/components/admin/ClearAllSellersButton";
 import Link from "next/link";
 
 export const revalidate = 0;
 
-export default async function AdminSellersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function AdminSellersPage({ searchParams }: { searchParams: Promise<{ tab?: string; search?: string }> }) {
   await requireAdmin();
 
   const params = await searchParams;
   const activeTab = params.tab || "pending";
+  const search = params.search || "";
   
   const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -45,6 +46,19 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
     .eq("status", status)
     .order("created_at", { ascending: false });
 
+  // Filter sellers locally based on search query
+  let filteredSellers = sellers || [];
+  if (search) {
+    const s = search.toLowerCase();
+    filteredSellers = filteredSellers.filter((seller: any) => {
+      const email = seller.profiles?.email?.toLowerCase() || "";
+      const bizName = seller.businesses?.business_name?.toLowerCase() || "";
+      const storeName = seller.stores?.[0]?.store_name?.toLowerCase() || "";
+      const identifier = seller.seller_identifier?.toLowerCase() || "";
+      return email.includes(s) || bizName.includes(s) || storeName.includes(s) || identifier.includes(s);
+    });
+  }
+
   // Fetch counts for all tabs
   const [pending, approved, rejected, suspended] = await Promise.all([
     supabaseAdmin.from("sellers").select("id", { count: "exact", head: true }).eq("status", "pending_verification"),
@@ -62,8 +76,8 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
 
   // For approved sellers, also fetch their financial summaries from the ledger
   let sellerFinancials: Record<string, any> = {};
-  if (activeTab === "approved" && sellers && sellers.length > 0) {
-    const sellerIds = sellers.map(s => s.id);
+  if (activeTab === "approved" && filteredSellers.length > 0) {
+    const sellerIds = filteredSellers.map(s => s.id);
     const { data: ledger } = await supabaseAdmin
       .from("financial_ledger")
       .select("seller_id, transaction_type, amount")
@@ -87,90 +101,92 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
     }
 
     // Also fetch product counts and order counts
-    const { data: products } = await supabaseAdmin
-      .from("products")
-      .select("seller_id")
-      .in("seller_id", sellerIds);
-    const { data: orders } = await supabaseAdmin
-      .from("seller_orders")
-      .select("seller_id")
-      .in("seller_id", sellerIds);
-
     for (const sid of sellerIds) {
+      const { count: pCount } = await supabaseAdmin.from("products").select("id", { count: "exact", head: true }).eq("seller_id", sid);
+      const { count: oCount } = await supabaseAdmin.from("order_items").select("id", { count: "exact", head: true }).eq("seller_id", sid);
       if (!sellerFinancials[sid]) sellerFinancials[sid] = { gross: 0, commission: 0, earnings: 0, pendingSettlement: 0, settled: 0 };
-      sellerFinancials[sid].productCount = products?.filter(p => p.seller_id === sid).length || 0;
-      sellerFinancials[sid].orderCount = orders?.filter(o => o.seller_id === sid).length || 0;
+      sellerFinancials[sid].productCount = pCount || 0;
+      sellerFinancials[sid].orderCount = oCount || 0;
     }
   }
 
+  // Server Actions for Seller Approvals
   async function approveSeller(formData: FormData) {
     "use server";
     const sellerId = formData.get("seller_id") as string;
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    
     await supabaseAdmin.from("sellers").update({ status: "approved" }).eq("id", sellerId);
     await supabaseAdmin.from("stores").update({ is_active: true }).eq("seller_id", sellerId);
     await supabaseAdmin.from("seller_verifications").update({ status: "approved" }).eq("seller_id", sellerId);
 
-    // Send approval email
-    const { data: seller } = await supabaseAdmin.from("sellers").select("profile_id, businesses(business_name), stores(store_name, slug)").eq("id", sellerId).single();
-    if (seller?.profile_id) {
-      const { data: { user } } = await supabaseAdmin.auth.admin.getUserById(seller.profile_id);
-      if (user?.email) {
-        const profile = { email: user.email }; // Keep variable name so rest of code works
-        const storeName = (seller as any).stores?.store_name || (seller as any).businesses?.business_name || "Your Store";
-        const storeSlug = (seller as any).stores?.slug || "";
-        try {
-          await fetch("https://api.resend.com/emails", {
-            method: "POST",
-            headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" },
-            body: JSON.stringify({
-              from: "ICONJ <noreply@iconj.com.ng>",
-              to: profile.email,
-              subject: "🎉 Your Seller Application Has Been Approved!",
-              html: `
-                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-                  <h1 style="color: #1e293b; font-size: 24px;">Congratulations! 🎉</h1>
-                  <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                    Your seller application for <strong>${storeName}</strong> has been approved on ICONJ Marketplace.
-                  </p>
-                  <p style="color: #475569; font-size: 16px; line-height: 1.6;">
-                    You can now start listing products and selling to customers across Nigeria.
-                  </p>
-                  <div style="margin: 30px 0;">
-                    <a href="https://iconj-web-rust.vercel.app/seller" style="background: #f97316; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
-                      Go to Seller Dashboard →
-                    </a>
-                  </div>
-                  ${storeSlug ? `<p style="color: #64748b; font-size: 14px;">Your public store: <a href="https://iconj-web-rust.vercel.app/store/${storeSlug}">iconj-web-rust.vercel.app/store/${storeSlug}</a></p>` : ""}
-                  <p style="color: #94a3b8; font-size: 13px; margin-top: 30px;">— The ICONJ Team</p>
-                </div>
-              `
-            })
-          });
-        } catch (e) {
-          console.error("Failed to send approval email:", e);
-        }
+    // Ensure wallet exists for newly approved seller
+    try {
+      const { ensureWalletExists } = await import("@/lib/wallet");
+      await ensureWalletExists(sellerId);
+    } catch (err) {
+      console.error("Failed to create wallet for seller", err);
+    }
+
+    // Get seller profile to send email
+    const { data: seller } = await supabaseAdmin
+      .from("sellers")
+      .select("profile_id, stores(slug)")
+      .eq("id", sellerId)
+      .single();
+
+    if (seller) {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("email, full_name")
+        .eq("id", seller.profile_id)
+        .single();
+      
+      const storeSlug = seller.stores?.[0]?.slug;
+
+      if (profile?.email) {
+        // Send approval email
+        const { sendAdminNotification } = await import("@/lib/email");
+        await sendAdminNotification(
+          "Your ICONJ Seller Account is Approved!",
+          `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+              <h2 style="color: #10b981;">Congratulations ${profile.full_name || ''}! 🎉</h2>
+              <p>Your seller account on ICONJ has been approved. Your KYC documents have been verified.</p>
+              <p style="background: #f8fafc; padding: 15px; border-left: 4px solid #f97316; margin: 20px 0;">
+                You can now start listing products and selling to customers across Nigeria.
+              </p>
+              <div style="margin: 30px 0;">
+                <a href="https://iconj-web-rust.vercel.app/seller" style="background: #f97316; color: white; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">
+                  Go to Seller Dashboard 🚀
+                </a>
+              </div>
+              ${storeSlug ? `<p style="color: #64748b; font-size: 14px;">Your public store: <a href="https://iconj-web-rust.vercel.app/store/${storeSlug}">iconj-web-rust.vercel.app/store/${storeSlug}</a></p>` : ""}
+              <p style="color: #94a3b8; font-size: 13px; margin-top: 30px;">— The ICONJ Team</p>
+            </div>
+          `
+        );
       }
     }
 
     revalidatePath("/admin/sellers");
-    revalidatePath("/seller");
   }
 
   async function rejectSeller(formData: FormData) {
     "use server";
     const sellerId = formData.get("seller_id") as string;
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    
     await supabaseAdmin.from("sellers").update({ status: "rejected" }).eq("id", sellerId);
     await supabaseAdmin.from("seller_verifications").update({ status: "rejected" }).eq("seller_id", sellerId);
     revalidatePath("/admin/sellers");
-    revalidatePath("/seller");
   }
 
   async function suspendSeller(formData: FormData) {
     "use server";
     const sellerId = formData.get("seller_id") as string;
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    
     await supabaseAdmin.from("sellers").update({ status: "suspended" }).eq("id", sellerId);
     await supabaseAdmin.from("stores").update({ is_active: false }).eq("seller_id", sellerId);
     revalidatePath("/admin/sellers");
@@ -180,6 +196,7 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
     "use server";
     const sellerId = formData.get("seller_id") as string;
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
+    
     await supabaseAdmin.from("sellers").update({ status: "approved" }).eq("id", sellerId);
     await supabaseAdmin.from("stores").update({ is_active: true }).eq("seller_id", sellerId);
     revalidatePath("/admin/sellers");
@@ -226,12 +243,26 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
 
   return (
     <main className="flex-1 p-4 md:p-8 overflow-auto bg-slate-50 min-h-[calc(100vh-130px)]">
-      <div className="mb-8 flex justify-between items-start">
+      <div className="mb-8 flex flex-col md:flex-row justify-between md:items-start gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Sellers</h1>
           <p className="text-sm text-slate-500">Manage all marketplace sellers — approvals, finances, and Paystack connections.</p>
         </div>
-        <ClearAllSellersButton action={clearAllSellers} />
+        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+          {/* Search Form */}
+          <form action="/admin/sellers" method="GET" className="relative flex-1 sm:w-64">
+            <input type="hidden" name="tab" value={activeTab} />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+            <input
+              name="search"
+              type="search"
+              defaultValue={search}
+              placeholder="Search business, store, email..."
+              className="w-full pl-10 h-10 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+            />
+          </form>
+          <ClearAllSellersButton action={clearAllSellers} />
+        </div>
       </div>
 
       {/* Tabs */}
@@ -239,7 +270,7 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
         {tabs.map(tab => (
           <Link
             key={tab.key}
-            href={`/admin/sellers?tab=${tab.key}`}
+            href={`/admin/sellers?tab=${tab.key}${search ? `&search=${encodeURIComponent(search)}` : ""}`}
             className={`px-4 py-2.5 text-sm font-medium rounded-t-lg border border-b-0 transition-colors ${
               activeTab === tab.key
                 ? "bg-white text-slate-900 border-slate-200"
@@ -255,8 +286,8 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
       </div>
 
       <div className="space-y-6">
-        {sellers && sellers.length > 0 ? (
-          sellers.map((seller: any) => {
+        {filteredSellers && filteredSellers.length > 0 ? (
+          filteredSellers.map((seller: any) => {
             const payout = seller.seller_payout_accounts?.[0];
             const fin = sellerFinancials[seller.id];
             const hasPaystack = !!payout?.paystack_subaccount_code;
