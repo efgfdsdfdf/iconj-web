@@ -50,7 +50,7 @@ export default async function WalletPage() {
 
   const { data: settings } = await supabase
     .from('wallet_settings')
-    .select('min_withdrawal_amount')
+    .select('min_withdrawal_amount, hold_period_days')
     .limit(1)
     .single();
 
