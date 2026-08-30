@@ -27,12 +27,16 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     .eq("id", id)
     .single();
 
-  const { data: recommended } = await supabaseAdmin
+  // Fetch up to 30 products, then randomize and pick 8 for the "You Might Also Like" section
+  const { data: recommendedRaw } = await supabaseAdmin
     .from("products")
     .select("*, stores(store_name, slug)")
     .neq("id", id)
     .eq("is_active", true)
-    .limit(5);
+    .limit(30);
+    
+  const recommended = recommendedRaw ? recommendedRaw.sort(() => 0.5 - Math.random()).slice(0, 8) : [];
+
 
   let product = productRaw;
   if (product) {
