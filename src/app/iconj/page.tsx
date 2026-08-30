@@ -30,13 +30,13 @@ export default async function IconjInteriorPage() {
 
   const defaultCategories = [
     { name: 'Blinds', desc: 'Modern control over light & style.', img: '/images/venetian_blinds_card.jpg' },
-    { name: 'Curtains', desc: 'Elegant finishing touches.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&q=80' },
-    { name: 'Blackout', desc: 'Maximum privacy & darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=500&q=80' },
-    { name: 'Sheer', desc: 'Soft natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80' },
+    { name: 'Curtains', desc: 'Elegant finishing touches.', img: 'https://images.unsplash.com/photo-mXPkC9xCRto?w=800&q=80' },
+    { name: 'Blackout', desc: 'Maximum privacy & darkness.', img: 'https://images.unsplash.com/photo-432c5o60XsA?w=800&q=80' },
+    { name: 'Sheer', desc: 'Soft natural light.', img: 'https://images.unsplash.com/photo-pPcKyqUEmcs?w=800&q=80' },
     { name: 'Roller Blinds', desc: 'Clean, minimal & modern.', img: '/images/roller_blinds_card.jpg' },
     { name: 'Zebra Blinds', desc: 'Flexible light control.', img: '/images/zebra_blinds_hero.jpg' },
     { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: '/images/venetian_blinds_card.jpg' },
-    { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-1515263898-ebf7ae69e985?w=500&q=80' }
+    { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-ui5N4nnc568?w=800&q=80' }
   ];
 
   const categories = defaultCategories.map(cat => {
@@ -194,12 +194,12 @@ export default async function IconjInteriorPage() {
           <div className="grid md:grid-cols-2 gap-2 max-w-5xl mx-auto">
             <div className="relative aspect-[4/3] bg-slate-800">
               {/* Before: plain bare window, no treatment */}
-              <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1000&q=80" alt="Window with no blinds or curtains — before" className="w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-fGYktEP9bOI?w=800&q=80" alt="Window with no blinds or curtains — before" className="w-full h-full object-cover" />
               <div className="absolute top-4 left-4 bg-black/60 backdrop-blur text-white px-4 py-1 text-sm font-bold uppercase tracking-widest">Before</div>
             </div>
             <div className="relative aspect-[4/3] bg-slate-800">
               {/* After: same window with elegant blinds/curtains installed */}
-              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1000&q=80" alt="Window with premium curtains installed — after" className="w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-mXPkC9xCRto?w=800&q=80" alt="Window with premium curtains installed — after" className="w-full h-full object-cover" />
               <div className="absolute top-4 left-4 bg-amber-600 text-white px-4 py-1 text-sm font-bold uppercase tracking-widest shadow-lg">After</div>
             </div>
           </div>
@@ -224,10 +224,10 @@ export default async function IconjInteriorPage() {
           
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { name: 'Living Room', desc: 'Elegant sheers and drapes to frame your windows.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' },
-              { name: 'Bedroom', desc: 'Blackout blinds for total privacy and darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=600&q=80' },
+              { name: 'Living Room', desc: 'Elegant sheers and drapes to frame your windows.', img: 'https://images.unsplash.com/photo-mXPkC9xCRto?w=800&q=80' },
+              { name: 'Bedroom', desc: 'Blackout blinds for total privacy and darkness.', img: 'https://images.unsplash.com/photo-432c5o60XsA?w=800&q=80' },
               { name: 'Office', desc: 'Clean roller blinds to control glare and light.', img: '/images/roller_blinds_card.jpg' },
-              { name: 'Dining Area', desc: 'Soft sheers to add warmth and natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&q=80' },
+              { name: 'Dining Area', desc: 'Soft sheers to add warmth and natural light.', img: 'https://images.unsplash.com/photo-pPcKyqUEmcs?w=800&q=80' },
               { name: 'Kids Room', desc: 'Colourful and safe window solutions for little ones.', img: '/images/zebra_blinds_hero.jpg' },
               { name: 'Large Windows', desc: 'Venetian and vertical blind solutions for wide windows.', img: '/images/venetian_blinds_card.jpg' }
             ].map((room, i) => (
@@ -318,8 +318,8 @@ export default async function IconjInteriorPage() {
           
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { title: 'Blackout Blinds', desc: 'Engineered to block light completely.', best: 'Bedrooms and spaces where you want maximum darkness and privacy.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=400&q=80' },
-              { title: 'Sheer Curtains', desc: 'Lightweight fabrics that filter sunlight.', best: 'Living rooms and spaces where you want natural light with a softer look.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400&q=80' },
+              { title: 'Blackout Blinds', desc: 'Engineered to block light completely.', best: 'Bedrooms and spaces where you want maximum darkness and privacy.', img: 'https://images.unsplash.com/photo-432c5o60XsA?w=800&q=80' },
+              { title: 'Sheer Curtains', desc: 'Lightweight fabrics that filter sunlight.', best: 'Living rooms and spaces where you want natural light with a softer look.', img: 'https://images.unsplash.com/photo-pPcKyqUEmcs?w=800&q=80' },
               { title: 'Zebra Blinds', desc: 'Alternating sheer and solid fabric bands.', best: 'Flexible control over light and privacy throughout the day.', img: '/images/zebra_blinds_hero.jpg' }
             ].map((guide, i) => (
               <Card key={i} className="rounded-none border-slate-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
@@ -407,14 +407,14 @@ export default async function IconjInteriorPage() {
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {/* Roller blinds in living room */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Roller blinds" />
+              <img src="https://images.unsplash.com/photo-3fjO_A5tmHE?w=800&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Roller blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=roller"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Roller Blinds</Button></Link>
               </div>
             </div>
             {/* Large hero: sheer curtains with light */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden md:col-span-2 md:row-span-2">
-              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1200&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Sheer curtains" />
+              <img src="https://images.unsplash.com/photo-mXPkC9xCRto?w=800&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Sheer curtains" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=sheer"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Sheer Curtains</Button></Link>
               </div>
@@ -428,13 +428,13 @@ export default async function IconjInteriorPage() {
             </div>
             {/* Blackout blinds bedroom */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Blackout blinds" />
+              <img src="https://images.unsplash.com/photo-432c5o60XsA?w=800&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Blackout blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=blackout"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Blackout</Button></Link>
               </div>
             </div>
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-j_J2JvXTe7M?w=800&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=living"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Living Room</Button></Link>
               </div>
