@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -20,14 +20,19 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
   const [verifying, setVerifying] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Note: In production, you would fetch this from Paystack's bank list API.
-  const commonBanks = [
-    { name: "Guaranty Trust Bank (GTB)", code: "058" },
-    { name: "Access Bank", code: "044" },
-    { name: "Zenith Bank", code: "057" },
-    { name: "First Bank of Nigeria", code: "011" },
-    { name: "United Bank for Africa (UBA)", code: "033" }
-  ];
+  const [banks, setBanks] = useState<{name: string, code: string}[]>([]);
+  const [fetchingBanks, setFetchingBanks] = useState(true);
+
+  // Fetch full Nigerian bank list from Paystack API
+  useEffect(() => {
+    fetch("https://api.paystack.co/bank?currency=NGN")
+      .then(res => res.json())
+      .then(data => {
+        if (data.status) setBanks(data.data);
+      })
+      .catch(err => console.error("Failed to fetch banks", err))
+      .finally(() => setFetchingBanks(false));
+  }, []);
 
   const handleResolve = async () => {
     if (!bankCode || !accountNumber) {
@@ -57,13 +62,15 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
     }
   };
 
+  const [isEditing, setIsEditing] = useState(false);
+
   const handleConfirm = async () => {
-    // If we are retrying an existing account, use that data instead of the state
-    const isRetry = !!existingAccount;
+    // If we are retrying a FAILED existing account, use that data instead of the state
+    const isRetry = !isEditing && !!existingAccount && existingAccount.status === 'FAILED';
     const finalBankCode = isRetry ? existingAccount.bank_code : bankCode;
     const finalAccountNumber = isRetry ? existingAccount.account_number : accountNumber;
     const finalAccountName = isRetry ? existingAccount.verified_name : resolvedAccount?.account_name;
-    const finalBankName = isRetry ? existingAccount.bank_name : commonBanks.find(b => b.code === bankCode)?.name || bankCode;
+    const finalBankName = isRetry ? existingAccount.bank_name : banks.find(b => b.code === bankCode)?.name || bankCode;
 
     if (!finalBankCode || !finalAccountNumber || !finalAccountName) return;
     
@@ -174,9 +181,13 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
                 onChange={e => setBankCode(e.target.value)}
               >
                 <option value="">Select your bank...</option>
-                {commonBanks.map(b => (
-                  <option key={b.code} value={b.code}>{b.name}</option>
-                ))}
+                {fetchingBanks ? (
+                  <option disabled>Loading banks...</option>
+                ) : (
+                  banks.map(b => (
+                    <option key={b.code} value={b.code}>{b.name}</option>
+                  ))
+                )}
               </select>
             </div>
             <div className="space-y-2">
