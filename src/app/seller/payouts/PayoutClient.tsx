@@ -212,7 +212,7 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
               <p className="text-slate-500 mt-2">Please confirm this matches your business registration.</p>
             </div>
             
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button variant="outline" className="w-full" onClick={() => setResolvedAccount(null)} disabled={verifying}>
                 Back
               </Button>
