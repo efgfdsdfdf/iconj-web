@@ -87,7 +87,8 @@ export default async function AdminDashboardPage() {
     totalSupplierCost += (cp * item.quantity);
   });
 
-  const netProfit = totalRevenue - totalSupplierCost - totalCommissions;
+  // Net Profit is simply the Revenue minus what we pay the sellers (which is the platform commission!)
+  const netProfit = totalRevenue - totalCommissions;
   
   // Total Sellers
   const { count: totalSellers } = await supabaseAdmin
