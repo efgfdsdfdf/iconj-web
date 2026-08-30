@@ -10,13 +10,6 @@ export const metadata = {
   description: 'Shop products from ICONJ Official and independent sellers. Discover products, compare options and order easily on ICONJ.',
 };
 
-export const viewport = {
-  width: 1280,
-  initialScale: 0.1,
-  maximumScale: 10,
-  userScalable: true,
-};
-
 
 export default async function IconjMarketingPage() {
   const supabase = await createClient();
@@ -43,7 +36,7 @@ export default async function IconjMarketingPage() {
   ];
 
   return (
-    <div className="min-w-[1280px] min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans overflow-x-hidden">
+    <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans overflow-x-hidden">
       {/* 15. NAVIGATION */}
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
@@ -82,7 +75,7 @@ export default async function IconjMarketingPage() {
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="relative pt-20 pb-24 lg:pt-32 lg:pb-40 px-4 overflow-hidden">
+      <section className="relative pt-8 pb-16 md:pt-20 lg:pt-32 lg:pb-40 px-4 overflow-hidden">
         {/* Abstract Background Elements */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
         
@@ -91,7 +84,7 @@ export default async function IconjMarketingPage() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-blue-400 text-xs font-semibold tracking-wide uppercase mb-6">
               <Star className="w-3.5 h-3.5 fill-blue-400" /> The Premium Marketplace
             </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]">
               Everything You Need.<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">One Marketplace.</span>
             </h1>
@@ -113,7 +106,7 @@ export default async function IconjMarketingPage() {
           </div>
 
           {/* Hero Visual - Premium Phone Mockup */}
-          <div className="relative w-full max-w-md mx-auto lg:ml-auto lg:mr-0">
+          <div className="relative w-full max-w-[280px] sm:max-w-md mx-auto mt-12 lg:mt-0 lg:ml-auto lg:mr-0">
             <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-[3rem] blur-2xl"></div>
             <div className="relative border-[8px] border-slate-800 bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden aspect-[9/19] flex flex-col">
               {/* Fake App Header */}
