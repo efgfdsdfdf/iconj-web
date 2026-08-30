@@ -4,17 +4,26 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteProductButton } from "./DeleteProductButton";
-import { Edit, Download } from "lucide-react";
+import { Edit, Download, Search } from "lucide-react";
 
 export const revalidate = 0;
 
-export default async function AdminProductsPage() {
+export default async function AdminProductsPage({ searchParams }: { searchParams: Promise<{ search?: string }> }) {
   const supabase = await createClient();
-  const { data: products } = await supabase
+  const params = await searchParams;
+  const search = params.search || "";
+
+  let query = supabase
     .from("products")
     .select("*")
     .not("name", "ilike", "[DELETED]%")
     .order("created_at", { ascending: false });
+
+  if (search) {
+    query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%`);
+  }
+
+  const { data: products } = await query;
 
   return (
     <main className="flex-1 p-4 md:p-8 min-h-[calc(100vh-130px)] overflow-x-hidden">
@@ -23,14 +32,26 @@ export default async function AdminProductsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Products</h1>
           <p className="text-sm text-slate-500">Manage your catalog directly from the database.</p>
         </div>
-        <div className="flex gap-3 self-start md:self-auto">
+        <div className="flex flex-col sm:flex-row gap-3 self-start md:self-auto w-full md:w-auto">
+          {/* Search Box */}
+          <form action="/admin/products" method="GET" className="relative flex-1 sm:w-64">
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+            <input
+              name="search"
+              type="search"
+              defaultValue={search}
+              placeholder="Search name or SKU..."
+              className="w-full pl-10 h-10 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
+            />
+          </form>
+
           <Link href="/admin/products/import">
-            <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50 font-bold">
+            <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50 font-bold h-10">
               <Download className="w-4 h-4 mr-2" /> Import from Alibaba
             </Button>
           </Link>
           <Link href="/admin/products/new">
-            <Button className="bg-blue-600 hover:bg-blue-700">Add New Product</Button>
+            <Button className="bg-blue-600 hover:bg-blue-700 h-10">Add New Product</Button>
           </Link>
         </div>
       </div>
@@ -57,7 +78,7 @@ export default async function AdminProductsPage() {
                   <TableCell>₦{Number(product.base_supplier_cost).toLocaleString()}</TableCell>
                   <TableCell className="font-bold text-slate-900">₦{Number(product.base_selling_price).toLocaleString()}</TableCell>
                   <TableCell className="text-emerald-600 font-medium bg-emerald-50/50">
-                    {Math.round(((product.base_selling_price - product.base_supplier_cost) / product.base_selling_price) * 100)}%
+                    {product.base_selling_price > 0 ? Math.round(((product.base_selling_price - product.base_supplier_cost) / product.base_selling_price) * 100) : 0}%
                   </TableCell>
                   <TableCell className="text-right pr-6 flex justify-end items-center gap-2">
                     <Link href={`/admin/products/${product.id}/edit`} className="text-blue-500 hover:text-blue-700 p-2 rounded hover:bg-blue-50 transition-colors" title="Edit Product">
@@ -70,7 +91,7 @@ export default async function AdminProductsPage() {
               {(!products || products.length === 0) && (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8 text-slate-500">
-                    No products found in database.
+                    {search ? `No products found matching "${search}"` : "No products found in database."}
                   </TableCell>
                 </TableRow>
               )}
