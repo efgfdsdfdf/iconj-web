@@ -88,7 +88,11 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 onClick={() => setActiveImage(img)}
                 className={`w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 transition-colors ${activeImage === img ? "border-orange-500" : "border-transparent opacity-70 hover:opacity-100"}`}
               >
-                <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                {img.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
+                    <video src={img} className="w-full h-full object-cover" />
+                  ) : (
+                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                  )}
               </button>
             ))}
           </div>

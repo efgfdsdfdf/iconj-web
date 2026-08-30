@@ -353,13 +353,17 @@ export default function SellerAddProductPage() {
 
         {/* Product Images */}
         <Card>
-          <CardHeader><CardTitle>Product Images *</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Product Media (Images & Videos) *</CardTitle></CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-xs text-slate-500">Upload clear, high-quality images. The first image will be the main display image.</p>
+            <p className="text-xs text-slate-500">Upload images or videos. The first item will be the main display image/video.</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {images.map((url, i) => (
                 <div key={i} className="relative aspect-square rounded-lg border overflow-hidden bg-slate-50 group">
-                  <img src={url} alt="Product" className="w-full h-full object-cover" />
+                  {url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
+                      <video src={url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                    ) : (
+                      <img src={url} alt="Product media" className="w-full h-full object-cover" />
+                    )}
                   {i === 0 && (
                     <span className="absolute bottom-2 left-2 bg-blue-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">Main</span>
                   )}
@@ -375,10 +379,10 @@ export default function SellerAddProductPage() {
                 ) : (
                   <>
                     <UploadCloud className="w-8 h-8 mb-2" />
-                    <span className="text-sm font-medium">Add Image</span>
+                    <span className="text-sm font-medium">Add Media</span>
                   </>
                 )}
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+                <input type="file" className="hidden" accept="image/*,video/*" onChange={handleImageUpload} disabled={uploadingImage} />
               </label>
             </div>
           </CardContent>

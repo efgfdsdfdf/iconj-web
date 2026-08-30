@@ -329,12 +329,16 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
 
         {/* Images */}
         <Card>
-          <CardHeader><CardTitle>Product Images *</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Product Media (Images & Videos) *</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {images.map((url, i) => (
                 <div key={i} className="relative aspect-square rounded-lg border overflow-hidden bg-slate-50 group">
-                  <img src={url} alt="Product" className="w-full h-full object-cover" />
+                  {url.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
+                      <video src={url} className="w-full h-full object-cover" autoPlay muted loop playsInline />
+                    ) : (
+                      <img src={url} alt="Product media" className="w-full h-full object-cover" />
+                    )}
                   <button type="button" onClick={() => removeImage(i)} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <X className="w-4 h-4" />
                   </button>
@@ -342,7 +346,7 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
               ))}
               <label className="aspect-square rounded-lg border-2 border-dashed flex flex-col items-center justify-center text-slate-500 hover:text-blue-600 cursor-pointer">
                 {uploadingImage ? <span className="text-sm">Uploading...</span> : <><UploadCloud className="w-8 h-8 mb-2" /><span className="text-sm">Add Image</span></>}
-                <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} disabled={uploadingImage} />
+                <input type="file" className="hidden" accept="image/*,video/*" onChange={handleImageUpload} disabled={uploadingImage} />
               </label>
             </div>
           </CardContent>
