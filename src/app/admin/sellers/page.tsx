@@ -191,6 +191,13 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
     // Delete in correct order to avoid FK violations
     await supabaseAdmin.from("financial_ledger").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabaseAdmin.from("commissions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    
+    // Wallet Engine Tables
+    await supabaseAdmin.from("refunds").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("wallet_transactions").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("withdrawal_requests").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    await supabaseAdmin.from("seller_wallets").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    
     await supabaseAdmin.from("seller_payout_accounts").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabaseAdmin.from("seller_verifications").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     await supabaseAdmin.from("wholesale_pricing").delete().neq("id", "00000000-0000-0000-0000-000000000000");
