@@ -356,7 +356,7 @@ export default async function IconjInteriorPage() {
             </div>
           </div>
           <Link href="/how-to-measure">
-            <Button size="lg" variant="outline" className="h-12 px-8 font-bold border-white text-white hover:bg-white hover:text-slate-900 rounded-none whitespace-nowrap">
+            <Button size="lg" variant="outline" className="h-12 px-8 font-bold bg-transparent border-white text-white hover:bg-white hover:text-slate-900 rounded-none whitespace-nowrap">
               How to Measure
             </Button>
           </Link>
@@ -409,34 +409,34 @@ export default async function IconjInteriorPage() {
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
               <img src="/images/roller_blinds_card.jpg" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Roller blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Link href="/shop?q=roller"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Roller Blinds</Button></Link>
+                <Link href="/shop?q=roller"><Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black rounded-none">Shop Roller Blinds</Button></Link>
               </div>
             </div>
             {/* Large hero: sheer curtains with light */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden md:col-span-2 md:row-span-2">
               <img src="/images/curtains_hero.jpg" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Sheer curtains" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Link href="/shop?q=sheer"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Sheer Curtains</Button></Link>
+                <Link href="/shop?q=sheer"><Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black rounded-none">Shop Sheer Curtains</Button></Link>
               </div>
             </div>
             {/* Zebra blinds */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
               <img src="/images/zebra_blinds_hero.jpg" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Zebra blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Link href="/shop?q=zebra"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Zebra Blinds</Button></Link>
+                <Link href="/shop?q=zebra"><Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black rounded-none">Shop Zebra Blinds</Button></Link>
               </div>
             </div>
             {/* Blackout blinds bedroom */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
               <img src="/images/blackout_blinds.jpg" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Blackout blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Link href="/shop?q=blackout"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Blackout</Button></Link>
+                <Link href="/shop?q=blackout"><Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black rounded-none">Shop Blackout</Button></Link>
               </div>
             </div>
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
               <img src="/images/curtains_hero.jpg" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                <Link href="/shop?q=living"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Living Room</Button></Link>
+                <Link href="/shop?q=living"><Button variant="outline" className="bg-transparent border-white text-white hover:bg-white hover:text-black rounded-none">Shop Living Room</Button></Link>
               </div>
             </div>
           </div>
