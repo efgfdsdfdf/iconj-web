@@ -10,6 +10,14 @@ export const metadata = {
   description: 'Shop products from ICONJ Official and independent sellers. Discover products, compare options and order easily on ICONJ.',
 };
 
+export const viewport = {
+  width: 1280,
+  initialScale: 0.1,
+  maximumScale: 10,
+  userScalable: true,
+};
+
+
 export default async function IconjMarketingPage() {
   const supabase = await createClient();
   
@@ -35,7 +43,7 @@ export default async function IconjMarketingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans overflow-x-hidden">
+    <div className="min-w-[1280px] min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans overflow-x-hidden">
       {/* 15. NAVIGATION */}
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
