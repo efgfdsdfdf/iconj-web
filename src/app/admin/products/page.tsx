@@ -20,7 +20,8 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
     .order("created_at", { ascending: false });
 
   if (search) {
-    query = query.or(`name.ilike.%${search}%,sku.ilike.%${search}%`);
+    const safeSearch = JSON.stringify(`%${search}%`);
+    query = query.or(`name.ilike.${safeSearch},sku.ilike.${safeSearch}`);
   }
 
   const { data: products } = await query;
