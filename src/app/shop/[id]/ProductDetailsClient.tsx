@@ -78,7 +78,11 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
       {/* Left: Image Gallery */}
       <div className="w-full lg:w-1/2 flex flex-col gap-4">
         <div className="aspect-square bg-slate-50 rounded-lg overflow-hidden border">
-          <img src={activeImage} alt={product.name} className="w-full h-full object-cover" />
+          {activeImage?.match(/\\.(mp4|webm|ogg|mov)(\\?.*)?$/i) ? (
+            <video src={activeImage} className="w-full h-full object-cover" autoPlay muted loop playsInline controls />
+          ) : (
+            <img src={activeImage} alt={product.name} className="w-full h-full object-cover" />
+          )}
         </div>
         {images.length > 1 && (
           <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
@@ -89,14 +93,10 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 className={`w-20 h-20 shrink-0 rounded-md overflow-hidden border-2 transition-colors ${activeImage === img ? "border-orange-500" : "border-transparent opacity-70 hover:opacity-100"}`}
               >
                 {img.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
-                    <video src={img} className="w-full h-full object-cover" />
-                  ) : (
-                    {img.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (
-                    <video src={img} className="w-full h-full object-cover" />
-                  ) : (
-                    <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
-                  )}
-                  )}
+                  <video src={img} className="w-full h-full object-cover" />
+                ) : (
+                  <img src={img} alt={`Thumbnail ${idx}`} className="w-full h-full object-cover" />
+                )}
               </button>
             ))}
           </div>
