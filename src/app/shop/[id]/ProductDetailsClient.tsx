@@ -7,6 +7,8 @@ import Link from "next/link";
 import { Star, Truck, Check, Minus, Plus, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Info } from "lucide-react";
 import { MeasurementConfigurator } from "@/components/product/MeasurementConfigurator";
 
 export function ProductDetailsClient({ product, images, rules }: { product: any, images: string[], rules?: any }) {
@@ -189,9 +191,45 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 <p className="text-xs text-slate-600 mt-0.5">Learn how to accurately measure your windows.</p>
               </div>
             </div>
-            <Link href="/how-to-measure" className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-white border border-amber-200 px-3 py-1.5 rounded hover:bg-amber-100 transition-colors">
-              Guide
-            </Link>
+            <Dialog>
+              <DialogTrigger className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-white border border-amber-200 px-3 py-1.5 rounded hover:bg-amber-100 transition-colors">
+                Guide
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold">How to Measure</DialogTitle>
+                  <DialogDescription>
+                    Follow our simple guide to get the perfect fit for your window.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-6 md:grid-cols-2 mt-4">
+                  <div className="border rounded-lg p-5">
+                    <h3 className="font-bold flex items-center gap-2 mb-3"><Ruler className="w-4 h-4 text-amber-600"/> Inside Mount (Recess)</h3>
+                    <p className="text-sm text-slate-600 mb-3">For a clean, built-in look where the blind fits inside the window frame.</p>
+                    <ul className="text-sm list-disc pl-4 space-y-2 text-slate-600 mb-4">
+                      <li><strong>Width:</strong> Measure inside width at top, middle, and bottom. Use narrowest.</li>
+                      <li><strong>Drop:</strong> Measure inside length at left, middle, right. Use longest.</li>
+                    </ul>
+                    <div className="bg-blue-50 p-3 rounded text-xs text-blue-800 flex gap-2">
+                      <Info className="w-4 h-4 shrink-0" />
+                      Do not make deductions. The factory will make them to ensure it fits perfectly.
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-5">
+                    <h3 className="font-bold flex items-center gap-2 mb-3"><Ruler className="w-4 h-4 text-amber-600"/> Outside Mount (Exact)</h3>
+                    <p className="text-sm text-slate-600 mb-3">The blind sits outside the frame to make the window look larger or block maximum light.</p>
+                    <ul className="text-sm list-disc pl-4 space-y-2 text-slate-600 mb-4">
+                      <li><strong>Width:</strong> Add at least 10cm to each side past the window frame to minimize light gap.</li>
+                      <li><strong>Drop:</strong> Measure from where headrail will sit, down to where blind finishes.</li>
+                    </ul>
+                    <div className="bg-amber-50 p-3 rounded text-xs text-amber-800 flex gap-2">
+                      <Info className="w-4 h-4 shrink-0" />
+                      We will make the blind exactly to your measurements. No deductions will be made.
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
 
           
