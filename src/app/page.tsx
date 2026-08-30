@@ -96,7 +96,7 @@ export default async function Home() {
               </div>
 
               <div className="mt-auto border-t px-4 py-3 bg-slate-50">
-                <Link href="/book-measurement" className="text-blue-600 font-bold text-sm flex items-center gap-2 hover:underline"><Blinds className="w-4 h-4"/> Book Free Measurement</Link>
+                <Link href="/how-to-measure" className="text-blue-600 font-bold text-sm flex items-center gap-2 hover:underline"><Blinds className="w-4 h-4"/> Book Free Measurement</Link>
               </div>
             </nav>
           </Card>
