@@ -1,19 +1,19 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ShoppingCart, ShieldCheck, Truck, Users, ArrowRight, CheckCircle, Smartphone, Star, Search, Menu, ChevronDown, Check, LayoutGrid, Tag, Store } from 'lucide-react';
+import { Search, ShoppingCart, Menu, ArrowRight, Truck, ShieldCheck, CheckCircle, ChevronDown, User, Star, Ruler, Info, LayoutGrid } from 'lucide-react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { ProductCard } from '@/components/product/ProductCard';
 
 export const metadata = {
-  title: 'ICONJ — Everything You Need. One Marketplace.',
-  description: 'Shop products from ICONJ Official and independent sellers. Discover products, compare options and order easily on ICONJ.',
+  title: 'ICONJ — Blinds, Curtains & Window Solutions',
+  description: 'Shop stylish blinds, curtains and window solutions on ICONJ. Transform your home or office with window treatments designed for comfort, privacy and style.',
 };
 
-export default async function IconjMarketingPage() {
+export default async function IconjInteriorPage() {
   const supabase = await createClient();
   
-  // Fetch trending products
+  // Fetch trending products (blinds/curtains)
   const { data: rawProducts } = await supabase
     .from('products')
     .select('*')
@@ -21,437 +21,298 @@ export default async function IconjMarketingPage() {
     .eq('is_active', true)
     .limit(20);
     
-  const trendingProducts = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 4) : [];
-
-  
-  const { data: dbCategories } = await supabase.from('categories').select('*').order('created_at');
-  const { data: settings } = await supabase.from('store_settings').select('value').eq('id', 'homepage_categories').single();
-  const adminCategories = settings?.value || [];
-  
-  const categories = (dbCategories || []).map(cat => {
-    const customMatch = adminCategories.find((ac: any) => 
-      ac.name.toLowerCase().trim() === cat.name.toLowerCase().trim() || 
-      ac.name.toLowerCase().includes(cat.name.toLowerCase())
-    );
-    return {
-      ...cat,
-      icon: customMatch?.icon || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
-    };
-  });
-
+  const featuredProducts = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 4) : [];
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans overflow-x-hidden">
-      {/* 15. NAVIGATION */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-black tracking-tighter text-white">
-              ICONJ<span className="text-blue-500">.</span>
+    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-amber-600/30 overflow-x-hidden">
+      
+      {/* 14. NAVIGATION (Custom for this page) */}
+      <header className="sticky top-0 z-50 w-full bg-white/95 backdrop-blur-md border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-10">
+            <Link href="/" className="text-3xl font-black tracking-tighter text-slate-950">
+              ICONJ<span className="text-amber-600">.</span>
             </Link>
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
-              <Link href="/shop" className="hover:text-white transition-colors">Shop</Link>
-              <Link href="/categories" className="hover:text-white transition-colors">Categories</Link>
-              <Link href="/shop?seller=iconj-official" className="hover:text-blue-400 transition-colors">ICONJ Official</Link>
-              <Link href="/seller" className="hover:text-white transition-colors">Sell on ICONJ</Link>
-              <Link href="/about" className="hover:text-white transition-colors">About</Link>
+            <nav className="hidden lg:flex items-center gap-8 text-sm font-semibold text-slate-600">
+              <Link href="/shop" className="hover:text-amber-600 transition-colors">Shop</Link>
+              <Link href="/shop?category=blinds" className="hover:text-amber-600 transition-colors">Blinds</Link>
+              <Link href="/shop?category=curtains" className="hover:text-amber-600 transition-colors">Curtains</Link>
+              <Link href="/categories" className="hover:text-amber-600 transition-colors">Window Solutions</Link>
+              <Link href="#inspiration" className="hover:text-amber-600 transition-colors">Inspiration</Link>
+              <Link href="/onboarding/seller" className="hover:text-amber-600 transition-colors">Become a Seller</Link>
             </nav>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex relative group">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+          <div className="flex items-center gap-6">
+            <div className="hidden md:flex relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-amber-600 transition-colors" />
               <input 
                 type="text" 
-                placeholder="Search products, categories..." 
-                className="w-64 h-9 pl-9 pr-4 rounded-full bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+                placeholder="Search blinds, curtains..." 
+                className="w-64 h-10 pl-9 pr-4 rounded-full bg-slate-100 border-transparent text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
               />
             </div>
-            <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-300 hover:text-white transition-colors">Login</Link>
+            <Link href="/login" className="hidden sm:flex text-sm font-semibold text-slate-600 hover:text-amber-600 transition-colors items-center gap-2">
+              <User className="w-4 h-4" /> Account
+            </Link>
             <Link href="/cart">
-              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-white/10 rounded-full">
+              <Button variant="ghost" size="icon" className="text-slate-600 hover:text-amber-600 hover:bg-amber-50 rounded-full">
                 <ShoppingCart className="w-5 h-5" />
               </Button>
             </Link>
-            <Button variant="ghost" size="icon" className="md:hidden text-slate-300">
-              <Menu className="w-5 h-5" />
+            <Button variant="ghost" size="icon" className="lg:hidden text-slate-600">
+              <Menu className="w-6 h-6" />
             </Button>
           </div>
         </div>
       </header>
 
       {/* 2. HERO SECTION */}
-      <section className="relative pt-8 pb-16 md:pt-20 lg:pt-32 lg:pb-40 px-4 overflow-hidden">
-        {/* Abstract Background Elements */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/20 blur-[120px] rounded-full pointer-events-none"></div>
+      <section className="relative h-[85vh] min-h-[600px] flex items-center justify-center overflow-hidden">
+        {/* Cinematic Background Image */}
+        <div className="absolute inset-0 bg-slate-900">
+          <img 
+            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2000&auto=format&fit=crop" 
+            alt="Beautiful modern living room with large windows and natural light" 
+            className="w-full h-full object-cover opacity-60 mix-blend-overlay"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-900/40 to-transparent"></div>
+        </div>
         
-        <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 lg:gap-8 items-center relative z-10">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-blue-400 text-xs font-semibold tracking-wide uppercase mb-6">
-              <Star className="w-3.5 h-3.5 fill-blue-400" /> The Premium Marketplace
-            </div>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]">
-              Everything You Need.<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">One Marketplace.</span>
-            </h1>
-            <p className="text-lg sm:text-xl text-slate-400 mb-8 max-w-lg leading-relaxed">
-              Discover products from ICONJ Official and trusted independent sellers, all in one simple shopping experience.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/shop">
-                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-[0_0_40px_-10px_rgba(37,99,235,0.5)] transition-all hover:scale-105">
-                  Shop Now <ArrowRight className="ml-2 w-5 h-5" />
-                </Button>
-              </Link>
-              <Link href="#explore">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-base font-bold border-white/20 bg-white/5 text-white hover:bg-white/10 rounded-full backdrop-blur-md transition-all">
-                  Explore ICONJ
-                </Button>
-              </Link>
-            </div>
+        <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold tracking-widest uppercase mb-8">
+            Beautiful Windows. Better Spaces.
           </div>
-
-          {/* Hero Visual - Premium Phone Mockup */}
-          <div className="relative w-full max-w-[280px] sm:max-w-md mx-auto mt-12 lg:mt-0 lg:ml-auto lg:mr-0">
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent rounded-[3rem] blur-2xl"></div>
-            <div className="relative border-[8px] border-slate-800 bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden aspect-[9/19] flex flex-col">
-              {/* Fake App Header */}
-              <div className="h-16 border-b border-white/10 bg-slate-950/50 flex items-center justify-between px-6 pt-4">
-                <span className="text-lg font-black tracking-tighter text-white">ICONJ<span className="text-blue-500">.</span></span>
-                <Search className="w-4 h-4 text-slate-400" />
-              </div>
-              {/* Fake App Body */}
-              <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
-                <div className="w-full h-32 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex flex-col justify-end">
-                  <span className="text-white/80 text-xs font-bold uppercase">New Arrival</span>
-                  <span className="text-white font-bold text-lg">Premium Collection</span>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="h-32 rounded-xl bg-slate-800 p-3 flex flex-col justify-between border border-white/5">
-                    <div className="w-full h-16 bg-slate-700 rounded-lg animate-pulse"></div>
-                    <div className="w-2/3 h-2 bg-slate-600 rounded"></div>
-                  </div>
-                  <div className="h-32 rounded-xl bg-slate-800 p-3 flex flex-col justify-between border border-white/5">
-                    <div className="w-full h-16 bg-slate-700 rounded-lg animate-pulse delay-75"></div>
-                    <div className="w-2/3 h-2 bg-slate-600 rounded"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Floating Elements */}
-            <div className="absolute -left-12 top-1/4 bg-slate-800/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-xl animate-[bounce_4s_infinite]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><ShoppingCart className="w-5 h-5 text-blue-400"/></div>
-                <div>
-                  <div className="text-sm font-bold text-white">Secure Checkout</div>
-                  <div className="text-xs text-slate-400">Paystack Powered</div>
-                </div>
-              </div>
-            </div>
-            <div className="absolute -right-8 bottom-1/4 bg-slate-800/90 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-xl animate-[bounce_5s_infinite_reverse]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center"><ShieldCheck className="w-5 h-5 text-emerald-400"/></div>
-                <div>
-                  <div className="text-sm font-bold text-white">Official Store</div>
-                  <div className="text-xs text-slate-400">Free Delivery</div>
-                </div>
-              </div>
-            </div>
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight drop-shadow-lg">
+            Transform Your Windows.<br className="hidden sm:block" /> Transform Your Space.
+          </h1>
+          <p className="text-lg sm:text-xl text-slate-200 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow">
+            Discover stylish blinds, curtains and window solutions designed to give your home or office the perfect finish.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/shop">
+              <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-none transition-all hover:scale-105">
+                Shop Window Solutions
+              </Button>
+            </Link>
+            <Link href="#collections">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-8 text-base font-bold border-white bg-white/10 text-white hover:bg-white hover:text-slate-900 rounded-none backdrop-blur-md transition-all">
+                Explore Collections
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 3. TRUST / VALUE STRIP */}
-      <section className="border-y border-white/5 bg-slate-900/50 py-8">
+      {/* 3. QUICK CATEGORY NAVIGATION */}
+      <section id="collections" className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-4 divide-x-0 md:divide-x divide-white/5">
-            {[
-              { icon: ShoppingCart, title: 'Shop Easily', desc: 'Find products without the stress.' },
-              { icon: ShieldCheck, title: 'Shop Securely', desc: 'A simple and secure checkout experience.' },
-              { icon: Truck, title: 'Delivery', desc: 'Get your orders delivered conveniently.' },
-              { icon: Store, title: 'Multiple Sellers', desc: 'Discover products from ICONJ Official & others.' }
-            ].map((feature, i) => (
-              <div key={i} className="flex flex-col items-center text-center px-4">
-                <feature.icon className="w-6 h-6 text-blue-400 mb-3" />
-                <h3 className="text-sm font-bold text-white mb-1">{feature.title}</h3>
-                <p className="text-xs text-slate-400">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. ICONJ OFFICIAL FEATURE */}
-      <section id="explore" className="py-24 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-blue-900 to-slate-900 border border-blue-800/30 p-8 md:p-16 flex flex-col md:flex-row items-center gap-10 shadow-2xl">
-            {/* Glow */}
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 blur-[100px] rounded-full pointer-events-none"></div>
-            
-            <div className="flex-1 relative z-10">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold tracking-wide uppercase mb-6 border border-emerald-500/30">
-                <Truck className="w-4 h-4" /> Free Delivery
-              </div>
-              <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-                Shop <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">ICONJ Official</span>
-              </h2>
-              <p className="text-lg text-blue-100/80 mb-8 max-w-xl">
-                Get products directly from ICONJ Official and enjoy <strong className="text-white">FREE DELIVERY</strong> on eligible ICONJ Official orders.
-              </p>
-              <Link href="/shop?seller=iconj-official">
-                <Button size="lg" className="h-14 px-8 text-base font-bold bg-white text-blue-950 hover:bg-slate-100 rounded-full shadow-lg">
-                  Shop ICONJ Official
-                </Button>
-              </Link>
-              <p className="mt-6 text-xs text-blue-200/50 max-w-lg leading-relaxed">
-                * Delivery terms for independent sellers may vary. Please check the seller's delivery information before placing an order. ICONJ Official = Free delivery. Independent sellers = Delivery terms vary.
-              </p>
-            </div>
-            
-            <div className="flex-1 relative z-10 w-full max-w-md">
-              <div className="aspect-square rounded-2xl bg-gradient-to-tr from-slate-800 to-slate-700 p-1 shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="w-full h-full rounded-xl bg-slate-900 border border-white/10 flex flex-col items-center justify-center p-8 text-center">
-                  <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(37,99,235,0.5)]">
-                    <CheckCircle className="w-10 h-10 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-white mb-2">Guaranteed Quality</h3>
-                  <p className="text-sm text-slate-400">Fulfilled directly from our warehouse to your doorstep.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. HOW ICONJ WORKS */}
-      <section className="py-24 bg-slate-950 px-4">
-        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Shopping Made Simple</h2>
-            <p className="text-slate-400 max-w-2xl mx-auto">Experience a seamless journey from discovery to delivery.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Shop by Window Style</h2>
+            <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-8 relative">
-            {/* Connecting line */}
-            <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-transparent via-white/10 to-transparent z-0"></div>
-            
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {[
-              { num: '01', title: 'Discover', desc: 'Browse products from ICONJ Official and independent sellers.' },
-              { num: '02', title: 'Choose', desc: 'Compare products, check reviews, and select what works for you.' },
-              { num: '03', title: 'Order', desc: 'Checkout securely via Paystack and get your order delivered.' }
-            ].map((step, i) => (
-              <div key={i} className="relative z-10 flex flex-col items-center text-center group">
-                <div className="w-24 h-24 rounded-full bg-slate-900 border-2 border-white/5 flex items-center justify-center mb-6 shadow-xl group-hover:border-blue-500/50 group-hover:scale-110 transition-all duration-300">
-                  <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-500">{step.num}</span>
+              { name: 'Blinds', desc: 'Modern control over light & style.', img: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=500&q=80' },
+              { name: 'Curtains', desc: 'Elegant finishing touches.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&q=80' },
+              { name: 'Blackout', desc: 'Maximum privacy & darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=500&q=80' },
+              { name: 'Sheer', desc: 'Soft natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80' },
+              { name: 'Roller Blinds', desc: 'Clean, minimal & modern.', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80' },
+              { name: 'Zebra Blinds', desc: 'Flexible light control.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=500&q=80' },
+              { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: 'https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=500&q=80' },
+              { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&q=80' }
+            ].map((cat, i) => (
+              <Link href={`/shop?q=${cat.name.split(' ')[0]}`} key={i} className="group block relative h-64 overflow-hidden bg-slate-900 rounded-none">
+                <img src={cat.img} alt={cat.name} className="w-full h-full object-cover opacity-80 group-hover:scale-110 group-hover:opacity-60 transition-all duration-700" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/20 to-transparent"></div>
+                <div className="absolute bottom-0 left-0 p-6 w-full translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+                  <h3 className="text-xl font-bold text-white mb-1">{cat.name}</h3>
+                  <p className="text-sm text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">{cat.desc}</p>
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{step.title}</h3>
-                <p className="text-slate-400 max-w-xs">{step.desc}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 6. PRODUCT DISCOVERY SECTION */}
-      <section className="py-24 bg-slate-900 px-4">
-        <div className="max-w-7xl mx-auto">
+      {/* 4. FEATURED COLLECTION */}
+      <section className="py-24 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Discover Something You'll Love</h2>
-              <p className="text-slate-400">Explore our diverse categories across the marketplace.</p>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Find Your Perfect Window Look</h2>
+              <div className="w-16 h-1 bg-amber-600"></div>
             </div>
-            <Link href="/categories">
-              <Button variant="outline" className="border-white/20 text-white hover:bg-white/10 rounded-full">
-                View All Categories <ArrowRight className="ml-2 w-4 h-4" />
+            <Link href="/shop">
+              <Button variant="outline" className="border-slate-300 text-slate-700 hover:bg-slate-100 rounded-none font-semibold">
+                View All Collections <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {categories.slice(0, 6).map((cat: any) => (
-              <Link href={`/shop?category=${cat.id}`} key={cat.id} className="group block">
-                <div className="relative rounded-2xl overflow-hidden aspect-[4/3] bg-slate-800">
-                  <img src={cat.icon || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&q=80'} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity"></div>
-                  <div className="absolute bottom-0 left-0 p-6 w-full">
-                    <h3 className="text-xl font-bold text-white mb-1 group-hover:text-blue-400 transition-colors">{cat.name}</h3>
-                    <div className="flex items-center text-sm text-slate-300 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300">
-                      Shop now <ArrowRight className="ml-1 w-4 h-4" />
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 7. FEATURED PRODUCTS */}
-      <section className="py-24 bg-slate-950 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-end mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white">Trending on ICONJ</h2>
-            <Link href="/shop" className="hidden sm:flex text-blue-400 hover:text-blue-300 font-medium items-center">
-              See All <ArrowRight className="ml-1 w-4 h-4" />
-            </Link>
-          </div>
-          
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-            {trendingProducts.map((product) => (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
-          {trendingProducts.length === 0 && (
-             <div className="text-center py-20 text-slate-500 border border-dashed border-slate-800 rounded-2xl">
-               Products will appear here once added to the catalog.
+          {featuredProducts.length === 0 && (
+             <div className="text-center py-24 bg-white border border-dashed border-slate-300">
+               <p className="text-slate-500 font-medium">Featured window treatments will appear here.</p>
              </div>
           )}
-          <div className="mt-8 sm:hidden text-center">
-             <Link href="/shop">
-               <Button variant="outline" className="w-full border-white/20 text-white rounded-full">View All Products</Button>
-             </Link>
-          </div>
         </div>
       </section>
 
-      {/* 8. WHY ICONJ */}
-      <section className="py-24 bg-slate-900 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">More Than Just a Store</h2>
-            <p className="text-lg text-slate-400">
-              ICONJ brings products, sellers and shoppers together in one modern marketplace built to make online shopping simpler.
-            </p>
+      {/* 5. ROOM TRANSFORMATION SECTION */}
+      <section className="py-24 bg-slate-950 text-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">See the Difference</h2>
+          <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-16">
+            The right window treatment can completely change the feel of a room.
+          </p>
+          
+          <div className="grid md:grid-cols-2 gap-2 max-w-5xl mx-auto">
+            <div className="relative aspect-[4/3] bg-slate-800">
+              <img src="https://images.unsplash.com/photo-1595514535313-25e4c05a109a?w=1000&q=80" alt="Before" className="w-full h-full object-cover opacity-70 grayscale" />
+              <div className="absolute top-4 left-4 bg-black/50 backdrop-blur text-white px-4 py-1 text-sm font-bold uppercase tracking-widest">Before</div>
+            </div>
+            <div className="relative aspect-[4/3] bg-slate-800">
+              <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1000&q=80" alt="After" className="w-full h-full object-cover" />
+              <div className="absolute top-4 left-4 bg-amber-600 text-white px-4 py-1 text-sm font-bold uppercase tracking-widest shadow-lg">After</div>
+            </div>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { icon: LayoutGrid, title: 'One Marketplace', desc: 'Discover products from different sellers in one beautifully designed place.' },
-              { icon: CheckCircle, title: 'Simple Checkout', desc: 'A straightforward, secure purchasing experience using standard Nigerian payment rails.' },
-              { icon: Store, title: 'Seller Discovery', desc: 'Find products from independent sellers alongside our premium official items.' },
-              { icon: Truck, title: 'Convenient Delivery', desc: 'Clear delivery information and convenient order fulfillment across the nation.' }
-            ].map((feature, i) => (
-              <Card key={i} className="bg-slate-800/50 border-white/5 hover:bg-slate-800 transition-colors">
-                <CardContent className="p-8 flex items-start gap-6">
-                  <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center shrink-0">
-                    <feature.icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-white mb-2">{feature.title}</h3>
-                    <p className="text-slate-400">{feature.desc}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="mt-12">
+            <Link href="/shop">
+              <Button size="lg" className="h-14 px-10 text-base font-bold bg-white text-slate-950 hover:bg-slate-200 rounded-none">
+                Find Your Style
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* 9. SELLER SECTION */}
-      <section className="py-24 bg-black px-4 relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-1/2 h-full bg-gradient-to-l from-blue-900/20 to-transparent pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
-          <div className="flex-1">
-            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
-              Have Something <span className="text-blue-500">to Sell?</span>
-            </h2>
-            <p className="text-lg text-slate-400 mb-8 max-w-xl">
-              Turn your products into a business on ICONJ. Create your store, reach new customers and grow your sales on Nigeria's modern marketplace.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Link href="/seller">
-                <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold bg-blue-600 hover:bg-blue-700 text-white rounded-full">
-                  Become a Seller
-                </Button>
-              </Link>
-              <Link href="/onboarding/seller">
-                <Button size="lg" variant="ghost" className="w-full sm:w-auto h-14 px-8 text-base font-bold text-slate-300 hover:text-white hover:bg-white/5 rounded-full">
-                  Learn More
-                </Button>
-              </Link>
-            </div>
-          </div>
-          <div className="flex-1 w-full">
-            <div className="rounded-2xl border border-white/10 bg-slate-900 p-6 shadow-2xl transform rotate-2 hover:rotate-0 transition-transform duration-500">
-              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-white/5">
-                <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center"><Store className="w-6 h-6 text-slate-400"/></div>
-                <div>
-                  <div className="text-white font-bold">Seller Dashboard</div>
-                  <div className="text-slate-500 text-sm">Manage your store easily</div>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="h-4 bg-slate-800 rounded w-3/4"></div>
-                <div className="h-4 bg-slate-800 rounded w-1/2"></div>
-                <div className="grid grid-cols-2 gap-4 mt-6">
-                  <div className="h-24 bg-slate-800 rounded-xl"></div>
-                  <div className="h-24 bg-blue-900/30 border border-blue-500/20 rounded-xl"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 10. MOBILE APP / EXPERIENCE */}
-      <section className="py-24 bg-slate-950 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center gap-16">
-          <div className="flex-1 flex justify-center">
-            <div className="relative w-64 h-[500px] bg-slate-900 rounded-[2.5rem] border-8 border-slate-800 shadow-2xl overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-6 bg-slate-800 rounded-b-2xl w-1/2 mx-auto"></div>
-              <div className="p-4 pt-8 h-full flex flex-col gap-4">
-                <div className="h-10 bg-slate-800 rounded-full flex items-center px-4">
-                  <Search className="w-4 h-4 text-slate-500"/>
-                </div>
-                <div className="h-32 bg-gradient-to-br from-blue-600 to-slate-800 rounded-xl"></div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="h-24 bg-slate-800 rounded-xl"></div>
-                  <div className="h-24 bg-slate-800 rounded-xl"></div>
-                </div>
-                <div className="h-12 mt-auto bg-slate-800 rounded-xl"></div>
-              </div>
-            </div>
-          </div>
-          <div className="flex-1">
-            <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/10 text-blue-400 mb-6">
-              <Smartphone className="w-6 h-6" />
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6 leading-tight">
-              ICONJ, Wherever You Shop
-            </h2>
-            <p className="text-lg text-slate-400 mb-8">
-              Enjoy a smooth, fast shopping experience directly from your phone, tablet or computer browser without needing to download a heavy app.
-            </p>
-            <Button size="lg" variant="outline" className="h-12 px-6 rounded-full border-white/20 text-white hover:bg-white/10">
-              Install ICONJ on your device
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* 11. TESTIMONIALS */}
-      <section className="py-24 bg-slate-900 px-4">
-        <div className="max-w-7xl mx-auto">
+      {/* 6. SHOP BY ROOM */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">People Are Shopping Smarter</h2>
-            <p className="text-slate-400">See what others are saying about the ICONJ experience.</p>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Perfect for Every Space</h2>
+            <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <Card key={i} className="bg-slate-950 border-white/5">
+            {[
+              { name: 'Living Room', desc: 'Create a warm and welcoming atmosphere.', img: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=600&q=80' },
+              { name: 'Bedroom', desc: 'Add privacy, comfort and better light control.', img: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80' },
+              { name: 'Office', desc: 'Create a clean and professional environment.', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80' },
+              { name: 'Dining Area', desc: 'Add elegance to your interior.', img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=600&q=80' },
+              { name: 'Kids Room', desc: 'Comfortable and practical window solutions.', img: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600&q=80' },
+              { name: 'Large Windows', desc: 'Beautiful solutions for wide windows and doors.', img: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80' }
+            ].map((room, i) => (
+              <Link href={`/shop?q=${room.name.split(' ')[0]}`} key={i} className="group block relative overflow-hidden bg-slate-100 aspect-[4/3]">
+                <img src={room.img} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
+                <div className="absolute inset-0 p-8 flex flex-col justify-end">
+                  <h3 className="text-2xl font-bold text-white mb-2">{room.name}</h3>
+                  <p className="text-white/90 text-sm font-medium">{room.desc}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 7. ICONJ OFFICIAL */}
+      <section className="py-24 bg-slate-100">
+        <div className="max-w-5xl mx-auto px-4">
+          <div className="bg-slate-900 rounded-none shadow-2xl overflow-hidden flex flex-col md:flex-row items-stretch">
+            <div className="flex-1 p-10 md:p-16 flex flex-col justify-center relative">
+              <div className="absolute top-0 right-0 p-8 opacity-5">
+                <ShieldCheck className="w-48 h-48 text-white" />
+              </div>
+              <div className="relative z-10">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-600/20 text-amber-500 text-xs font-bold tracking-widest uppercase mb-6 border border-amber-600/30">
+                  <Truck className="w-4 h-4" /> Free Delivery
+                </div>
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  Shop ICONJ Official
+                </h2>
+                <p className="text-slate-300 mb-8 text-lg">
+                  Explore premium blinds and curtains available directly from ICONJ Official and enjoy <strong className="text-white">FREE DELIVERY</strong> on eligible official orders.
+                </p>
+                <Link href="/shop?seller=iconj-official">
+                  <Button size="lg" className="h-14 px-8 text-base font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-none">
+                    Shop ICONJ Official
+                  </Button>
+                </Link>
+                <p className="mt-8 text-xs text-slate-500 leading-relaxed max-w-md">
+                  Independent sellers may have different delivery terms and charges. Please check the seller's delivery information before ordering.
+                </p>
+              </div>
+            </div>
+            <div className="md:w-2/5 min-h-[300px] relative hidden md:block">
+              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80" alt="Premium Curtains" className="w-full h-full object-cover" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. WHY CHOOSE ICONJ */}
+      <section className="py-24 bg-white border-t border-slate-100">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Designed for Better Spaces</h2>
+            <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
+          </div>
+          
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { title: 'Style', desc: 'Find window treatments that perfectly match your interior design.', icon: Star },
+              { title: 'Choice', desc: 'Explore different blinds, curtains, materials and modern styles.', icon: LayoutGrid },
+              { title: 'Convenience', desc: 'Shop easily and securely from the comfort of your home.', icon: ShoppingCart },
+              { title: 'Trusted Sellers', desc: 'Discover products from ICONJ Official and verified independent sellers.', icon: ShieldCheck }
+            ].map((feature, i) => (
+              <div key={i} className="flex flex-col items-center text-center p-6">
+                <div className="w-16 h-16 bg-slate-50 border border-slate-100 rounded-full flex items-center justify-center mb-6 text-amber-600">
+                  <feature.icon className="w-8 h-8" strokeWidth={1.5} />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
+                <p className="text-slate-600 leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 9. WINDOW SOLUTION GUIDE */}
+      <section className="py-24 bg-slate-50 border-y border-slate-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Not Sure Which One to Choose?</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto">Use our guide to understand the differences and find the perfect match for your space.</p>
+            <div className="w-16 h-1 bg-amber-600 mx-auto mt-6"></div>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { title: 'Blackout Blinds', desc: 'Engineered to block light completely.', best: 'Bedrooms and spaces where you want maximum darkness and privacy.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=400&q=80' },
+              { title: 'Sheer Curtains', desc: 'Lightweight fabrics that filter sunlight.', best: 'Living rooms and spaces where you want natural light with a softer look.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400&q=80' },
+              { title: 'Zebra Blinds', desc: 'Alternating sheer and solid fabric bands.', best: 'Flexible control over light and privacy throughout the day.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400&q=80' }
+            ].map((guide, i) => (
+              <Card key={i} className="rounded-none border-slate-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+                <div className="h-48 overflow-hidden">
+                  <img src={guide.img} alt={guide.title} className="w-full h-full object-cover" />
+                </div>
                 <CardContent className="p-8">
-                  <div className="flex text-amber-400 mb-6">
-                    {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-current" />)}
+                  <h3 className="text-xl font-bold text-slate-900 mb-2">{guide.title}</h3>
+                  <p className="text-slate-600 mb-6 text-sm">{guide.desc}</p>
+                  <div className="bg-slate-50 p-4 border border-slate-100 mb-6">
+                    <span className="font-bold text-slate-900 block mb-1 text-sm">Best for:</span>
+                    <span className="text-slate-600 text-sm">{guide.best}</span>
                   </div>
-                  <p className="text-slate-300 italic mb-6">"[Testimonial placeholder - To be replaced by real verified customer reviews once collected. ICONJ provides a seamless shopping experience.]"</p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-800"></div>
-                    <div>
-                      <div className="text-white font-bold text-sm">Customer Name</div>
-                      <div className="text-slate-500 text-xs">Verified Buyer</div>
-                    </div>
-                  </div>
+                  <Link href={`/shop?q=${guide.title.split(' ')[0]}`} className="text-amber-600 font-bold text-sm inline-flex items-center hover:text-amber-700">
+                    View Products <ArrowRight className="w-4 h-4 ml-1" />
+                  </Link>
                 </CardContent>
               </Card>
             ))}
@@ -459,25 +320,172 @@ export default async function IconjMarketingPage() {
         </div>
       </section>
 
-      {/* 12. FAQ */}
-      <section className="py-24 bg-slate-950 px-4">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-12 text-center">Frequently Asked Questions</h2>
+      {/* 10. MEASUREMENT / INSTALLATION */}
+      <section className="py-16 bg-slate-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 rounded-none bg-white/10 flex items-center justify-center shrink-0">
+              <Ruler className="w-8 h-8 text-amber-500" />
+            </div>
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold mb-2">Get the Right Fit</h2>
+              <p className="text-slate-300">Learn how to measure your windows accurately before ordering.</p>
+            </div>
+          </div>
+          <Link href="/about">
+            <Button size="lg" variant="outline" className="h-12 px-8 font-bold border-white text-white hover:bg-white hover:text-slate-900 rounded-none whitespace-nowrap">
+              Measurement Guide
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* 12. CUSTOMER JOURNEY */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">From Window to Wow</h2>
+            <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { num: '01', title: 'Explore', desc: 'Find the style that fits your space.' },
+              { num: '02', title: 'Choose', desc: 'Select your preferred product & size.' },
+              { num: '03', title: 'Order', desc: 'Complete your order securely.' },
+              { num: '04', title: 'Transform', desc: 'Enjoy a better-looking space.' }
+            ].map((step, i) => (
+              <div key={i} className="text-center relative">
+                {i < 3 && <div className="hidden md:block absolute top-10 left-[60%] w-full h-[1px] bg-slate-200"></div>}
+                <div className="w-20 h-20 bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10">
+                  <span className="text-2xl font-black text-slate-300">{step.num}</span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 mb-2">{step.title}</h3>
+                <p className="text-slate-600 text-sm">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 15. INSPIRATION SECTION */}
+      <section id="inspiration" className="py-24 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">Get Inspired</h2>
+              <div className="w-16 h-1 bg-amber-600"></div>
+            </div>
+            <p className="text-slate-600 max-w-md text-sm md:text-right">
+              Explore beautiful interior scenes and discover how the right window treatment elevates a room.
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="aspect-square bg-slate-200 relative group overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <Link href="/shop?q=curtain"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop This Look</Button></Link>
+              </div>
+            </div>
+            <div className="aspect-square bg-slate-200 relative group overflow-hidden md:col-span-2 md:row-span-2">
+              <img src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=1200&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <Link href="/shop?q=sheer"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Sheer Curtains</Button></Link>
+              </div>
+            </div>
+            <div className="aspect-square bg-slate-200 relative group overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <Link href="/shop?q=venetian"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Venetian Blinds</Button></Link>
+              </div>
+            </div>
+            <div className="aspect-square bg-slate-200 relative group overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <Link href="/shop?q=blackout"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Blackout</Button></Link>
+              </div>
+            </div>
+            <div className="aspect-square bg-slate-200 relative group overflow-hidden">
+              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                <Link href="/shop?q=living"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Living Room</Button></Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 11. SELLER SECTION */}
+      <section className="py-24 bg-white border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center gap-16">
+          <div className="flex-1">
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6">Sell Your Window Products on ICONJ</h2>
+            <div className="w-16 h-1 bg-amber-600 mb-6"></div>
+            <p className="text-lg text-slate-600 mb-8 max-w-lg">
+              Reach customers looking for blinds, curtains and window solutions. Create your store and grow your business on ICONJ.
+            </p>
+            <Link href="/onboarding/seller">
+              <Button size="lg" className="h-14 px-8 text-base font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-none">
+                Become a Seller
+              </Button>
+            </Link>
+          </div>
+          <div className="flex-1 w-full">
+            <div className="bg-slate-50 border border-slate-200 p-6 shadow-xl relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100 -mt-8 -mr-8 -z-10"></div>
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-slate-100 -mb-8 -ml-8 -z-10"></div>
+              
+              <div className="border-b border-slate-200 pb-4 mb-6 flex items-center justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-900">Seller Dashboard</h4>
+                  <p className="text-xs text-slate-500">Manage your premium listings</p>
+                </div>
+                <div className="w-8 h-8 bg-slate-200 rounded-full"></div>
+              </div>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 bg-slate-200 flex-shrink-0"></div>
+                  <div className="flex-1 space-y-2 py-2">
+                    <div className="h-4 bg-slate-200 w-3/4"></div>
+                    <div className="h-3 bg-slate-100 w-1/2"></div>
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 bg-slate-200 flex-shrink-0"></div>
+                  <div className="flex-1 space-y-2 py-2">
+                    <div className="h-4 bg-slate-200 w-2/3"></div>
+                    <div className="h-3 bg-slate-100 w-1/3"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 17. FAQ */}
+      <section className="py-24 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-3xl mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">Frequently Asked Questions</h2>
+            <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
+          </div>
+          
           <div className="space-y-4">
             {[
-              { q: 'What is ICONJ?', a: 'ICONJ is an online marketplace where shoppers can discover products from ICONJ Official and independent sellers.' },
-              { q: 'Is delivery free?', a: 'Orders from ICONJ Official enjoy free delivery where applicable. Delivery terms for independent sellers may vary.' },
-              { q: 'Can I sell on ICONJ?', a: 'Yes. Independent sellers can create stores and list their products on ICONJ.' },
-              { q: 'Is payment secure?', a: 'ICONJ uses secure payment processing (like Paystack) for safe and reliable checkout.' },
-              { q: 'Can I track my order?', a: 'Yes, provide order tracking functionality is available within your customer account dashboard.' },
-              { q: 'How do I contact ICONJ?', a: 'You can reach out through our official Help Center or contact support via the live chat.' }
+              { q: 'What does ICONJ sell?', a: 'ICONJ specializes in blinds, curtains, window treatments and related window/interior solutions.' },
+              { q: 'Do you offer free delivery?', a: 'ICONJ Official offers free delivery on eligible orders. Delivery terms for independent sellers may vary.' },
+              { q: 'Can I buy from independent sellers?', a: 'Yes. ICONJ allows independent sellers to offer their high-quality window and interior products on our marketplace.' },
+              { q: 'How do I know which blind is right for me?', a: 'Use our product information and Window Solution Guide to compare different styles like Blackout, Sheer, Zebra, and Roller blinds.' },
+              { q: 'How can I become an ICONJ seller?', a: 'Click "Become a Seller" in the navigation menu to begin the simple seller onboarding process.' }
             ].map((faq, i) => (
-              <details key={i} className="group bg-slate-900 border border-white/5 rounded-2xl overflow-hidden cursor-pointer">
-                <summary className="flex items-center justify-between p-6 text-lg font-medium text-white list-none">
+              <details key={i} className="group bg-white border border-slate-200 cursor-pointer">
+                <summary className="flex items-center justify-between p-6 text-lg font-bold text-slate-900 list-none">
                   {faq.q}
                   <ChevronDown className="w-5 h-5 text-slate-400 group-open:rotate-180 transition-transform" />
                 </summary>
-                <div className="px-6 pb-6 text-slate-400">
+                <div className="px-6 pb-6 text-slate-600 leading-relaxed border-t border-slate-100 pt-4">
                   {faq.a}
                 </div>
               </details>
@@ -486,86 +494,86 @@ export default async function IconjMarketingPage() {
         </div>
       </section>
 
-      {/* 13. FINAL CTA */}
-      <section className="py-32 bg-blue-600 px-4 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-20 h-32 border-2 border-white rounded-xl rotate-12 animate-pulse"></div>
-          <div className="absolute bottom-10 right-20 w-32 h-20 border-2 border-white rounded-xl -rotate-6 animate-pulse delay-150"></div>
-          <div className="absolute top-1/2 right-1/4 w-16 h-16 border-2 border-white rounded-full animate-bounce"></div>
+      {/* 18. FINAL CTA */}
+      <section className="relative py-32 bg-slate-900 overflow-hidden">
+        <div className="absolute inset-0">
+          <img src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?q=80&w=2000&auto=format&fit=crop" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-slate-950/70"></div>
         </div>
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
-            Your Next Find Is Waiting.
+        <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
+          <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+            Give Your Windows the<br />Finish They Deserve.
           </h2>
-          <p className="text-xl text-blue-100 mb-10 max-w-2xl mx-auto">
-            Discover products, explore sellers and start shopping on ICONJ.
+          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
+            Discover blinds, curtains and window solutions designed to make your space feel better.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/shop">
-              <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-lg font-bold bg-white text-blue-600 hover:bg-slate-100 rounded-full shadow-2xl">
-                Start Shopping
+              <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-lg font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-none">
+                Shop ICONJ
               </Button>
             </Link>
-            <Link href="/seller">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-10 text-lg font-bold border-white text-white hover:bg-white/10 rounded-full">
-                Become a Seller
+            <Link href="/shop?category=blinds">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto h-14 px-10 text-lg font-bold border-white text-white hover:bg-white hover:text-slate-900 rounded-none backdrop-blur-sm">
+                Explore Blinds
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* 14. FOOTER */}
-      <footer className="bg-slate-950 border-t border-white/10 pt-20 pb-10 px-4">
+      {/* 19. FOOTER */}
+      <footer className="bg-white border-t border-slate-200 pt-20 pb-10 px-4">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-16">
-            <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="text-2xl font-black tracking-tighter text-white mb-4 block">
-                ICONJ<span className="text-blue-500">.</span>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-10 mb-16">
+            <div className="col-span-2">
+              <Link href="/" className="text-3xl font-black tracking-tighter text-slate-950 mb-4 block">
+                ICONJ<span className="text-amber-600">.</span>
               </Link>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
-                Your marketplace for discovering, shopping and selling. Built for the modern African shopper.
+              <p className="text-slate-500 text-sm leading-relaxed max-w-xs mb-6 font-bold uppercase tracking-widest">
+                Beautiful Windows. Better Spaces.
+              </p>
+              <p className="text-slate-600 text-sm leading-relaxed max-w-sm">
+                Premium e-commerce and home-interior marketplace specializing in blinds, curtains, and elegant window treatments.
               </p>
             </div>
             
             <div>
-              <h4 className="text-white font-bold mb-4">Navigation</h4>
-              <ul className="space-y-3 text-sm text-slate-400">
-                <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
-                <li><Link href="/shop" className="hover:text-white transition-colors">Shop</Link></li>
-                <li><Link href="/categories" className="hover:text-white transition-colors">Categories</Link></li>
-                <li><Link href="/shop?seller=iconj-official" className="hover:text-blue-400 transition-colors">ICONJ Official</Link></li>
-                <li><Link href="/seller" className="hover:text-white transition-colors">Become a Seller</Link></li>
-                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+              <h4 className="font-bold text-slate-900 mb-4">Shop</h4>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li><Link href="/shop" className="hover:text-amber-600 transition-colors">All Products</Link></li>
+                <li><Link href="/shop?category=blinds" className="hover:text-amber-600 transition-colors">Blinds</Link></li>
+                <li><Link href="/shop?category=curtains" className="hover:text-amber-600 transition-colors">Curtains</Link></li>
+                <li><Link href="/categories" className="hover:text-amber-600 transition-colors">Window Solutions</Link></li>
+                <li><Link href="#inspiration" className="hover:text-amber-600 transition-colors">Inspiration</Link></li>
+                <li><Link href="/shop?seller=iconj-official" className="hover:text-amber-600 transition-colors">ICONJ Official</Link></li>
               </ul>
             </div>
             
             <div>
-              <h4 className="text-white font-bold mb-4">Legal</h4>
-              <ul className="space-y-3 text-sm text-slate-400">
-                <li><Link href="/legal/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/legal/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
-                <li><Link href="/legal/returns" className="hover:text-white transition-colors">Returns & Refunds</Link></li>
-                <li><Link href="/legal/shipping" className="hover:text-white transition-colors">Shipping Policy</Link></li>
+              <h4 className="font-bold text-slate-900 mb-4">Company</h4>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li><Link href="/about" className="hover:text-amber-600 transition-colors">About Us</Link></li>
+                <li><Link href="/onboarding/seller" className="hover:text-amber-600 transition-colors">Become a Seller</Link></li>
+                <li><Link href="/contact" className="hover:text-amber-600 transition-colors">Contact</Link></li>
+                <li><Link href="/faq" className="hover:text-amber-600 transition-colors">FAQ</Link></li>
               </ul>
             </div>
-            
+
             <div>
-              <h4 className="text-white font-bold mb-4">Support</h4>
-              <ul className="space-y-3 text-sm text-slate-400">
-                <li><Link href="/support" className="hover:text-white transition-colors">Help Center</Link></li>
-                <li><Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
-                <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+              <h4 className="font-bold text-slate-900 mb-4">Legal</h4>
+              <ul className="space-y-3 text-sm text-slate-600">
+                <li><Link href="/legal/privacy" className="hover:text-amber-600 transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/legal/terms" className="hover:text-amber-600 transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="/legal/returns" className="hover:text-amber-600 transition-colors">Returns & Refunds</Link></li>
+                <li><Link href="/legal/shipping" className="hover:text-amber-600 transition-colors">Shipping Policy</Link></li>
               </ul>
             </div>
           </div>
           
-          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="pt-8 border-t border-slate-200 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-slate-500 text-sm">
               © {new Date().getFullYear()} ICONJ. All rights reserved.
-            </div>
-            <div className="flex items-center gap-4 text-slate-500">
-              <span className="text-sm">Nigeria's Modern Marketplace</span>
             </div>
           </div>
         </div>
