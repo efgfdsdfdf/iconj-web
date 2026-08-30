@@ -94,6 +94,11 @@ export default function CheckoutPage() {
 
   const handleContinueToPayment = (e: React.FormEvent) => {
     e.preventDefault();
+    if (userAddresses.length === 0 || !selectedAddressId || selectedAddressId === "new") {
+      alert("Please select or add a delivery address.");
+      return;
+    }
+    
     if (selectedAddressId !== "new") {
       const selected = userAddresses.find(a => a.id === selectedAddressId);
       if (selected) {
@@ -193,68 +198,27 @@ export default function CheckoutPage() {
                         </div>
                       ))}
                       
-                      <div 
-                        onClick={() => setSelectedAddressId('new')}
-                        className={`border p-4 rounded-lg cursor-pointer flex flex-col items-center justify-center min-h-[120px] ${selectedAddressId === 'new' ? 'border-orange-500 bg-orange-50 text-orange-600' : 'border-dashed border-slate-300 text-slate-500 hover:border-orange-400 hover:bg-orange-50'}`}
-                      >
-                         <Plus className="w-6 h-6 mb-2" />
-                         <span className="font-medium">Add New Address</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {selectedAddressId === "new" && (
-                    <div className={userAddresses.length > 0 ? "space-y-6 border-t pt-6" : "space-y-6"}>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>First Name</Label>
-                          <Input required value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Last Name</Label>
-                          <Input required value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
-                        </div>
-                      </div>
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>Email Address</Label>
-                          <Input type="email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Phone Number</Label>
-                          <Input type="tel" required placeholder="e.g. 08012345678" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label>Delivery Address</Label>
-                        <Input required placeholder="Street address, apartment, suite, etc." value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
-                      </div>
                       
-                      <div className="grid sm:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label>State</Label>
-                          <select required className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})}>
-                            <option value="">Select State</option>
-                            <option value="Lagos">Lagos</option>
-                            <option value="Abuja">Abuja (FCT)</option>
-                            <option value="Rivers">Rivers</option>
-                            <option value="Oyo">Oyo</option>
-                            <option value="Kano">Kano</option>
-                            <option value="Enugu">Enugu</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>City / L.G.A</Label>
-                          <Input required value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
-                        </div>
-                      </div>
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full h-12 text-md font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-md mt-4">
-                    Continue to Payment <ChevronRight className="w-4 h-4 ml-1" />
-                  </Button>
+                  
+                  {userAddresses.length === 0 && (
+                    <div className="bg-amber-50 border border-amber-200 p-6 rounded-lg text-center mb-6">
+                      <p className="text-amber-800 font-medium mb-4">You don't have any saved delivery addresses.</p>
+                      <Link href="/account/address">
+                        <Button type="button" className="bg-amber-600 hover:bg-amber-700 text-white">
+                          Add an Address
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
+
+{userAddresses.length > 0 && (
+                      <Button type="submit" className="w-full h-12 text-md font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-md mt-4">
+                        Continue to Payment <ChevronRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    )}
                 </form>
               </CardContent>
             </Card>
