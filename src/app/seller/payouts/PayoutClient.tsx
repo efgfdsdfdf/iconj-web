@@ -103,7 +103,7 @@ export function PayoutClient({ existingAccount }: { existingAccount: any }) {
     }
   };
 
-  const [isEditing, setIsEditing] = useState(false);
+
 
   if (!isEditing && existingAccount && existingAccount.status !== 'FAILED') {
     const isReady = existingAccount.status === 'VERIFIED';
