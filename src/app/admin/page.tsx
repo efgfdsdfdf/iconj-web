@@ -23,13 +23,13 @@ export default async function AdminDashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("order_status", "DISPUTED");
     
-  // 3. Pending Payouts (Commissions)
-  const { data: pendingCommissions } = await supabaseAdmin
-    .from("commissions")
-    .select("seller_net_amount")
+  // 3. Pending Payouts (Withdrawal Requests)
+  const { data: pendingRequests } = await supabaseAdmin
+    .from("withdrawal_requests")
+    .select("amount")
     .eq("status", "PENDING");
-  const totalPendingPayouts = pendingCommissions?.reduce((sum, c) => sum + Number(c.seller_net_amount), 0) || 0;
-  const pendingPayoutCount = pendingCommissions?.length || 0;
+  const totalPendingPayouts = pendingRequests?.reduce((sum, r) => sum + Number(r.amount), 0) || 0;
+  const pendingPayoutCount = pendingRequests?.length || 0;
 
   // 4. Unread Support Messages
   const { data: supportMsgs } = await supabaseAdmin
@@ -50,11 +50,12 @@ export default async function AdminDashboardPage() {
     unreadSupportUsers = Object.values(userConversations).filter(c => c.lastCustomerMsg > c.lastAdminMsg).length;
   }
 
-  // 5. Unviewed Orders
+  // 5. Unviewed Orders (Only count PAID orders, ignore abandoned checkouts)
   const { count: unviewedOrders } = await supabaseAdmin
     .from("orders")
     .select("*", { count: "exact", head: true })
-    .eq("admin_viewed", false);
+    .eq("admin_viewed", false)
+    .eq("payment_status", "PAID");
 
   // 6. Platform Financials (Total Paid Orders)
   const { data: paidOrders } = await supabaseAdmin
@@ -64,11 +65,12 @@ export default async function AdminDashboardPage() {
   const totalRevenue = paidOrders?.reduce((sum, o) => sum + Number(o.total_amount), 0) || 0;
 
   // Calculate Net Profit
-  // Profit = Total Revenue - Total Supplier Cost - Total Seller Commissions
-  const { data: allCommissions } = await supabaseAdmin
+  // Profit = Total Revenue - Total Supplier Cost - Total Seller Commissions (Only from PAID orders)
+  const { data: paidCommissions } = await supabaseAdmin
     .from("commissions")
-    .select("seller_net_amount");
-  const totalCommissions = allCommissions?.reduce((sum, c) => sum + Number(c.seller_net_amount), 0) || 0;
+    .select("seller_net_amount")
+    .neq("status", "PENDING");
+  const totalCommissions = paidCommissions?.reduce((sum, c) => sum + Number(c.seller_net_amount), 0) || 0;
 
   const { data: rawPaidItems } = await supabaseAdmin
     .from("order_items")
