@@ -35,7 +35,7 @@ export default async function IconjInteriorPage() {
     { name: 'Sheer', desc: 'Soft natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80' },
     { name: 'Roller Blinds', desc: 'Clean, minimal & modern.', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80' },
     { name: 'Zebra Blinds', desc: 'Flexible light control.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=500&q=80' },
-    { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: 'https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=500&q=80' },
+    { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: 'https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=500&q=80' },
     { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&q=80' }
   ];
 
@@ -223,11 +223,11 @@ export default async function IconjInteriorPage() {
           <div className="grid md:grid-cols-3 gap-6">
             {[
               { name: 'Living Room', desc: 'Create a warm and welcoming atmosphere.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' },
-              { name: 'Bedroom', desc: 'Add privacy, comfort and better light control.', img: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600&q=80' },
-              { name: 'Office', desc: 'Create a clean and professional environment.', img: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80' },
-              { name: 'Dining Area', desc: 'Add elegance to your interior.', img: 'https://images.unsplash.com/photo-1579606032822-1db7bd00bc70?w=600&q=80' },
-              { name: 'Kids Room', desc: 'Comfortable and practical window solutions.', img: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600&q=80' },
-              { name: 'Large Windows', desc: 'Beautiful solutions for wide windows and doors.', img: 'https://images.unsplash.com/photo-1600607686527-6fb886090705?w=600&q=80' }
+              { name: 'Bedroom', desc: 'Add privacy, comfort and better light control.', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80' },
+              { name: 'Office', desc: 'Create a clean and professional environment.', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80' },
+              { name: 'Dining Area', desc: 'Add elegance to your interior.', img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=600&q=80' },
+              { name: 'Kids Room', desc: 'Comfortable and practical window solutions.', img: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600&q=80' },
+              { name: 'Large Windows', desc: 'Beautiful solutions for wide windows and doors.', img: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80' }
             ].map((room, i) => (
               <Link href={`/shop?q=${room.name.split(' ')[0]}`} key={i} className="group block relative overflow-hidden bg-slate-100 aspect-[4/3]">
                 <img src={room.img} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -409,13 +409,13 @@ export default async function IconjInteriorPage() {
               </div>
             </div>
             <div className="aspect-square bg-slate-200 relative group overflow-hidden md:col-span-2 md:row-span-2">
-              <img src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=1200&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=sheer"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Sheer Curtains</Button></Link>
               </div>
             </div>
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=venetian"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Venetian Blinds</Button></Link>
               </div>
@@ -451,34 +451,9 @@ export default async function IconjInteriorPage() {
               </Button>
             </Link>
           </div>
-          <div className="flex-1 w-full">
-            <div className="bg-slate-50 border border-slate-200 p-6 shadow-xl relative">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100 -mt-8 -mr-8 -z-10"></div>
-              <div className="absolute bottom-0 left-0 w-24 h-24 bg-slate-100 -mb-8 -ml-8 -z-10"></div>
-              
-              <div className="border-b border-slate-200 pb-4 mb-6 flex items-center justify-between">
-                <div>
-                  <h4 className="font-bold text-slate-900">Seller Dashboard</h4>
-                  <p className="text-xs text-slate-500">Manage your premium listings</p>
-                </div>
-                <div className="w-8 h-8 bg-slate-200 rounded-full"></div>
-              </div>
-              <div className="space-y-4">
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-slate-200 flex-shrink-0"></div>
-                  <div className="flex-1 space-y-2 py-2">
-                    <div className="h-4 bg-slate-200 w-3/4"></div>
-                    <div className="h-3 bg-slate-100 w-1/2"></div>
-                  </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-20 h-20 bg-slate-200 flex-shrink-0"></div>
-                  <div className="flex-1 space-y-2 py-2">
-                    <div className="h-4 bg-slate-200 w-2/3"></div>
-                    <div className="h-3 bg-slate-100 w-1/3"></div>
-                  </div>
-                </div>
-              </div>
+          <div className="flex-1 w-full max-w-sm mx-auto">
+            <div className="relative border-[8px] border-slate-900 bg-slate-900 rounded-[3rem] shadow-2xl overflow-hidden aspect-[9/19]">
+              <img src="/images/seller-mockup.png" alt="ICONJ Seller Dashboard" className="w-full h-full object-cover object-top" />
             </div>
           </div>
         </div>
@@ -517,7 +492,7 @@ export default async function IconjInteriorPage() {
       {/* 18. FINAL CTA */}
       <section className="relative py-32 bg-slate-900 overflow-hidden">
         <div className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1600121848594-d8644e57abab?q=80&w=2000&auto=format&fit=crop" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
+          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2000&auto=format&fit=crop" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
           <div className="absolute inset-0 bg-slate-950/70"></div>
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
