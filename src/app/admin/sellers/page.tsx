@@ -262,32 +262,50 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
             const hasPaystack = !!payout?.paystack_subaccount_code;
 
             return (
-              <Card key={seller.id} className={`shadow-sm overflow-hidden ${
-                activeTab === "pending" ? "border-amber-200" :
-                activeTab === "approved" ? "border-emerald-200" :
-                activeTab === "rejected" ? "border-red-200" : "border-slate-300"
-              }`}>
-                {/* Header Bar */}
-                <div className={`px-6 py-3 border-b flex justify-between items-center ${
-                  activeTab === "pending" ? "bg-amber-50 border-amber-200" :
-                  activeTab === "approved" ? "bg-emerald-50 border-emerald-200" :
-                  activeTab === "rejected" ? "bg-red-50 border-red-200" : "bg-slate-100 border-slate-200"
+                <details key={seller.id} className={`group bg-white rounded-lg shadow-sm overflow-hidden border transition-all ${
+                  activeTab === "pending" ? "border-amber-200" :
+                  activeTab === "approved" ? "border-emerald-200" :
+                  activeTab === "rejected" ? "border-red-200" : "border-slate-300"
                 }`}>
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={`text-xs ${
-                      activeTab === "pending" ? "bg-amber-100 text-amber-800 border-amber-300" :
-                      activeTab === "approved" ? "bg-emerald-100 text-emerald-800 border-emerald-300" :
-                      activeTab === "rejected" ? "bg-red-100 text-red-800 border-red-300" : "bg-slate-200 text-slate-700 border-slate-300"
-                    }`}>
-                      {seller.status?.toUpperCase().replace("_", " ")}
-                    </Badge>
-                    <span className="text-xs text-slate-500">Since {new Date(seller.created_at).toLocaleDateString()}</span>
-                  </div>
-                  <span className="text-sm font-medium text-slate-700">{seller.profiles?.email}</span>
-                </div>
+                  {/* Header Bar / Summary Row */}
+                  <summary className={`px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-slate-50 transition-colors ${
+                    activeTab === "pending" ? "bg-amber-50/50" :
+                    activeTab === "approved" ? "bg-emerald-50/50" :
+                    activeTab === "rejected" ? "bg-red-50/50" : "bg-slate-50"
+                  }`}>
+                    <div className="flex items-center gap-4 flex-1">
+                      <Badge variant="outline" className={`text-xs whitespace-nowrap ${
+                        activeTab === "pending" ? "bg-amber-100 text-amber-800 border-amber-300" :
+                        activeTab === "approved" ? "bg-emerald-100 text-emerald-800 border-emerald-300" :
+                        activeTab === "rejected" ? "bg-red-100 text-red-800 border-red-300" : "bg-slate-200 text-slate-700 border-slate-300"
+                      }`}>
+                        {seller.status?.toUpperCase().replace("_", " ")}
+                      </Badge>
+                      
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 flex-1 overflow-hidden">
+                        <span className="font-bold text-slate-900 truncate">
+                          {seller.businesses?.business_name || "Unknown Business"}
+                        </span>
+                        <span className="text-sm text-slate-500 truncate hidden md:block">
+                          {seller.stores?.[0]?.store_name || "No Store Setup"}
+                        </span>
+                        <span className="text-sm text-slate-500 truncate hidden lg:block">
+                          {seller.profiles?.email}
+                        </span>
+                      </div>
+                    </div>
 
-                <CardContent className="p-6">
-                  <div className="grid md:grid-cols-3 gap-8">
+                    <div className="flex items-center gap-4 text-sm font-medium text-blue-600 shrink-0">
+                      <span className="text-xs text-slate-500 hidden sm:block">
+                        Since {new Date(seller.created_at).toLocaleDateString()}
+                      </span>
+                      <span className="group-open:hidden flex items-center gap-1">View Details ▾</span>
+                      <span className="hidden group-open:flex items-center gap-1">Hide Details ▴</span>
+                    </div>
+                  </summary>
+  
+                  <div className="p-6 border-t border-slate-100 bg-white">
+                    <div className="grid md:grid-cols-3 gap-8">
                     {/* Business Details */}
                     <div className="space-y-4">
                       <h3 className="font-bold text-slate-900 border-b pb-2 flex items-center gap-2">
@@ -456,10 +474,10 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
                         </div>
                       )}
                     </div>
+                    </div>
                   </div>
-                </CardContent>
-              </Card>
-            );
+                </details>
+              );
           })
         ) : (
           <Card className="border-dashed border-2 shadow-none bg-slate-50">
