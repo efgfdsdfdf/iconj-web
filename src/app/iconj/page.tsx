@@ -193,11 +193,11 @@ export default async function IconjInteriorPage() {
           
           <div className="grid md:grid-cols-2 gap-2 max-w-5xl mx-auto">
             <div className="relative aspect-[4/3] bg-slate-800">
-              <img src="https://images.unsplash.com/photo-1595514535313-25e4c05a109a?w=1000&q=80" alt="Before" className="w-full h-full object-cover opacity-70 grayscale" />
+              <img src="https://images.unsplash.com/photo-1502005097973-6a7082348e28?w=1000&q=80" alt="Before" className="w-full h-full object-cover opacity-90" />
               <div className="absolute top-4 left-4 bg-black/50 backdrop-blur text-white px-4 py-1 text-sm font-bold uppercase tracking-widest">Before</div>
             </div>
             <div className="relative aspect-[4/3] bg-slate-800">
-              <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1000&q=80" alt="After" className="w-full h-full object-cover" />
+              <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?w=1000&q=80" alt="After" className="w-full h-full object-cover" />
               <div className="absolute top-4 left-4 bg-amber-600 text-white px-4 py-1 text-sm font-bold uppercase tracking-widest shadow-lg">After</div>
             </div>
           </div>
@@ -222,12 +222,12 @@ export default async function IconjInteriorPage() {
           
           <div className="grid md:grid-cols-3 gap-6">
             {[
-              { name: 'Living Room', desc: 'Create a warm and welcoming atmosphere.', img: 'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=600&q=80' },
-              { name: 'Bedroom', desc: 'Add privacy, comfort and better light control.', img: 'https://images.unsplash.com/photo-1616594039964-ae9021a400a0?w=600&q=80' },
-              { name: 'Office', desc: 'Create a clean and professional environment.', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80' },
-              { name: 'Dining Area', desc: 'Add elegance to your interior.', img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=600&q=80' },
-              { name: 'Kids Room', desc: 'Comfortable and practical window solutions.', img: 'https://images.unsplash.com/photo-1519689680058-324335c77eba?w=600&q=80' },
-              { name: 'Large Windows', desc: 'Beautiful solutions for wide windows and doors.', img: 'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80' }
+              { name: 'Living Room', desc: 'Create a warm and welcoming atmosphere.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' },
+              { name: 'Bedroom', desc: 'Add privacy, comfort and better light control.', img: 'https://images.unsplash.com/photo-1540518614846-7eded433c457?w=600&q=80' },
+              { name: 'Office', desc: 'Create a clean and professional environment.', img: 'https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=600&q=80' },
+              { name: 'Dining Area', desc: 'Add elegance to your interior.', img: 'https://images.unsplash.com/photo-1579606032822-1db7bd00bc70?w=600&q=80' },
+              { name: 'Kids Room', desc: 'Comfortable and practical window solutions.', img: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600&q=80' },
+              { name: 'Large Windows', desc: 'Beautiful solutions for wide windows and doors.', img: 'https://images.unsplash.com/photo-1600607686527-6fb886090705?w=600&q=80' }
             ].map((room, i) => (
               <Link href={`/shop?q=${room.name.split(' ')[0]}`} key={i} className="group block relative overflow-hidden bg-slate-100 aspect-[4/3]">
                 <img src={room.img} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -403,7 +403,7 @@ export default async function IconjInteriorPage() {
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+              <img src="https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=curtain"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop This Look</Button></Link>
               </div>
