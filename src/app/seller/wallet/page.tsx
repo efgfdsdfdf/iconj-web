@@ -6,6 +6,9 @@ import WithdrawForm from './WithdrawForm';
 import Link from 'next/link';
 import { ensureWalletExists } from '@/lib/wallet';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function WalletPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
