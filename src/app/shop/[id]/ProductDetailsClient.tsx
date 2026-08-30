@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Star, Truck, Check, Minus, Plus } from "lucide-react";
+import { Star, Truck, Check, Minus, Plus, Ruler } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { MeasurementConfigurator } from "@/components/product/MeasurementConfigurator";
@@ -178,6 +178,22 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
 
         {/* Dynamic Configurator */}
         <div className="space-y-6 mb-8">
+          
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2 rounded-md shadow-sm">
+                <Ruler className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm">Need a perfect fit?</h4>
+                <p className="text-xs text-slate-600 mt-0.5">Learn how to accurately measure your windows.</p>
+              </div>
+            </div>
+            <Link href="/how-to-measure" className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-white border border-amber-200 px-3 py-1.5 rounded hover:bg-amber-100 transition-colors">
+              Guide
+            </Link>
+          </div>
+
           
           {rules ? (
             <MeasurementConfigurator 
