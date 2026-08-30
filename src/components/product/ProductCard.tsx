@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
+import { cleanProductName } from "@/lib/cleanProductName";
 
 export function ProductCard({ product, hideOnLg = false }: { product: any, hideOnLg?: boolean }) {
   const addItem = useCartStore(state => state.addItem);
@@ -73,7 +74,9 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
           {ageRange && (
             <span className="text-[10px] uppercase font-bold text-slate-400 mb-1 block">{ageRange}</span>
           )}
-          <h3 className="font-bold text-slate-900 text-sm line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors">{product.name}</h3>
+          <h3 className="font-bold text-slate-900 text-sm line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors" title={product.name}>
+            {cleanProductName(product.name)}
+          </h3>
           {product.stores?.store_name && (
             <p className="text-[11px] text-slate-500 mt-1">Sold by <span className="font-semibold text-slate-700">{product.stores.store_name}</span></p>
           )}
