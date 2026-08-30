@@ -355,9 +355,9 @@ export default async function IconjInteriorPage() {
               <p className="text-slate-300">Learn how to measure your windows accurately before ordering.</p>
             </div>
           </div>
-          <Link href="/book-measurement">
+          <Link href="/how-to-measure">
             <Button size="lg" variant="outline" className="h-12 px-8 font-bold border-white text-white hover:bg-white hover:text-slate-900 rounded-none whitespace-nowrap">
-              Measurement Guide
+              How to Measure
             </Button>
           </Link>
         </div>
