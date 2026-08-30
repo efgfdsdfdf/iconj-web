@@ -29,14 +29,14 @@ export default async function IconjInteriorPage() {
   const adminCategories = settings?.value || [];
 
   const defaultCategories = [
-    { name: 'Blinds', desc: 'Modern control over light & style.', img: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=500&q=80' },
+    { name: 'Blinds', desc: 'Modern control over light & style.', img: '/images/venetian_blinds_card.jpg' },
     { name: 'Curtains', desc: 'Elegant finishing touches.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&q=80' },
     { name: 'Blackout', desc: 'Maximum privacy & darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=500&q=80' },
     { name: 'Sheer', desc: 'Soft natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80' },
-    { name: 'Roller Blinds', desc: 'Clean, minimal & modern.', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80' },
-    { name: 'Zebra Blinds', desc: 'Flexible light control.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=500&q=80' },
-    { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: 'https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=500&q=80' },
-    { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&q=80' }
+    { name: 'Roller Blinds', desc: 'Clean, minimal & modern.', img: '/images/roller_blinds_card.jpg' },
+    { name: 'Zebra Blinds', desc: 'Flexible light control.', img: '/images/zebra_blinds_hero.jpg' },
+    { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: '/images/venetian_blinds_card.jpg' },
+    { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-1515263898-ebf7ae69e985?w=500&q=80' }
   ];
 
   const categories = defaultCategories.map(cat => {
@@ -100,7 +100,7 @@ export default async function IconjInteriorPage() {
         {/* Cinematic Background Image */}
         <div className="absolute inset-0 bg-slate-900">
           <img 
-            src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2000&auto=format&fit=crop" 
+            src="/images/zebra_blinds_hero.jpg" 
             alt="Beautiful modern living room with large windows and natural light" 
             className="w-full h-full object-cover opacity-60 mix-blend-overlay"
           />
@@ -223,13 +223,13 @@ export default async function IconjInteriorPage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            {[
+            [
               { name: 'Living Room', desc: 'Elegant sheers and drapes to frame your windows.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=600&q=80' },
               { name: 'Bedroom', desc: 'Blackout blinds for total privacy and darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=600&q=80' },
-              { name: 'Office', desc: 'Clean roller blinds to control glare and light.', img: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=600&q=80' },
-              { name: 'Dining Area', desc: 'Soft roman blinds to add warmth and elegance.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&q=80' },
-              { name: 'Kids Room', desc: 'Colourful and safe window solutions for little ones.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80' },
-              { name: 'Large Windows', desc: 'Vertical blinds and floor-to-ceiling curtain solutions.', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&q=80' }
+              { name: 'Office', desc: 'Clean roller blinds to control glare and light.', img: '/images/roller_blinds_card.jpg' },
+              { name: 'Dining Area', desc: 'Soft sheers to add warmth and natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=600&q=80' },
+              { name: 'Kids Room', desc: 'Colourful and safe window solutions for little ones.', img: '/images/zebra_blinds_hero.jpg' },
+              { name: 'Large Windows', desc: 'Venetian and vertical blind solutions for wide windows.', img: '/images/venetian_blinds_card.jpg' }
             ].map((room, i) => (
               <Link href={`/shop?q=${room.name.split(' ')[0]}`} key={i} className="group block relative overflow-hidden bg-slate-100 aspect-[4/3]">
                 <img src={room.img} alt={room.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
@@ -274,7 +274,7 @@ export default async function IconjInteriorPage() {
             </div>
             <div className="md:w-2/5 min-h-[300px] relative hidden md:block">
               {/* Premium zebra blinds on large window */}
-              <img src="https://images.unsplash.com/photo-1599696848652-f0ff23bc911f?w=600&q=80" alt="Premium window blinds" className="w-full h-full object-cover" />
+              <img src="/images/venetian_blinds_card.jpg" alt="Premium window blinds" className="w-full h-full object-cover" />
             </div>
           </div>
         </div>
@@ -320,7 +320,7 @@ export default async function IconjInteriorPage() {
             {[
               { title: 'Blackout Blinds', desc: 'Engineered to block light completely.', best: 'Bedrooms and spaces where you want maximum darkness and privacy.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=400&q=80' },
               { title: 'Sheer Curtains', desc: 'Lightweight fabrics that filter sunlight.', best: 'Living rooms and spaces where you want natural light with a softer look.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=400&q=80' },
-              { title: 'Zebra Blinds', desc: 'Alternating sheer and solid fabric bands.', best: 'Flexible control over light and privacy throughout the day.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400&q=80' }
+              { title: 'Zebra Blinds', desc: 'Alternating sheer and solid fabric bands.', best: 'Flexible control over light and privacy throughout the day.', img: '/images/zebra_blinds_hero.jpg' }
             ].map((guide, i) => (
               <Card key={i} className="rounded-none border-slate-200 overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
                 <div className="h-48 overflow-hidden">
@@ -421,7 +421,7 @@ export default async function IconjInteriorPage() {
             </div>
             {/* Zebra blinds */}
             <div className="aspect-square bg-slate-200 relative group overflow-hidden">
-              <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=600&q=80" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Zebra blinds" />
+              <img src="/images/zebra_blinds_hero.jpg" className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Zebra blinds" />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <Link href="/shop?q=zebra"><Button variant="outline" className="border-white text-white hover:bg-white hover:text-black rounded-none">Shop Zebra Blinds</Button></Link>
               </div>
@@ -499,7 +499,7 @@ export default async function IconjInteriorPage() {
       {/* 18. FINAL CTA */}
       <section className="relative py-32 bg-slate-900 overflow-hidden">
         <div className="absolute inset-0">
-          <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=2000&auto=format&fit=crop" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
+          <img src="/images/zebra_blinds_hero.jpg" className="w-full h-full object-cover opacity-40 mix-blend-overlay" />
           <div className="absolute inset-0 bg-slate-950/70"></div>
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
