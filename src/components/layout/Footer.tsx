@@ -1,6 +1,11 @@
+"use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function Footer() {
+  const pathname = usePathname();
+  if (pathname === '/iconj') return null;
+
   return (
     <footer className="border-t bg-blue-50 text-blue-900 py-12">
       <div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">

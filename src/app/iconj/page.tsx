@@ -10,7 +10,6 @@ export const metadata = {
   description: 'Shop products from ICONJ Official and independent sellers. Discover products, compare options and order easily on ICONJ.',
 };
 
-
 export default async function IconjMarketingPage() {
   const supabase = await createClient();
   
@@ -25,7 +24,7 @@ export default async function IconjMarketingPage() {
   const trendingProducts = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 4) : [];
 
   
-  const { data: dbCategories } = await supabase.from('categories').select('*').limit(6);
+  const { data: dbCategories } = await supabase.from('categories').select('*').order('created_at');
   const { data: settings } = await supabase.from('store_settings').select('value').eq('id', 'homepage_categories').single();
   const adminCategories = settings?.value || [];
   
@@ -43,6 +42,43 @@ export default async function IconjMarketingPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-blue-500/30 font-sans overflow-x-hidden">
+      {/* 15. NAVIGATION */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-slate-950/80 backdrop-blur-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="text-2xl font-black tracking-tighter text-white">
+              ICONJ<span className="text-blue-500">.</span>
+            </Link>
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-300">
+              <Link href="/shop" className="hover:text-white transition-colors">Shop</Link>
+              <Link href="/categories" className="hover:text-white transition-colors">Categories</Link>
+              <Link href="/shop?seller=iconj-official" className="hover:text-blue-400 transition-colors">ICONJ Official</Link>
+              <Link href="/seller" className="hover:text-white transition-colors">Sell on ICONJ</Link>
+              <Link href="/about" className="hover:text-white transition-colors">About</Link>
+            </nav>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="hidden sm:flex relative group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Search products, categories..." 
+                className="w-64 h-9 pl-9 pr-4 rounded-full bg-white/5 border border-white/10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all"
+              />
+            </div>
+            <Link href="/login" className="hidden sm:block text-sm font-medium text-slate-300 hover:text-white transition-colors">Login</Link>
+            <Link href="/cart">
+              <Button variant="ghost" size="icon" className="text-slate-300 hover:text-white hover:bg-white/10 rounded-full">
+                <ShoppingCart className="w-5 h-5" />
+              </Button>
+            </Link>
+            <Button variant="ghost" size="icon" className="md:hidden text-slate-300">
+              <Menu className="w-5 h-5" />
+            </Button>
+          </div>
+        </div>
+      </header>
+
       {/* 2. HERO SECTION */}
       <section className="relative pt-8 pb-16 md:pt-20 lg:pt-32 lg:pb-40 px-4 overflow-hidden">
         {/* Abstract Background Elements */}
@@ -84,8 +120,21 @@ export default async function IconjMarketingPage() {
                 <Search className="w-4 h-4 text-slate-400" />
               </div>
               {/* Fake App Body */}
-              <div className="flex-1 w-full h-full relative overflow-hidden bg-slate-50">
-                <iframe src="/shop" className="w-full h-full border-none pointer-events-none absolute inset-0" tabIndex={-1} aria-hidden="true" style={{ width: '100%', height: '100%', transform: 'scale(1)', transformOrigin: 'top left' }} />
+              <div className="flex-1 p-4 flex flex-col gap-4 overflow-hidden">
+                <div className="w-full h-32 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 p-4 flex flex-col justify-end">
+                  <span className="text-white/80 text-xs font-bold uppercase">New Arrival</span>
+                  <span className="text-white font-bold text-lg">Premium Collection</span>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-32 rounded-xl bg-slate-800 p-3 flex flex-col justify-between border border-white/5">
+                    <div className="w-full h-16 bg-slate-700 rounded-lg animate-pulse"></div>
+                    <div className="w-2/3 h-2 bg-slate-600 rounded"></div>
+                  </div>
+                  <div className="h-32 rounded-xl bg-slate-800 p-3 flex flex-col justify-between border border-white/5">
+                    <div className="w-full h-16 bg-slate-700 rounded-lg animate-pulse delay-75"></div>
+                    <div className="w-2/3 h-2 bg-slate-600 rounded"></div>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -350,8 +399,16 @@ export default async function IconjMarketingPage() {
           <div className="flex-1 flex justify-center">
             <div className="relative w-64 h-[500px] bg-slate-900 rounded-[2.5rem] border-8 border-slate-800 shadow-2xl overflow-hidden">
               <div className="absolute top-0 inset-x-0 h-6 bg-slate-800 rounded-b-2xl w-1/2 mx-auto"></div>
-              <div className="w-full h-full relative overflow-hidden rounded-[2rem]">
-                <iframe src="/" className="w-full h-full border-none pointer-events-none absolute inset-0" tabIndex={-1} aria-hidden="true" style={{ width: '100%', height: '100%', transform: 'scale(1)', transformOrigin: 'top left' }} />
+              <div className="p-4 pt-8 h-full flex flex-col gap-4">
+                <div className="h-10 bg-slate-800 rounded-full flex items-center px-4">
+                  <Search className="w-4 h-4 text-slate-500"/>
+                </div>
+                <div className="h-32 bg-gradient-to-br from-blue-600 to-slate-800 rounded-xl"></div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="h-24 bg-slate-800 rounded-xl"></div>
+                  <div className="h-24 bg-slate-800 rounded-xl"></div>
+                </div>
+                <div className="h-12 mt-auto bg-slate-800 rounded-xl"></div>
               </div>
             </div>
           </div>
@@ -458,6 +515,61 @@ export default async function IconjMarketingPage() {
         </div>
       </section>
 
+      {/* 14. FOOTER */}
+      <footer className="bg-slate-950 border-t border-white/10 pt-20 pb-10 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-10 mb-16">
+            <div className="col-span-2 md:col-span-1">
+              <Link href="/" className="text-2xl font-black tracking-tighter text-white mb-4 block">
+                ICONJ<span className="text-blue-500">.</span>
+              </Link>
+              <p className="text-slate-400 text-sm leading-relaxed max-w-xs">
+                Your marketplace for discovering, shopping and selling. Built for the modern African shopper.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-white font-bold mb-4">Navigation</h4>
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+                <li><Link href="/shop" className="hover:text-white transition-colors">Shop</Link></li>
+                <li><Link href="/categories" className="hover:text-white transition-colors">Categories</Link></li>
+                <li><Link href="/shop?seller=iconj-official" className="hover:text-blue-400 transition-colors">ICONJ Official</Link></li>
+                <li><Link href="/seller" className="hover:text-white transition-colors">Become a Seller</Link></li>
+                <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-white font-bold mb-4">Legal</h4>
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li><Link href="/legal/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/legal/terms" className="hover:text-white transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="/legal/returns" className="hover:text-white transition-colors">Returns & Refunds</Link></li>
+                <li><Link href="/legal/shipping" className="hover:text-white transition-colors">Shipping Policy</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="text-white font-bold mb-4">Support</h4>
+              <ul className="space-y-3 text-sm text-slate-400">
+                <li><Link href="/support" className="hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact Support</Link></li>
+                <li><Link href="/faq" className="hover:text-white transition-colors">FAQ</Link></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-slate-500 text-sm">
+              © {new Date().getFullYear()} ICONJ. All rights reserved.
+            </div>
+            <div className="flex items-center gap-4 text-slate-500">
+              <span className="text-sm">Nigeria's Modern Marketplace</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
