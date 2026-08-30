@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteProductButton } from "./DeleteProductButton";
-import { Edit, Download, Search } from "lucide-react";
+import { Edit, Download } from "lucide-react";
+import { LiveSearch } from "@/components/admin/LiveSearch";
 
 export const revalidate = 0;
 
@@ -34,17 +35,7 @@ export default async function AdminProductsPage({ searchParams }: { searchParams
           <p className="text-sm text-slate-500">Manage your catalog directly from the database.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 self-start md:self-auto w-full md:w-auto">
-          {/* Search Box */}
-          <form action="/admin/products" method="GET" className="relative flex-1 sm:w-64">
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
-            <input
-              name="search"
-              type="search"
-              defaultValue={search}
-              placeholder="Search name or SKU..."
-              className="w-full pl-10 h-10 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all"
-            />
-          </form>
+          <LiveSearch placeholder="Search name or SKU..." />
 
           <Link href="/admin/products/import">
             <Button variant="outline" className="border-orange-300 text-orange-600 hover:bg-orange-50 font-bold h-10">
