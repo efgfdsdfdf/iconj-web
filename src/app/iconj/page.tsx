@@ -21,7 +21,36 @@ export default async function IconjInteriorPage() {
     .eq('is_active', true)
     .limit(20);
     
+
   const featuredProducts = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 4) : [];
+
+  // Fetch custom category images from store_settings
+  const { data: settings } = await supabase.from('store_settings').select('value').eq('id', 'homepage_categories').single();
+  const adminCategories = settings?.value || [];
+
+  const defaultCategories = [
+    { name: 'Blinds', desc: 'Modern control over light & style.', img: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=500&q=80' },
+    { name: 'Curtains', desc: 'Elegant finishing touches.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&q=80' },
+    { name: 'Blackout', desc: 'Maximum privacy & darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=500&q=80' },
+    { name: 'Sheer', desc: 'Soft natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80' },
+    { name: 'Roller Blinds', desc: 'Clean, minimal & modern.', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80' },
+    { name: 'Zebra Blinds', desc: 'Flexible light control.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=500&q=80' },
+    { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: 'https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=500&q=80' },
+    { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&q=80' }
+  ];
+
+  const categories = defaultCategories.map(cat => {
+    const customMatch = adminCategories.find((ac: any) => 
+      ac.name.toLowerCase().trim() === cat.name.toLowerCase().trim() || 
+      ac.name.toLowerCase().includes(cat.name.toLowerCase()) ||
+      cat.name.toLowerCase().includes(ac.name.toLowerCase())
+    );
+    return {
+      ...cat,
+      img: customMatch?.icon || cat.img
+    };
+  });
+
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-amber-600/30 overflow-x-hidden">
@@ -112,16 +141,7 @@ export default async function IconjInteriorPage() {
           </div>
           
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[
-              { name: 'Blinds', desc: 'Modern control over light & style.', img: 'https://images.unsplash.com/photo-1588854337236-6889d631faa8?w=500&q=80' },
-              { name: 'Curtains', desc: 'Elegant finishing touches.', img: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=500&q=80' },
-              { name: 'Blackout', desc: 'Maximum privacy & darkness.', img: 'https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=500&q=80' },
-              { name: 'Sheer', desc: 'Soft natural light.', img: 'https://images.unsplash.com/photo-1505693314120-0d443867891c?w=500&q=80' },
-              { name: 'Roller Blinds', desc: 'Clean, minimal & modern.', img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80' },
-              { name: 'Zebra Blinds', desc: 'Flexible light control.', img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=500&q=80' },
-              { name: 'Venetian Blinds', desc: 'Classic adjustable styling.', img: 'https://images.unsplash.com/photo-1534349762230-e0cadf78f5da?w=500&q=80' },
-              { name: 'Vertical Blinds', desc: 'Perfect for large windows.', img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=500&q=80' }
-            ].map((cat, i) => (
+            {categories.map((cat, i) => (
               <Link href={`/shop?q=${cat.name.split(' ')[0]}`} key={i} className="group block relative h-64 overflow-hidden bg-slate-900 rounded-none">
                 <img src={cat.img} alt={cat.name} className="w-full h-full object-cover opacity-80 group-hover:scale-110 group-hover:opacity-60 transition-all duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-900/20 to-transparent"></div>
