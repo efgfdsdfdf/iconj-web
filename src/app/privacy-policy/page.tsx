@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
             <Shield className="w-8 h-8" />
             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Privacy Policy</h1>
           </div>
-          <p className="text-slate-500">Last Updated: [DATE]</p>
+          <p className="text-slate-500">Last Updated: 30/08/26</p>
         </div>
 
         {/* Content */}
@@ -66,9 +66,9 @@ export default function PrivacyPolicyPage() {
             <h2 className="text-xl font-bold text-slate-900 mb-4">6. Contact Information</h2>
             <p>If you have any questions about this Privacy Policy or our privacy practices, please contact us at:</p>
             <div className="bg-slate-50 p-4 rounded-lg mt-4 border">
-              <p><strong>Email:</strong> [ICONJ SUPPORT EMAIL]</p>
-              <p><strong>Address:</strong> [ICONJ BUSINESS ADDRESS]</p>
-              <p><strong>Business Name:</strong> [ICONJ LEGAL BUSINESS NAME]</p>
+              <p><strong>Email:</strong> ezeilodavid292@gmail.com</p>
+              <p><strong>Address:</strong> 39B OJEKUNLE STREET, DALEKO, LAGOS , NIGERIA</p>
+              <p><strong>Business Name:</strong> ICON J GLOBAL SERVICES</p>
             </div>
           </section>
         </div>
