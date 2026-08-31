@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 , ArrowRightLeft} from "lucide-react";
 
 import Link from "next/link";
 
@@ -448,9 +448,14 @@ export default function AddProductPage() {
                   </Button>
                 </div>
               ))}
-              <Button type="button" variant="outline" size="sm" onClick={addSpecification} className="mt-2 text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100">
-                <Plus className="w-4 h-4 mr-1" /> Add Specification Row
-              </Button>
+              <div className="flex items-center gap-3 mt-4">
+                <Button type="button" variant="outline" size="sm" onClick={addSpecification} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100">
+                  <Plus className="w-4 h-4 mr-1" /> Add Row
+                </Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => setSpecifications(prev => prev.map(s => ({ key: s.value, value: s.key })))} className="text-slate-600 border-slate-200 bg-slate-50 hover:bg-slate-100">
+                  <ArrowRightLeft className="w-4 h-4 mr-2" /> Swap Keys & Values
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

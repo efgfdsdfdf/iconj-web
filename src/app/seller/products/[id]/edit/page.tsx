@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UploadCloud, X, Plus, Trash2, ArrowLeft } from "lucide-react";
+import { UploadCloud, X, Plus, Trash2, ArrowLeft , ArrowRightLeft} from "lucide-react";
 import Link from "next/link";
 
 export default function SellerEditProductPage({ params }: { params: Promise<{ id: string }> }) {

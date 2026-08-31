@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UploadCloud, X, Plus, Trash2 } from "lucide-react";
+import { UploadCloud, X, Plus, Trash2 , ArrowRightLeft} from "lucide-react";
 
 export default function SellerAddProductPage() {
   const router = useRouter();
