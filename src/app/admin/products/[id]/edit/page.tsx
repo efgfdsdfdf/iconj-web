@@ -218,7 +218,6 @@ export default function EditProductPage() {
           let cleanDescription = formData.description || "";
           cleanDescription = cleanDescription.replace(/data:image\/[^"'\s>)]+/gi, "");
           cleanDescription = cleanDescription.replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, "");
-        }
         const payload = {
         name: formData.name || "",
           sku: formData.sku || "",
