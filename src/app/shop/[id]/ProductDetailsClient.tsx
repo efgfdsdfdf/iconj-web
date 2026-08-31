@@ -26,7 +26,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
     min_height_cm: 30,
     max_height_cm: 300,
     motorization_available: true,
-    motorization_fee: 15000,
+    motorization_fee: 50000,
     installation_available: true,
     base_installation_fee: 5000
   } : null);

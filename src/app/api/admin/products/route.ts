@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    let { enable_custom_measurements, ...data } = await req.json();
+    let { enable_custom_measurements, motorization_fee, installation_fee, ...data } = await req.json();
 
     // Auto-generate SKU
     const category = data.category || "PROD";
@@ -44,9 +44,9 @@ export async function POST(req: NextRequest) {
         min_height_cm: 30,
         max_height_cm: 300,
         motorization_available: true,
-        motorization_fee: 15000,
+        motorization_fee: Number(motorization_fee) || 50000,
         installation_available: true,
-        base_installation_fee: 5000
+        base_installation_fee: Number(installation_fee) || 5000
       }]);
     }
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });
