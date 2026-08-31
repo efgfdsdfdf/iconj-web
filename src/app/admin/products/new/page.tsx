@@ -391,87 +391,51 @@ export default function AddProductPage() {
                   data-placeholder="Paste raw specifications or HTML table here..." 
                   className="min-h-[80px] max-h-[300px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 overflow-y-auto empty:before:content-[attr(data-placeholder)] empty:before:text-slate-400"
                   onInput={(e) => {
-                    const el = e.currentTarget;
-                    const html = el.innerHTML;
-                    if (!html.trim() || html === '<br>') return;
-                    
-                    const newSpecs: {key: string, value: string}[] = [];
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    
-                    const rows = doc.querySelectorAll('tr');
-                    if (rows.length > 0) {
-                      rows.forEach(row => {
-                        const cells = Array.from(row.querySelectorAll('td, th')).map(c => c.textContent?.trim().replace(/:$/, '') || "");
-                        // Process multi-column rows (e.g. 4 cells = 2 pairs)
-                        for (let i = 0; i < cells.length; i += 2) {
-                          let k = cells[i] || '';
-                          let v = cells[i+1] || '';
-                          if (k || v) {
-                            newSpecs.push({ key: k, value: v });
-                          }
-                        }
-                      });
-                    } else {
-                      // DOM Node walker for Div grids (Alibaba uses separate elements for bold/light text)
-                      const walker = document.createTreeWalker(doc.body, NodeFilter.SHOW_TEXT);
-                      let node;
-                      let rawTokens: string[] = [];
+                      const el = e.currentTarget;
+                      const text = el.innerText;
+                      if (!text || !text.trim()) return;
                       
-                      while ((node = walker.nextNode())) {
-                        const val = node.nodeValue?.trim();
-                        if (val && val !== ":" && val !== "-") {
-                          rawTokens.push(val);
+                      const newSpecs: {key: string, value: string}[] = [];
+                      const tokens: string[] = [];
+                      
+                      // Extract all distinct tokens from the pasted text exactly as it renders visually
+                      const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+                      for (const line of lines) {
+                        if (line.includes('\t')) {
+                          tokens.push(...line.split('\t').map(p => p.trim()).filter(Boolean));
+                        } else if (line.includes(':')) {
+                          const idx = line.indexOf(':');
+                          const k = line.substring(0, idx).trim();
+                          const v = line.substring(idx + 1).trim();
+                          if (k) tokens.push(k);
+                          if (v) tokens.push(v);
+                        } else if (line.split(/\s{2,}/).length > 1) {
+                          tokens.push(...line.split(/\s{2,}/).map(p => p.trim()).filter(Boolean));
+                        } else {
+                          tokens.push(line);
                         }
                       }
                       
-                      // Fallback if walker found almost nothing (raw plain text pasted)
-                      if (rawTokens.length <= 1) {
-                        rawTokens = el.innerText.split('\n').map(s => s.trim()).filter(Boolean);
-                      }
-                      
-                      const processedTokens: string[] = [];
-                      rawTokens.forEach(t => {
-                        // Split by colon if it clearly divides a key/value
-                        if (t.includes(':')) {
-                          const colonIndex = t.indexOf(':');
-                          const k = t.substring(0, colonIndex).trim();
-                          const v = t.substring(colonIndex + 1).trim();
-                          if (k && v) {
-                            processedTokens.push(k);
-                            processedTokens.push(v);
-                            return;
-                          }
-                        }
-                        
-                        // Split by tab or multiple spaces. NEVER split on single spaces!
-                        const spaceParts = t.split(/\s{2,}|\t/);
-                        if (spaceParts.length > 1) {
-                          spaceParts.forEach(p => {
-                            if (p.trim()) processedTokens.push(p.trim());
-                          });
-                          return;
-                        }
-                        
-                        processedTokens.push(t);
-                      });
-                      
-                      for (let i = 0; i < processedTokens.length; i += 2) {
-                        let k = processedTokens[i].replace(/:$/, '').trim();
-                        let v = (processedTokens[i+1] || '').trim();
-                        if (k || v) {
-                          newSpecs.push({ key: k, value: v });
+                      // Pair up the tokens
+                      for (let i = 0; i < tokens.length; i += 2) {
+                        const k = tokens[i];
+                        const v = tokens[i+1] || "";
+                        if (k) {
+                          newSpecs.push({ key: k.replace(/:$/, ''), value: v });
                         }
                       }
-                    }
-                    
-                    if (newSpecs.length > 0) {
-                      setSpecifications(prev => [...prev.filter(s => s.key || s.value), ...newSpecs]);
-                    }
-                    
-                    setTimeout(() => { el.innerHTML = ''; }, 100);
-                  }}
-                />
+                      
+                      if (newSpecs.length > 0) {
+                        setSpecifications(prev => {
+                          const existing = prev.filter(s => s.key && s.value);
+                          const uniqueNew = newSpecs.filter(ns => !existing.some(es => es.key === ns.key));
+                          return [...existing, ...uniqueNew, { key: "", value: "" }];
+                        });
+                      }
+                      
+                      setTimeout(() => { el.innerHTML = ''; }, 100);
+                    }}
+                  />
               </div>
 
               <p className="text-sm text-slate-500 mb-2 font-medium">Or add them manually below:</p>
