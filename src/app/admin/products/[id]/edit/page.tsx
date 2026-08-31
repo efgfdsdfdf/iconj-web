@@ -70,7 +70,7 @@ export default function EditProductPage() {
     const fetchProduct = async () => {
       
         // Fetch via API route to bypass RLS infinite recursion bug on product_configuration_rules
-        const res = await fetch(`/api/admin/products/${id}`);
+        const res = await fetch(`/api/admin/products/${id}?v=2`);
         const json = await res.json();
         const data = json.success ? json.data : null;
         const error = json.success ? null : new Error(json.error);
@@ -199,7 +199,7 @@ export default function EditProductPage() {
           if (file.size > 4 * 1024 * 1024) {
             throw new Error(`Image ${file.name || 'pasted image'} is too large. Max size is 4MB.`);
           }
-          const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+          const res = await fetch("/api/admin/upload-image?v=2", { method: "POST", body: fd });
           
           if (!res.ok) {
             const text = await res.text();
@@ -269,7 +269,7 @@ export default function EditProductPage() {
           throw new Error("Product data is too large to save (exceeds 4MB). Please remove some text or images from the description.");
         }
         
-        const res = await fetch(`/api/admin/products/${id}`, {
+        const res = await fetch(`/api/admin/products/${id}?v=2`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: payloadStr,

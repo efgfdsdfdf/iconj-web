@@ -131,7 +131,7 @@ export default function AddProductPage() {
         if (file.size > 4 * 1024 * 1024) {
             throw new Error(`Image ${file.name || 'pasted image'} is too large. Max size is 4MB.`);
           }
-          const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+          const res = await fetch("/api/admin/upload-image?v=2", { method: "POST", body: fd });
           
           if (!res.ok) {
             const text = await res.text();
@@ -199,7 +199,7 @@ export default function AddProductPage() {
           throw new Error("Product data is too large to save (exceeds 4MB). Please remove some text or images from the description.");
         }
         
-        const res = await fetch("/api/admin/products", {
+        const res = await fetch("/api/admin/products?v=2", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: payloadStr,
