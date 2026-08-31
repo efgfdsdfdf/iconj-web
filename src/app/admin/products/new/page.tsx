@@ -130,9 +130,7 @@ export default function AddProductPage() {
       for (const file of imageFiles) {
         const fd = new FormData();
         fd.append("file", file);
-        if (file.size > 4 * 1024 * 1024) {
-            throw new Error(`Image ${file.name || 'pasted image'} is too large. Max size is 4MB.`);
-          }
+        
           const fileExt = file.name.split(".").pop() || "jpg";
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           
