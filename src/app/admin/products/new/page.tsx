@@ -396,32 +396,63 @@ export default function AddProductPage() {
                       if (!text || !text.trim()) return;
                       
                       const newSpecs: {key: string, value: string}[] = [];
-                      const tokens: string[] = [];
-                      
-                      // Extract all distinct tokens from the pasted text exactly as it renders visually
                       const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+                      let pendingKey: string | null = null;
+                      
+                      // Line-by-line parsing prevents misalignment cascades!
                       for (const line of lines) {
+                        // Ignore common Alibaba garbage buttons
+                        const lower = line.toLowerCase();
+                        if (lower === "chat now" || lower === "contact supplier" || lower === "send inquiry" || lower === "company profile") {
+                          continue;
+                        }
+
+                        // 1. Try splitting by Tab
                         if (line.includes('\t')) {
-                          tokens.push(...line.split('\t').map(p => p.trim()).filter(Boolean));
-                        } else if (line.includes(':')) {
+                          const parts = line.split('\t').map(p => p.trim()).filter(Boolean);
+                          for (let i = 0; i < parts.length; i += 2) {
+                            if (parts[i] && parts[i+1]) {
+                              newSpecs.push({ key: parts[i].replace(/:$/, ''), value: parts[i+1] });
+                            } else if (parts[i] && !parts[i+1]) {
+                              pendingKey = parts[i];
+                            }
+                          }
+                          continue;
+                        }
+                        
+                        // 2. Try splitting by Colon
+                        if (line.includes(':')) {
                           const idx = line.indexOf(':');
                           const k = line.substring(0, idx).trim();
                           const v = line.substring(idx + 1).trim();
-                          if (k) tokens.push(k);
-                          if (v) tokens.push(v);
-                        } else if (line.split(/\s{2,}/).length > 1) {
-                          tokens.push(...line.split(/\s{2,}/).map(p => p.trim()).filter(Boolean));
-                        } else {
-                          tokens.push(line);
+                          if (k && v) {
+                            newSpecs.push({ key: k, value: v });
+                            continue;
+                          } else if (k && !v) {
+                            pendingKey = k;
+                            continue;
+                          }
                         }
-                      }
-                      
-                      // Pair up the tokens
-                      for (let i = 0; i < tokens.length; i += 2) {
-                        const k = tokens[i];
-                        const v = tokens[i+1] || "";
-                        if (k) {
-                          newSpecs.push({ key: k.replace(/:$/, ''), value: v });
+                        
+                        // 3. Try splitting by multiple spaces
+                        const spaceParts = line.split(/\s{2,}/).map(p => p.trim()).filter(Boolean);
+                        if (spaceParts.length > 1) {
+                          for (let i = 0; i < spaceParts.length; i += 2) {
+                            if (spaceParts[i] && spaceParts[i+1]) {
+                              newSpecs.push({ key: spaceParts[i].replace(/:$/, ''), value: spaceParts[i+1] });
+                            } else if (spaceParts[i] && !spaceParts[i+1]) {
+                              pendingKey = spaceParts[i];
+                            }
+                          }
+                          continue;
+                        }
+                        
+                        // 4. Vertical stacking (Fallback)
+                        if (pendingKey) {
+                          newSpecs.push({ key: pendingKey.replace(/:$/, ''), value: line });
+                          pendingKey = null;
+                        } else {
+                          pendingKey = line;
                         }
                       }
                       
