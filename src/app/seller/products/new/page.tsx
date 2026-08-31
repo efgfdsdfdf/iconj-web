@@ -170,10 +170,27 @@ export default function SellerAddProductPage() {
           moq: isWholesale ? formData.moq : "1",
           pricing_tiers: isWholesale ? pricingTiers : [],
           stock_quantity: formData.stock_quantity,
-        }),
-      });
+        });
 
-      const result = await res.json();
+        if (payloadStr.length > 4 * 1024 * 1024) {
+          throw new Error("Product data is too large to save. Please shorten the description or remove images.");
+        }
+        
+        const res = await fetch('/api/seller/products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payloadStr,
+        });
+        
+        if (!res.ok) {
+          const text = await res.text();
+          let errorMessage = text;
+          try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
+          if (text.includes("Request Entity Too Large")) errorMessage = "Product data is too large for the server.";
+          throw new Error(errorMessage);
+        }
+        
+        const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Failed to add product');
       
       router.push('/seller/products');
