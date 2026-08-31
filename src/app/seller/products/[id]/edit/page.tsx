@@ -108,25 +108,14 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
       const formData = new FormData();
       formData.append('file', file);
       
-      if (file.size > 4 * 1024 * 1024) {
-          throw new Error("Image " + file.name + " is too large (Max 4MB).");
-        }
+      const fileExt = file.name.split('.').pop() || 'jpg';
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
-        const res = await fetch('/api/seller/upload', {
-          method: 'POST',
-          body: formData,
-        });
+        const { data, error } = await supabase.storage.from('product-images').upload(fileName, file);
+        if (error) throw new Error("Upload failed: " + error.message);
         
-        if (!res.ok) {
-          const text = await res.text();
-          let errorMessage = text;
-          try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
-          if (text.includes("Request Entity Too Large")) errorMessage = "Image is too large for the server (Max 4MB).";
-          throw new Error(errorMessage);
-        }
-        
-        const result = await res.json();
-      if (!res.ok) throw new Error(result.error || 'Upload failed');
+        const { data: publicData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+        const result = { url: publicData.publicUrl };
       
       setImages([...images, result.url]);
     } catch (error: any) {
