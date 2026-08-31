@@ -67,9 +67,6 @@ export default function CheckoutPage() {
             });
             setUseSavedAddress(true);
           }
-            setUseSavedAddress(true);
-          }
-        });
         setCheckingAuth(false);
       } else {
         router.push("/login?redirect=/checkout");
