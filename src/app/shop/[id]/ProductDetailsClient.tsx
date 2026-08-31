@@ -16,6 +16,20 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const addItem = useCartStore((state) => state.addItem);
 
   const [activeImage, setActiveImage] = useState(images[0]);
+  
+  // Inject default custom measurement rules for blinds/shades if missing
+  const isBlindOrShade = product.name?.toLowerCase().includes('blind') || product.name?.toLowerCase().includes('shade') || product.name?.toLowerCase().includes('curtain');
+  const activeRules = rules || (isBlindOrShade ? {
+    pricing_model: "per_sqm",
+    min_width_cm: 30,
+    max_width_cm: 300,
+    min_height_cm: 30,
+    max_height_cm: 300,
+    motorization_available: true,
+    motorization_fee: 15000,
+    installation_available: true,
+    base_installation_fee: 5000
+  } : null);
   const moq = product.moq || 1;
   const pricingTiers = product.pricing_tiers || [];
   const [qty, setQty] = useState(moq);
@@ -148,7 +162,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 ₦{(customConfig ? customConfig.finalPrice : currentPrice).toLocaleString()}
               </span>
               <span className="text-sm font-semibold text-slate-500 mb-1.5">
-                {rules?.pricing_model === 'per_sqm' ? '/ unit (calculated by sqm)' : '/ unit'}
+                {activeRules?.pricing_model === 'per_sqm' ? '/ unit (calculated by sqm)' : '/ unit'}
               </span>
             </div>
             
@@ -235,9 +249,9 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           </div>
 
           
-          {rules ? (
+          {activeRules ? (
             <MeasurementConfigurator 
-              rules={rules} 
+              rules={activeRules} 
               basePrice={Number(product.base_selling_price) || 0} 
               onConfigChange={setCustomConfig} 
             />

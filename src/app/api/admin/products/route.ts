@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json();
+    let { enable_custom_measurements, ...data } = await req.json();
 
     // Auto-generate SKU
     const category = data.category || "PROD";
@@ -34,7 +34,21 @@ export async function POST(req: NextRequest) {
 
     data.sku = `ICONJ-${prefix}-${String(maxNum + 1).padStart(3, "0")}`;
 
-    const { error } = await supabaseAdmin.from("products").insert([data]);
+    const { data: newProduct, error } = await supabaseAdmin.from("products").insert([data]).select().single();
+    if (newProduct && enable_custom_measurements) {
+      await supabaseAdmin.from("product_configuration_rules").insert([{
+        product_id: newProduct.id,
+        pricing_model: "per_sqm",
+        min_width_cm: 30,
+        max_width_cm: 300,
+        min_height_cm: 30,
+        max_height_cm: 300,
+        motorization_available: true,
+        motorization_fee: 15000,
+        installation_available: true,
+        base_installation_fee: 5000
+      }]);
+    }
     if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });
 
     return NextResponse.json({ success: true });
