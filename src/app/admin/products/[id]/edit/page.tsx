@@ -52,7 +52,7 @@ export default function EditProductPage() {
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
-    name: "", sku: "", category: "", available_colors: "",
+    name: "", sku: "", category: "", available_colors: "", enable_custom_measurements: false, motorization_fee: "50000", installation_fee: "5000",
     product_cost: "", shipping_cost: "", selling_price: "",
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
@@ -68,7 +68,7 @@ export default function EditProductPage() {
   useEffect(() => {
     if (!id) return;
     const fetchProduct = async () => {
-      const { data, error } = await supabase.from("products").select("*").eq("id", id).single();
+      const { data, error } = await supabase.from("products").select("*, product_configuration_rules(*)").eq("id", id).single();
       if (data) {
         setFormData({
           name: data.name || "",
@@ -82,6 +82,9 @@ export default function EditProductPage() {
           supplier_id: data.supplier_id || "",
           supplier_sku: data.supplier_sku || "",
           available_colors: (data.variants?.colors || []).join(", "),
+            enable_custom_measurements: (data.product_configuration_rules && data.product_configuration_rules.length > 0),
+            motorization_fee: data.product_configuration_rules?.[0]?.motorization_fee?.toString() || "50000",
+            installation_fee: data.product_configuration_rules?.[0]?.base_installation_fee?.toString() || "5000",
           supplier_product_url: data.variants?.supplier_product_url || "",
           brand: data.brand || "",
           age_range: data.age_range || "",
@@ -217,6 +220,9 @@ export default function EditProductPage() {
           colors: formData.available_colors ? formData.available_colors.split(',').map(c => c.trim()).filter(Boolean) : []
         },
         description: formData.description || "",
+          enable_custom_measurements: formData.enable_custom_measurements,
+          motorization_fee: formData.motorization_fee,
+          installation_fee: formData.installation_fee,
         supplier_id: formData.supplier_id || null,
         supplier_sku: formData.supplier_sku || null,
         brand: formData.brand || null,
