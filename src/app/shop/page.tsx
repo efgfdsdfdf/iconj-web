@@ -86,8 +86,10 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       {/* Breadcrumb Header / Wholesale Hero */}
       {filter === 'wholesale' ? (
         <>
-          <div className="bg-gradient-to-r from-blue-900 via-sky-800 to-blue-900 text-white border-b-4 border-amber-500">
-            <div className="container mx-auto px-4 py-12 md:py-16 flex flex-col items-center text-center">
+          <div className="relative bg-slate-900 text-white border-b-4 border-amber-500 overflow-hidden">
+              <img src={(category && categories?.find(c => c.id === category)?.icon && categories?.find(c => c.id === category)?.icon !== 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80') ? categories.find(c => c.id === category)?.icon : "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=2000"} alt="Wholesale B2B" className="absolute inset-0 w-full h-full object-cover opacity-30 mix-blend-overlay" />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-sky-900/80 to-blue-950/90"></div>
+            <div className="container mx-auto px-4 py-12 md:py-16 flex flex-col items-center text-center relative z-10">
               <span className="bg-amber-500 text-amber-950 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4">B2B Marketplace</span>
               <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4 text-white">
                 {category && categories?.find(c => c.id === category) 
@@ -114,7 +116,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         <>
           {/* Retail Hero */}
           <div className="relative bg-slate-900 text-white mb-0 overflow-hidden">
-            <img src="https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2000" alt="Retail Store" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+            <img src={(category && categories?.find(c => c.id === category)?.icon && categories?.find(c => c.id === category)?.icon !== 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80') ? categories.find(c => c.id === category)?.icon : "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2000"} alt="Retail Store" className="absolute inset-0 w-full h-full object-cover opacity-40" />
             <div className="absolute inset-0 bg-gradient-to-r from-slate-900/90 to-transparent"></div>
             <div className="container mx-auto px-4 py-12 md:py-16 relative z-10 flex flex-col items-start">
               <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-widest mb-4 flex items-center gap-2"><Star className="w-3 h-3 fill-white" /> Retail Center</span>
