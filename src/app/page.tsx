@@ -14,19 +14,36 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
 
   const pageParam = searchParams.page;
   const page = parseInt(typeof pageParam === 'string' ? pageParam : "1");
+  const seedParam = searchParams.seed;
+  const currentSeed = seedParam ? parseInt(typeof seedParam === 'string' ? seedParam : "12345") : Math.floor(Math.random() * 1000000);
+  
   const limit = 20;
   const start = (page - 1) * limit;
-  const end = start + limit - 1;
 
+  // Fetch a large pool of active products to shuffle
   const { data: rawProducts, count } = await supabase
     .from("products")
     .select("*, stores(store_name)", { count: "exact" })
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .order('created_at', { ascending: false })
-    .range(start, end);
+    .limit(1000);
     
-  const products = rawProducts || [];
+  let allProducts = rawProducts || [];
+  
+  // Seeded Random Generator for consistent shuffling across pagination
+  function seededRandom(seed: number) {
+    return function() {
+      seed = (seed * 9301 + 49297) % 233280;
+      return seed / 233280;
+    }
+  }
+  const randomFunc = seededRandom(currentSeed);
+  
+  // Shuffle array using the seed
+  allProducts = allProducts.sort(() => randomFunc() - 0.5);
+
+  // Apply pagination
+  const products = allProducts.slice(start, start + limit);
   const totalPages = Math.ceil((count || 0) / limit);
   const hasNext = page < totalPages;
   const hasPrev = page > 1;
@@ -164,12 +181,12 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
                   Page {page} of {totalPages || 1}
                 </div>
                 <div className="flex gap-2">
-                  <Link href={hasPrev ? `/?page=${page - 1}` : '#'} className={!hasPrev ? 'pointer-events-none opacity-50' : ''}>
+                  <Link href={hasPrev ? `/?page=${page - 1}&seed=${currentSeed}` : '#'} className={!hasPrev ? 'pointer-events-none opacity-50' : ''}>
                     <Button variant="outline" size="lg" className="font-bold border-2">
                       <ChevronLeft className="w-5 h-5 mr-1" /> Previous
                     </Button>
                   </Link>
-                  <Link href={hasNext ? `/?page=${page + 1}` : '#'} className={!hasNext ? 'pointer-events-none opacity-50' : ''}>
+                  <Link href={hasNext ? `/?page=${page + 1}&seed=${currentSeed}` : '#'} className={!hasNext ? 'pointer-events-none opacity-50' : ''}>
                     <Button variant="outline" size="lg" className="font-bold border-2 text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
                       Next <ChevronRight className="w-5 h-5 ml-1" />
                     </Button>
