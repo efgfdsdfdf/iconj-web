@@ -131,6 +131,9 @@ export default function AddProductPage() {
         const fd = new FormData();
         fd.append("file", file);
         
+          if (file.size > 4.5 * 1024 * 1024) {
+            throw new Error(`Image ${file.name} is too large (${(file.size/1024/1024).toFixed(1)}MB). Supabase and Vercel have strict 4.5MB limits. Please compress it using tinypng.com before uploading.`);
+          }
           const fileExt = file.name.split(".").pop() || "jpg";
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           

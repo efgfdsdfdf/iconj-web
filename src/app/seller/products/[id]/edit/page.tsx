@@ -108,7 +108,10 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
       const formData = new FormData();
       formData.append('file', file);
       
-      const fileExt = file.name.split('.').pop() || 'jpg';
+      if (file.size > 4.5 * 1024 * 1024) {
+          throw new Error(`Image ${file.name} is too large (${(file.size/1024/1024).toFixed(1)}MB). Please compress it using tinypng.com to be under 4.5MB.`);
+        }
+        const fileExt = file.name.split('.').pop() || 'jpg';
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
         const { data, error } = await supabase.storage.from('product-images').upload(fileName, file);
