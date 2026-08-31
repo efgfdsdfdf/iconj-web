@@ -44,7 +44,7 @@ export function MeasurementConfigurator({ rules, basePrice, onConfigChange }: { 
           <Label>Width (cm)</Label>
           <Input 
             type="number" 
-            placeholder={Min: } 
+            placeholder={`Min: ${rules?.min_width_cm || 0}`} 
             value={width} 
             onChange={e => setWidth(e.target.value)}
           />
@@ -53,7 +53,7 @@ export function MeasurementConfigurator({ rules, basePrice, onConfigChange }: { 
           <Label>Height (cm)</Label>
           <Input 
             type="number" 
-            placeholder={Min: } 
+            placeholder={`Min: ${rules?.min_height_cm || 0}`} 
             value={height} 
             onChange={e => setHeight(e.target.value)}
           />
