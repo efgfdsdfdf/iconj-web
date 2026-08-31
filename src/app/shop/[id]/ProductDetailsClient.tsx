@@ -166,8 +166,8 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
               <span className="text-3xl md:text-4xl font-black text-slate-900">
                 ₦{(customConfig ? customConfig.finalPrice : currentPrice).toLocaleString()}
               </span>
-              <span className="text-sm font-semibold text-slate-500 mb-1.5">
-                '/ unit'
+              <span className="text-sm font-bold text-slate-500 mb-1.5">
+                / unit
               </span>
             </div>
             
