@@ -167,7 +167,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 ₦{(customConfig ? customConfig.finalPrice : currentPrice).toLocaleString()}
               </span>
               <span className="text-sm font-semibold text-slate-500 mb-1.5">
-                {activeRules?.pricing_model === 'per_sqm' ? '/ unit (calculated by sqm)' : '/ unit'}
+                '/ unit'
               </span>
             </div>
             
