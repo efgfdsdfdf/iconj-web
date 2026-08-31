@@ -14,8 +14,8 @@ export function CopyToSupplierButton({ item, address }: { item: any, address?: a
     const sku = item.product?.supplier_sku || item.product?.sku || config.store_sku || "";
     
     let specs: string[] = [];
-    if (config.width && config.width !== '0cm' && config.width !== 'Standard') specs.push(`Width: ${config.width}`);
-    if (config.height && config.height !== '0cm' && config.height !== 'Standard') specs.push(`Height: ${config.height}`);
+    if (config.width) specs.push(`Width: ${config.width}`);
+    if (config.height) specs.push(`Height: ${config.height}`);
     if (config.motorType) specs.push(`Motor: ${config.motorType}`);
     if (config.color) specs.push(`Color: ${config.color}`);
     
