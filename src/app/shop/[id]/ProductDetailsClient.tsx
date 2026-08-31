@@ -45,7 +45,6 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
 
   // Local Selection State
   const [selectedColor, setSelectedColor] = useState(colors[0] || "");
-  const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");

@@ -8,10 +8,12 @@ import { AutoScrollingCategories } from "@/components/AutoScrollingCategories";
 
 export const revalidate = 0;
 
-export default async function Home({ searchParams }: { searchParams: { page?: string } }) {
+export default async function Home(props: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
+  const searchParams = await props.searchParams;
   const supabase = await createClient();
 
-  const page = parseInt(searchParams.page || "1");
+  const pageParam = searchParams.page;
+  const page = parseInt(typeof pageParam === 'string' ? pageParam : "1");
   const limit = 20;
   const start = (page - 1) * limit;
   const end = start + limit - 1;
