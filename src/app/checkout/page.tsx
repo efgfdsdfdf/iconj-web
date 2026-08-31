@@ -51,8 +51,10 @@ export default function CheckoutPage() {
           }
         });
 
-        // Fetch user's address book from DB
-        supabase.from("addresses").select("*").eq("user_id", data.user.id).order("is_default", { ascending: false }).order("created_at", { ascending: false }).then(({ data: addresses }) => {
+                  // Fetch user's address book from auth metadata
+          const addresses = data.user.user_metadata?.addresses || [];
+          addresses.sort((a: any, b: any) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
+          
           if (addresses && addresses.length > 0) {
             setUserAddresses(addresses);
             setSelectedAddressId(addresses[0].id);
@@ -60,9 +62,11 @@ export default function CheckoutPage() {
               street: addresses[0].street,
               city: addresses[0].city,
               state: addresses[0].state,
-                phone: addresses[0].phone,
-                name: addresses[0].label
+              phone: addresses[0].phone,
+              name: addresses[0].label
             });
+            setUseSavedAddress(true);
+          }
             setUseSavedAddress(true);
           }
         });
