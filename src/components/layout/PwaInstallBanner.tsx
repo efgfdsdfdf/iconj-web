@@ -47,11 +47,23 @@ export function PwaInstallBanner() {
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    setIsVisible(false);
-    setDeferredPrompt(null);
+    if (!deferredPrompt) {
+      alert("Installation prompt is not ready. Please try again from your browser menu.");
+      return;
+    }
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === "accepted") {
+        setIsVisible(false);
+        setDeferredPrompt(null);
+      }
+    } catch (err) {
+      console.error("Install error:", err);
+      // Sometimes prompt() throws if called twice, we just hide the banner
+      setIsVisible(false);
+    }
   };
 
   const handleDismiss = () => {
