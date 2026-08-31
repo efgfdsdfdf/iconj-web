@@ -17,6 +17,7 @@ export function CopyToSupplierButton({ item, address }: { item: any, address?: a
     if (config.width && config.width !== '0cm' && config.width !== 'Standard') specs.push(`Width: ${config.width}`);
     if (config.height && config.height !== '0cm' && config.height !== 'Standard') specs.push(`Height: ${config.height}`);
     if (config.motorType) specs.push(`Motor: ${config.motorType}`);
+    if (config.color) specs.push(`Color: ${config.color}`);
     
     const variant = config.selected_variant || config.variant_string;
     if (variant) {
@@ -25,23 +26,13 @@ export function CopyToSupplierButton({ item, address }: { item: any, address?: a
     
     if (config.custom_notes) specs.push(`Notes: ${config.custom_notes}`);
 
-    let addressBlock = "";
-    if (address) {
-      const customerName = (address.name || "").trim() || "N/A";
-      addressBlock = `\n\nShipping Address:
-Name: ${customerName}
-Phone: ${address.phone || "N/A"}
-Street: ${address.street || "N/A"}
-City/State: ${address.city || ""}${address.state ? `, ${address.state}` : ""}, Nigeria`;
-    }
-
     const detailsBlock = specs.length > 0 ? `\nDetails:\n${specs.join('\n')}` : "";
 
     const textToCopy = `Order Request
 Product: ${config.product_name || item.product?.name || "Unknown Product"}
 SKU: ${sku}
 Quantity: ${item.quantity}
-${url ? `Product URL: ${url}` : ''}${detailsBlock}${addressBlock}`;
+${url ? `Product URL: ${url}` : ''}${detailsBlock}`;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);
