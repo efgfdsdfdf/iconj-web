@@ -131,19 +131,14 @@ export default function AddProductPage() {
         if (file.size > 4 * 1024 * 1024) {
             throw new Error(`Image ${file.name || 'pasted image'} is too large. Max size is 4MB.`);
           }
-          const res = await fetch("/api/admin/upload-image?v=2", { method: "POST", body: fd });
+          const fileExt = file.name.split(".").pop() || "jpg";
+          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           
-          if (!res.ok) {
-            const text = await res.text();
-            let errorMessage = text;
-            try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
-            if (text.includes("Request Entity Too Large")) errorMessage = "Image is too large for the server (Max 4MB).";
-            throw new Error("Image upload failed: " + errorMessage);
-          }
+          const { data, error } = await supabase.storage.from("product-images").upload(fileName, file);
+          if (error) throw new Error("Supabase upload failed: " + error.message);
           
-          const result = await res.json();
-        if (!res.ok || !result.url) throw new Error("Image upload failed: " + (result.error || "Unknown error"));
-        uploadedUrls.push(result.url);
+          const { data: publicData } = supabase.storage.from("product-images").getPublicUrl(fileName);
+          uploadedUrls.push(publicData.publicUrl);
       }
 
       // 2. Build product payload
