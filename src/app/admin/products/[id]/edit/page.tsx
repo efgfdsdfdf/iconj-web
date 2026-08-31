@@ -52,7 +52,7 @@ export default function EditProductPage() {
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
-    name: "", sku: "", category: "",
+    name: "", sku: "", category: "", available_colors: "",
     product_cost: "", shipping_cost: "", selling_price: "",
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
@@ -81,6 +81,7 @@ export default function EditProductPage() {
           description: data.description || "",
           supplier_id: data.supplier_id || "",
           supplier_sku: data.supplier_sku || "",
+          available_colors: (data.variants?.colors || []).join(", "),
           supplier_product_url: data.variants?.supplier_product_url || "",
           brand: data.brand || "",
           age_range: data.age_range || "",

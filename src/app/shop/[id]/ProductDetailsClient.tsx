@@ -38,11 +38,13 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
 
   // Parse variants or use fallbacks
   const variants = product.variants || {};
+  const colors = variants.colors?.length > 0 ? variants.colors : [];
   const sizes = variants.sizes?.length > 0 ? variants.sizes : [];
   const motors = variants.motors?.length > 0 ? variants.motors : [];
   const fabrics = variants.fabrics?.length > 0 ? variants.fabrics : [];
 
   // Local Selection State
+  const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");

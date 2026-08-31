@@ -47,7 +47,7 @@ export default function AddProductPage() {
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
-    name: "", sku: "", category: "",
+    name: "", sku: "", category: "", available_colors: "",
     product_cost: "", shipping_cost: "", selling_price: "",
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
@@ -151,7 +151,10 @@ export default function AddProductPage() {
         is_configurable: false,
         requires_quote: false,
         images: uploadedUrls,
-        variants: { supplier_product_url: formData.supplier_product_url || null },
+        variants: { 
+          supplier_product_url: formData.supplier_product_url || null,
+          colors: formData.available_colors ? formData.available_colors.split(',').map(c => c.trim()).filter(Boolean) : []
+        },
         description: formData.description || "",
         supplier_id: formData.supplier_id || null,
         supplier_sku: formData.supplier_sku || null,
