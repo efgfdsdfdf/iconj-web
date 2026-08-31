@@ -548,8 +548,18 @@ export default function EditProductPage() {
                 <Button type="button" variant="outline" size="sm" onClick={addSpecification} className="text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100">
                   <Plus className="w-4 h-4 mr-1" /> Add Row
                 </Button>
-                <Button type="button" variant="outline" size="sm" onClick={() => setSpecifications(prev => prev.map(s => ({ key: s.value, value: s.key })))} className="text-slate-600 border-slate-200 bg-slate-50 hover:bg-slate-100">
-                  <ArrowRightLeft className="w-4 h-4 mr-2" /> Swap Keys & Values
+                <Button type="button" variant="outline" size="sm" onClick={() => {
+                  setSpecifications(prev => {
+                    const flat = prev.flatMap(s => [s.key, s.value]);
+                    flat.unshift(""); // Shift right by 1
+                    const newSpecs = [];
+                    for (let i = 0; i < flat.length; i += 2) {
+                      newSpecs.push({ key: flat[i] || "", value: flat[i+1] || "" });
+                    }
+                    return newSpecs;
+                  });
+                }} className="text-amber-600 border-amber-200 bg-amber-50 hover:bg-amber-100" title="Use this if you accidentally missed highlighting the first word, causing all rows to misalign!">
+                  <ArrowRightLeft className="w-4 h-4 mr-2" /> Re-align (Shift Cells)
                 </Button>
               </div>
             </CardContent>
