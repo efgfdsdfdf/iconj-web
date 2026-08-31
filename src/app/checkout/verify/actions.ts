@@ -129,7 +129,8 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
           const itemRows = (items || []).map((item: any) => {
             const config = item.configuration_details || {};
             let specs = '';
-            if (config.width && config.width !== '0cm') specs += `Width: ${config.width} | `;
+            if (config.color) specs += `Color: ${config.color} | `;
+              if (config.width && config.width !== '0cm') specs += `Width: ${config.width} | `;
             if (config.height && config.height !== '0cm') specs += `Height: ${config.height} | `;
             if (config.motorType) specs += `Motor: ${config.motorType} | `;
             if (config.requiresInstall) specs += `Installation: Yes | `;
@@ -286,7 +287,8 @@ export async function verifyPaymentAndCompleteOrder(reference: string) {
           const supplierItemRows = group.items.map((item: any) => {
             const config = item.configuration_details || {};
             let specs = '';
-            if (config.width && config.width !== '0cm') specs += `Width: ${config.width} | `;
+            if (config.color) specs += `Color: ${config.color} | `;
+              if (config.width && config.width !== '0cm') specs += `Width: ${config.width} | `;
             if (config.height && config.height !== '0cm') specs += `Height: ${config.height} | `;
             if (config.motorType) specs += `Motor: ${config.motorType} | `;
             if (config.selected_variant) specs += `Variant: ${typeof config.selected_variant === 'object' ? JSON.stringify(config.selected_variant) : config.selected_variant} | `;

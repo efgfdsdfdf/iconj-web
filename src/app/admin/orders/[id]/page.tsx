@@ -88,7 +88,12 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                       <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider">
                         SKU: {item.configuration_details?.store_sku || item.product?.sku}
                       </p>
-                      {item.configuration_details?.variant_string && (
+                      {item.configuration_details?.color && (
+                          <p className="text-sm text-slate-600 mt-1">
+                            Color: {item.configuration_details.color}
+                          </p>
+                        )}
+                        {item.configuration_details?.variant_string && (
                         <p className="text-sm text-slate-600 mt-1">
                           Variant: {item.configuration_details.variant_string}
                         </p>

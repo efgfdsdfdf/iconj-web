@@ -180,13 +180,20 @@ export default async function SellerOrdersPage() {
                             </p>
                             
                             {/* Customer Specifications */}
-                            {(config.width || config.height || config.motorType || config.requiresInstall || config.selected_variant || config.custom_notes) && (
+                            {(config.width || config.height || config.motorType || config.requiresInstall || config.selected_variant || config.custom_notes || config.color) && (
                               <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded space-y-1">
                                 <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
                                   <Settings className="w-3 h-3" /> Customer Specifications
                                 </span>
                                 <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
-                                  {config.width && config.width !== "0cm" && (
+                                  {config.color && (
+                                      <div className="flex items-center gap-1">
+                                        <Settings className="w-3 h-3 text-amber-600" />
+                                        <span className="text-slate-600">Color:</span>
+                                        <span className="font-bold text-slate-900">{config.color}</span>
+                                      </div>
+                                    )}
+                                    {config.width && config.width !== "0cm" && (
                                     <div className="flex items-center gap-1">
                                       <Ruler className="w-3 h-3 text-amber-600" />
                                       <span className="text-slate-600">Width:</span>
