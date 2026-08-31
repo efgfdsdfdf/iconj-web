@@ -59,7 +59,8 @@ export default function CheckoutPage() {
             setSavedAddress({
               street: addresses[0].street,
               city: addresses[0].city,
-              state: addresses[0].state
+              state: addresses[0].state,
+                phone: addresses[0].phone
             });
             setUseSavedAddress(true);
           }
@@ -105,7 +106,8 @@ export default function CheckoutPage() {
         setSavedAddress({
           street: selected.street,
           city: selected.city,
-          state: selected.state
+          state: selected.state,
+            phone: selected.phone
         });
         setUseSavedAddress(true);
       }
@@ -189,7 +191,7 @@ export default function CheckoutPage() {
                           className={`border p-4 rounded-lg cursor-pointer transition-all ${selectedAddressId === addr.id ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' : 'border-slate-200 hover:border-blue-300'}`}
                         >
                            <div className="flex justify-between items-start">
-                             <p className="font-bold text-slate-900">{addr.label || 'Delivery Address'}</p>
+                             <p className="font-bold text-slate-900">{addr.label || 'Delivery Address'} &middot; <Link href="/account/addresses" className="text-blue-600 hover:underline font-normal text-xs ml-2">Edit</Link></p>
                              {selectedAddressId === addr.id && <CheckCircle2 className="w-5 h-5 text-blue-600" />}
                            </div>
                            <p className="text-sm text-slate-600 mt-2">{addr.street}</p>
@@ -204,15 +206,25 @@ export default function CheckoutPage() {
 
                   
                   {userAddresses.length === 0 && (
-                    <div className="bg-amber-50 border border-amber-200 p-6 rounded-lg text-center mb-6">
-                      <p className="text-amber-800 font-medium mb-4">You don't have any saved delivery addresses.</p>
-                      <Link href="/account/address">
-                        <Button type="button" className="bg-amber-600 hover:bg-amber-700 text-white">
-                          Add an Address
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
+                      <div className="bg-amber-50 border border-amber-200 p-6 rounded-lg text-center mb-6">
+                        <p className="text-amber-800 font-medium mb-4">You don't have any saved delivery addresses.</p>
+                        <Link href="/account/addresses">
+                          <Button type="button" className="bg-amber-600 hover:bg-amber-700 text-white">
+                            Add an Address
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
+
+                    {userAddresses.length > 0 && (
+                      <div className="mb-6 flex justify-end">
+                        <Link href="/account/addresses">
+                          <Button type="button" variant="outline" className="text-sm border-2">
+                            Manage Addresses
+                          </Button>
+                        </Link>
+                      </div>
+                    )}
 
 {userAddresses.length > 0 && (
                       <Button type="submit" className="w-full h-12 text-md font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-md mt-4">
@@ -238,8 +250,9 @@ export default function CheckoutPage() {
                     <div className="flex items-start gap-3 p-4 border rounded-lg bg-blue-50/50 border-blue-100">
                       <div className="mt-1"><ShieldCheck className="w-5 h-5 text-blue-600" /></div>
                       <div>
-                        <p className="font-bold text-slate-900">Delivering to your default address</p>
+                        <p className="font-bold text-slate-900">{formData.firstName} {formData.lastName}</p>
                         <p className="text-sm text-slate-600 mt-1">{savedAddress.street}, {savedAddress.city}, {savedAddress.state}</p>
+                        <p className="text-sm text-slate-600 mt-1">{savedAddress.phone || formData.phone}</p>
                       </div>
                     </div>
                   ) : (
