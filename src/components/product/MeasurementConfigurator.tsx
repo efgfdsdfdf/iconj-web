@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
@@ -9,8 +9,7 @@ export function MeasurementConfigurator({ rules, basePrice, onConfigChange }: { 
   const [width, setWidth] = useState<string>("");
   const [height, setHeight] = useState<string>("");
   const [isMotorized, setIsMotorized] = useState(false);
-  const [requiresInstall, setRequiresInstall] = useState(false);
-
+  
   useEffect(() => {
     const w = parseFloat(width) || 0;
     const h = parseFloat(height) || 0;
@@ -23,16 +22,15 @@ export function MeasurementConfigurator({ rules, basePrice, onConfigChange }: { 
     }
     
     if (isMotorized) calculatedPrice += Number(rules?.motorization_fee || 0);
-    if (requiresInstall) calculatedPrice += Number(rules?.base_installation_fee || 0);
-    
+        
     onConfigChange({
       width: w,
       height: h,
       isMotorized,
-      requiresInstall,
+      requiresInstall: false,
       finalPrice: calculatedPrice
     });
-  }, [width, height, isMotorized, requiresInstall, rules, basePrice]);
+  }, [width, height, isMotorized, rules, basePrice]);
 
   return (
     <div className="bg-slate-50 p-5 rounded-xl border space-y-5">
@@ -46,7 +44,7 @@ export function MeasurementConfigurator({ rules, basePrice, onConfigChange }: { 
           <Label>Width (cm)</Label>
           <Input 
             type="number" 
-            placeholder={`Min: ${rules?.min_width_cm || 0}`} 
+            placeholder={Min: } 
             value={width} 
             onChange={e => setWidth(e.target.value)}
           />
@@ -55,7 +53,7 @@ export function MeasurementConfigurator({ rules, basePrice, onConfigChange }: { 
           <Label>Height (cm)</Label>
           <Input 
             type="number" 
-            placeholder={`Min: ${rules?.min_height_cm || 0}`} 
+            placeholder={Min: } 
             value={height} 
             onChange={e => setHeight(e.target.value)}
           />
@@ -74,21 +72,6 @@ export function MeasurementConfigurator({ rules, basePrice, onConfigChange }: { 
             />
             <Label htmlFor="motorized" className="font-medium cursor-pointer">
               Add Motorization (+ ₦{Number(rules.motorization_fee).toLocaleString()})
-            </Label>
-          </div>
-        )}
-        
-        {rules?.installation_available && (
-          <div className="flex items-center space-x-2">
-            <input 
-              type="checkbox" 
-              id="install" 
-              className="w-4 h-4 rounded border-slate-300 text-blue-600" 
-              checked={requiresInstall} 
-              onChange={(e) => setRequiresInstall(e.target.checked)} 
-            />
-            <Label htmlFor="install" className="font-medium cursor-pointer">
-              Include Professional Installation (+ ₦{Number(rules.base_installation_fee).toLocaleString()})
             </Label>
           </div>
         )}

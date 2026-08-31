@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
         min_height_cm: 30,
         max_height_cm: 300,
         motorization_available: true,
-        motorization_fee: Number(motorization_fee) || 50000,
+        motorization_fee: Number(motorization_fee) || 15000,
         installation_available: true,
         base_installation_fee: Number(installation_fee) || 5000
       }]);

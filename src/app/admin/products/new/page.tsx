@@ -47,7 +47,7 @@ export default function AddProductPage() {
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
-    name: "", sku: "", category: "", available_colors: "", enable_custom_measurements: true, motorization_fee: "50000", installation_fee: "5000",
+    name: "", sku: "", category: "", available_colors: "", enable_custom_measurements: true, motorization_fee: "15000", installation_fee: "5000",
     product_cost: "", shipping_cost: "", selling_price: "",
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",

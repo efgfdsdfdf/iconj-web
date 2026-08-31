@@ -52,7 +52,7 @@ export default function EditProductPage() {
   const [pricingTiers, setPricingTiers] = useState<any[]>([]);
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
-    name: "", sku: "", category: "", available_colors: "", enable_custom_measurements: false, motorization_fee: "50000", installation_fee: "5000",
+    name: "", sku: "", category: "", available_colors: "", enable_custom_measurements: false, motorization_fee: "15000", installation_fee: "5000",
     product_cost: "", shipping_cost: "", selling_price: "",
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
@@ -89,7 +89,7 @@ export default function EditProductPage() {
           supplier_sku: data.supplier_sku || "",
           available_colors: (data.variants?.colors || []).join(", "),
             enable_custom_measurements: (data.product_configuration_rules && data.product_configuration_rules.length > 0),
-            motorization_fee: data.product_configuration_rules?.[0]?.motorization_fee?.toString() || "50000",
+            motorization_fee: data.product_configuration_rules?.[0]?.motorization_fee?.toString() || "15000",
             installation_fee: data.product_configuration_rules?.[0]?.base_installation_fee?.toString() || "5000",
           supplier_product_url: data.variants?.supplier_product_url || "",
           brand: data.brand || "",
