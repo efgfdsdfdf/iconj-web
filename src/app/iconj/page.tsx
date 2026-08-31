@@ -565,10 +565,10 @@ export default async function IconjInteriorPage() {
             <div>
               <h4 className="font-bold text-slate-900 mb-4">Legal</h4>
               <ul className="space-y-3 text-sm text-slate-600">
-                <li><Link href="/legal/privacy" className="hover:text-amber-600 transition-colors">Privacy Policy</Link></li>
-                <li><Link href="/legal/terms" className="hover:text-amber-600 transition-colors">Terms & Conditions</Link></li>
-                <li><Link href="/legal/returns" className="hover:text-amber-600 transition-colors">Returns & Refunds</Link></li>
-                <li><Link href="/legal/shipping" className="hover:text-amber-600 transition-colors">Shipping Policy</Link></li>
+                <li><Link href="/privacy-policy" className="hover:text-amber-600 transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms-and-conditions" className="hover:text-amber-600 transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="/returns" className="hover:text-amber-600 transition-colors">Returns & Refunds</Link></li>
+                <li><Link href="/faq" className="hover:text-amber-600 transition-colors">Shipping Policy</Link></li>
               </ul>
             </div>
           </div>
