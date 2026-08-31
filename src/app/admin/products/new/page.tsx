@@ -295,6 +295,10 @@ export default function AddProductPage() {
                   <Label>Product Name</Label>
                   <Input required placeholder="e.g. Premium Blackout Roller Blind 120x200cm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                 </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Available Colors (Optional, comma separated)</Label>
+                  <Input placeholder="e.g. Red, Blue, Matte Black" value={formData.available_colors || ""} onChange={e => setFormData({...formData, available_colors: e.target.value})} />
+                </div>
                 <div className="space-y-2">
                   <Label>Brand</Label>
                   <Input placeholder="e.g. ICONJ" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
