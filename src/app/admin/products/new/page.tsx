@@ -8,12 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 , ArrowRightLeft} from "lucide-react";
 
 import Link from "next/link";
 
 export default function AddProductPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [categoriesList, setCategoriesList] = useState<string[]>([]);
   const [suppliersList, setSuppliersList] = useState<any[]>([]);
