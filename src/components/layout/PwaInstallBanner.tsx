@@ -15,7 +15,8 @@ export function PwaInstallBanner() {
       navigator.serviceWorker.register("/sw.js").catch(console.error);
     }
 
-    const dismissed = localStorage.getItem("pwa_install_dismissed");
+    let dismissed = null;
+    try { dismissed = localStorage.getItem("pwa_install_dismissed"); } catch(e) {}
     if (dismissed) {
       const dismissTime = parseInt(dismissed, 10);
       const now = new Date().getTime();
@@ -68,7 +69,7 @@ export function PwaInstallBanner() {
 
   const handleDismiss = () => {
     setIsVisible(false);
-    localStorage.setItem("pwa_install_dismissed", new Date().getTime().toString());
+    try { localStorage.setItem("pwa_install_dismissed", new Date().getTime().toString()); } catch(e) {}
   };
 
   if (!isVisible) return null;

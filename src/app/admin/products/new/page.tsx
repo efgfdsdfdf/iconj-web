@@ -465,7 +465,9 @@ export default function AddProductPage() {
                         setSpecifications(prev => {
                           const existing = prev.filter(s => s.key && s.value);
                           const uniqueNew = newSpecs.filter(ns => !existing.some(es => es.key === ns.key));
-                          return [...existing, ...uniqueNew, { key: "", value: "" }];
+                          const merged = [...existing, ...uniqueNew, { key: "", value: "" }];
+                          if (merged.length > 100) return merged.slice(0, 100);
+                          return merged;
                         });
                       }
                       

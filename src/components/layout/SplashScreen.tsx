@@ -8,7 +8,8 @@ export function SplashScreen() {
 
   useEffect(() => {
     // Check if we already showed the splash screen in this session
-    const hasSeenSplash = sessionStorage.getItem("hasSeenSplash");
+    let hasSeenSplash = null;
+    try { hasSeenSplash = sessionStorage.getItem("hasSeenSplash"); } catch(e) {}
     
     if (hasSeenSplash) {
       setShowSplash(false);
@@ -16,7 +17,7 @@ export function SplashScreen() {
       // Show for 2 seconds, then fade out
       const timer = setTimeout(() => {
         setShowSplash(false);
-        sessionStorage.setItem("hasSeenSplash", "true");
+        try { sessionStorage.setItem("hasSeenSplash", "true"); } catch(e) {}
       }, 2000);
       return () => clearTimeout(timer);
     }
