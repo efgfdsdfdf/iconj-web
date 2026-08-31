@@ -1,3 +1,4 @@
+import React from 'react';
 "use client";
 
 import { useState } from "react";
@@ -19,17 +20,21 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   
   // Inject default custom measurement rules for blinds/shades if missing
   const isBlindOrShade = product.name?.toLowerCase().includes('blind') || product.name?.toLowerCase().includes('shade') || product.name?.toLowerCase().includes('curtain');
-  const activeRules = rules || (isBlindOrShade ? {
-    pricing_model: "per_sqm",
-    min_width_cm: 30,
-    max_width_cm: 300,
-    min_height_cm: 30,
-    max_height_cm: 300,
-    motorization_available: true,
-    motorization_fee: 50000,
-    installation_available: true,
-    base_installation_fee: 5000
-  } : null);
+  
+  // Memoize to prevent infinite re-renders!
+  const activeRules = React.useMemo(() => {
+    return rules || (isBlindOrShade ? {
+      pricing_model: "per_sqm",
+      min_width_cm: 30,
+      max_width_cm: 300,
+      min_height_cm: 30,
+      max_height_cm: 300,
+      motorization_available: true,
+      motorization_fee: 50000,
+      installation_available: true,
+      base_installation_fee: 5000
+    } : null);
+  }, [rules, isBlindOrShade]);
   const moq = product.moq || 1;
   const pricingTiers = product.pricing_tiers || [];
   const [qty, setQty] = useState(moq);
