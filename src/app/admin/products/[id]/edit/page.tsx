@@ -211,7 +211,11 @@ export default function EditProductPage() {
         is_configurable: false,
         requires_quote: false,
         images: uploadedUrls,
-        variants: { ...existingVariants, supplier_product_url: formData.supplier_product_url || null },
+        variants: { 
+          ...existingVariants, 
+          supplier_product_url: formData.supplier_product_url || null,
+          colors: formData.available_colors ? formData.available_colors.split(',').map(c => c.trim()).filter(Boolean) : []
+        },
         description: formData.description || "",
         supplier_id: formData.supplier_id || null,
         supplier_sku: formData.supplier_sku || null,
@@ -353,6 +357,10 @@ export default function EditProductPage() {
                 <div className="space-y-2 md:col-span-2">
                   <Label>Product Name</Label>
                   <Input required placeholder="e.g. Premium Blackout Roller Blind 120x200cm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Available Colors (Optional, comma separated)</Label>
+                  <Input placeholder="e.g. Red, Blue, Matte Black" value={formData.available_colors || ""} onChange={e => setFormData({...formData, available_colors: e.target.value})} />
                 </div>
                 <div className="space-y-2">
                   <Label>Brand</Label>
