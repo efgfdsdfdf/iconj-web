@@ -105,15 +105,19 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
     
     setUploadingImage(true);
     try {
-      file = await compressImage(file);
+      let compressedFile = await compressImage(file);
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressedFile);
+      if (compressedFile.size > 8 * 1024 * 1024) throw new Error("Image is too large even after compression. Please use a smaller image.");
+      const fileExt = compressedFile.name.split('.').pop() || 'jpg';
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const { data, error } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
       
-      if (file.size > 8 * 1024 * 1024) throw new Error("Image is too large even after compression. Please use a smaller image.");
+      if (compressedFile.size > 8 * 1024 * 1024) throw new Error("Image is too large even after compression. Please use a smaller image.");
         const fileExt = file.name.split('.').pop() || 'jpg';
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
-        const { data, error } = await supabase.storage.from('product-images').upload(fileName, file);
+        const { data, error } = await supabase.storage.from('product-images').upload(fileName, compressedFile);
         if (error) throw new Error("Upload failed: " + error.message);
         
         const { data: publicData } = supabase.storage.from('product-images').getPublicUrl(fileName);
