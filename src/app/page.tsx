@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Truck, ShieldCheck, Star, ChevronRight, Gift, Blinds, Sun, Shield, Menu } from "lucide-react";
+import { Truck, ShieldCheck, Star, ChevronRight, ChevronLeft, Gift, Blinds, Sun, Shield, Menu } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -8,18 +8,26 @@ import { AutoScrollingCategories } from "@/components/AutoScrollingCategories";
 
 export const revalidate = 0;
 
-export default async function Home() {
+export default async function Home({ searchParams }: { searchParams: { page?: string } }) {
   const supabase = await createClient();
 
-  const { data: rawProducts } = await supabase
+  const page = parseInt(searchParams.page || "1");
+  const limit = 20;
+  const start = (page - 1) * limit;
+  const end = start + limit - 1;
+
+  const { data: rawProducts, count } = await supabase
     .from("products")
-    .select("*")
+    .select("*, stores(store_name)", { count: "exact" })
     .eq('approval_status', 'approved')
     .eq('is_active', true)
-    .limit(100);
+    .order('created_at', { ascending: false })
+    .range(start, end);
     
-  // Randomly shuffle products and take 20 for the homepage
-  const products = rawProducts ? [...rawProducts].sort(() => Math.random() - 0.5).slice(0, 20) : [];
+  const products = rawProducts || [];
+  const totalPages = Math.ceil((count || 0) / limit);
+  const hasNext = page < totalPages;
+  const hasPrev = page > 1;
 
   const { data: dbCategories } = await supabase.from("categories").select("*").order("created_at");
   const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
@@ -149,13 +157,23 @@ export default async function Home() {
             </div>
             
             {/* View All Button */}
-            <div className="flex justify-center mt-10 mb-4">
-              <Link href="/shop">
-                <Button size="lg" className="bg-slate-900 hover:bg-slate-800 text-white font-bold px-8 h-12 shadow-md rounded-full flex items-center gap-2">
-                  View All Products <ChevronRight className="w-5 h-5" />
-                </Button>
-              </Link>
-            </div>
+            <div className="flex justify-between items-center mt-10 mb-4 px-2">
+                <div className="text-sm font-semibold text-slate-500">
+                  Page {page} of {totalPages || 1}
+                </div>
+                <div className="flex gap-2">
+                  <Link href={hasPrev ? `/?page=${page - 1}` : '#'} className={!hasPrev ? 'pointer-events-none opacity-50' : ''}>
+                    <Button variant="outline" size="lg" className="font-bold border-2">
+                      <ChevronLeft className="w-5 h-5 mr-1" /> Previous
+                    </Button>
+                  </Link>
+                  <Link href={hasNext ? `/?page=${page + 1}` : '#'} className={!hasNext ? 'pointer-events-none opacity-50' : ''}>
+                    <Button variant="outline" size="lg" className="font-bold border-2 text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
+                      Next <ChevronRight className="w-5 h-5 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
           </CardContent>
         </Card>
       </section>

@@ -45,6 +45,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
 
   // Local Selection State
   const [selectedColor, setSelectedColor] = useState(colors[0] || "");
+  const [selectedColor, setSelectedColor] = useState(colors[0] || "");
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");
@@ -241,20 +242,42 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
               basePrice={Number(product.base_selling_price) || 0} 
               onConfigChange={setCustomConfig} 
             />
-          ) : sizes.length > 0 && (
-            <div className="space-y-3">
-              <Label className="text-base font-bold text-slate-900">Select Size / Dimension</Label>
-              <div className="flex flex-wrap gap-2">
-                {sizes.map((s: string, idx: number) => (
-                  <button 
-                    key={idx} 
-                    onClick={() => setSelectedSize(s)}
-                    className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${selectedSize === s ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-700 hover:border-slate-300"}`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
+          ) : (sizes.length > 0 || colors.length > 0) && (
+            <div className="space-y-6">
+              
+              {colors.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-base font-bold text-slate-900">Select Color</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((c: string, idx: number) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => setSelectedColor(c)}
+                        className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${selectedColor === c ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-700 hover:border-slate-300"}`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {sizes.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-base font-bold text-slate-900">Select Size / Dimension</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {sizes.map((s: string, idx: number) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => setSelectedSize(s)}
+                        className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${selectedSize === s ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-700 hover:border-slate-300"}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
