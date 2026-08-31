@@ -589,12 +589,12 @@ export default function AddProductPage() {
               
               <div className="flex items-center gap-2 pt-2">
                 <input type="checkbox" id="featured" className="w-4 h-4 rounded text-blue-600" checked={formData.is_featured} onChange={e => setFormData({...formData, is_featured: e.target.checked})} />
-                <Label htmlFor="featured" className="font-normal cursor-pointer">Featured Product</Label>
+                <Label htmlFor="featured" className="font-normal cursor-pointer">Tag as "Designer's Pick"</Label>
               </div>
               
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="bundle" className="w-4 h-4 rounded text-blue-600" checked={formData.is_bundle} onChange={e => setFormData({...formData, is_bundle: e.target.checked})} />
-                <Label htmlFor="bundle" className="font-normal cursor-pointer">This is a Gift Bundle</Label>
+                <Label htmlFor="bundle" className="font-normal cursor-pointer">Tag as "Premium Quality"</Label>
               </div>
             </CardContent>
           </Card>

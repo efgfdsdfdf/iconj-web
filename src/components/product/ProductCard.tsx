@@ -61,9 +61,9 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
             </span>
           )}
           {!isOutOfStock && isBundle && (
-            <span className="bg-blue-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
-              Bundle
-            </span>
+            <span className="bg-slate-900 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+                Premium Quality
+              </span>
           )}
         </div>
       </Link>

@@ -184,7 +184,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
               <Link href="/onboarding/seller" className="hover:text-blue-600 hover:underline">Sell on ICON</Link>
             )}
             <Link href="/track" className="hover:text-blue-600">Track Order</Link>
-            <Link href="/shop?bundle=true" className="hover:text-rose-600 text-rose-500 font-bold">Shop Gift Bundles</Link>
+            <Link href="/shop?bundle=true" className="hover:text-blue-600 text-blue-500 font-bold">Premium Collection</Link>
           </div>
         </div>
       </div>
