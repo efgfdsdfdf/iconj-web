@@ -68,7 +68,13 @@ export default function EditProductPage() {
   useEffect(() => {
     if (!id) return;
     const fetchProduct = async () => {
-      const { data, error } = await supabase.from("products").select("*, product_configuration_rules(*)").eq("id", id).single();
+      
+        // Fetch via API route to bypass RLS infinite recursion bug on product_configuration_rules
+        const res = await fetch(`/api/admin/products/${id}`);
+        const json = await res.json();
+        const data = json.success ? json.data : null;
+        const error = json.success ? null : new Error(json.error);
+
       if (data) {
         setFormData({
           name: data.name || "",

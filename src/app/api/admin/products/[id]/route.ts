@@ -38,3 +38,15 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ success: false, error: err.message || "Failed to update product" }, { status: 500 });
   }
 }
+
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params;
+    const { data, error } = await supabaseAdmin.from("products").select("*, product_configuration_rules(*)").eq("id", id).single();
+    if (error) return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    return NextResponse.json({ success: true, data });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
