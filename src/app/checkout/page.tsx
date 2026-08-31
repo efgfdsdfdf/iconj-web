@@ -60,7 +60,8 @@ export default function CheckoutPage() {
               street: addresses[0].street,
               city: addresses[0].city,
               state: addresses[0].state,
-                phone: addresses[0].phone
+                phone: addresses[0].phone,
+                name: addresses[0].label
             });
             setUseSavedAddress(true);
           }
@@ -107,7 +108,8 @@ export default function CheckoutPage() {
           street: selected.street,
           city: selected.city,
           state: selected.state,
-            phone: selected.phone
+            phone: selected.phone,
+            name: selected.label
         });
         setUseSavedAddress(true);
       }
@@ -129,7 +131,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({ 
           email: formData.email, 
           userId: userId,
-          name: `${formData.firstName} ${formData.lastName}`.trim(),
+          name: isNewAddress ? `${formData.firstName} ${formData.lastName}`.trim() : (selectedAddr?.label || `${formData.firstName} ${formData.lastName}`.trim()),
           phone: isNewAddress ? formData.phone : (selectedAddr?.phone || formData.phone),
           address: isNewAddress ? {
             street: formData.address,
@@ -250,7 +252,7 @@ export default function CheckoutPage() {
                     <div className="flex items-start gap-3 p-4 border rounded-lg bg-blue-50/50 border-blue-100">
                       <div className="mt-1"><ShieldCheck className="w-5 h-5 text-blue-600" /></div>
                       <div>
-                        <p className="font-bold text-slate-900">{formData.firstName} {formData.lastName}</p>
+                        <p className="font-bold text-slate-900">{savedAddress?.name && savedAddress.name !== 'Home' && savedAddress.name !== 'Office' ? savedAddress.name : `${formData.firstName} ${formData.lastName}`.trim() || 'No Name Provided'}</p>
                         <p className="text-sm text-slate-600 mt-1">{savedAddress.street}, {savedAddress.city}, {savedAddress.state}</p>
                         <p className="text-sm text-slate-600 mt-1">{savedAddress.phone || formData.phone}</p>
                       </div>

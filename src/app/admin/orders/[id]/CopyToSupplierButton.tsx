@@ -26,13 +26,15 @@ export function CopyToSupplierButton({ item, address }: { item: any, address?: a
     
     if (config.custom_notes) specs.push(`Notes: ${config.custom_notes}`);
 
+    let addressBlock = "";
+    if (address) {
+      const customerName = (address.name || "").trim() || "N/A";
+      addressBlock = `\n\nShipping Address:\nName: ${customerName}\nPhone: ${address.phone || "N/A"}\nStreet: ${address.street || "N/A"}\nCity/State: ${address.city || ""}${address.state ? `, ${address.state}` : ""}, Nigeria`;
+    }
+
     const detailsBlock = specs.length > 0 ? `\nDetails:\n${specs.join('\n')}` : "";
 
-    const textToCopy = `Order Request
-Product: ${config.product_name || item.product?.name || "Unknown Product"}
-SKU: ${sku}
-Quantity: ${item.quantity}
-${url ? `Product URL: ${url}` : ''}${detailsBlock}`;
+    const textToCopy = `Order Request\nProduct: ${config.product_name || item.product?.name || "Unknown Product"}\nSKU: ${sku}\nQuantity: ${item.quantity}\n${url ? `Product URL: ${url}` : ''}${detailsBlock}${addressBlock}`;
 
     navigator.clipboard.writeText(textToCopy).then(() => {
       setCopied(true);

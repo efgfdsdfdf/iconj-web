@@ -44,8 +44,8 @@ export function AddressForm() {
       {error && <div className="p-3 bg-red-50 text-red-600 rounded text-sm">{error}</div>}
       
       <div className="space-y-2">
-        <Label>Address Label (e.g. Home, Office)</Label>
-        <Input name="label" required placeholder="Home" value={formData.label} onChange={e => setFormData({...formData, label: e.target.value})} />
+        <Label>Receiver's Full Name (e.g. John Doe)</Label>
+        <Input name="label" required placeholder="John Doe" value={formData.label} onChange={e => setFormData({...formData, label: e.target.value})} />
       </div>
 
       <div className="space-y-2">
