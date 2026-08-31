@@ -391,9 +391,11 @@ export default function AddProductPage() {
                       rows.forEach(row => {
                         const cells = Array.from(row.querySelectorAll('td, th')).map(c => c.textContent?.trim().replace(/:$/, '') || "");
                         // Process multi-column rows (e.g. 4 cells = 2 pairs)
-                        for (let i = 0; i < cells.length - 1; i += 2) {
-                          if (cells[i] || cells[i+1]) {
-                            newSpecs.push({ key: cells[i], value: cells[i+1] });
+                        for (let i = 0; i < cells.length; i += 2) {
+                          let k = cells[i] || '';
+                          let v = cells[i+1] || '';
+                          if (k || v) {
+                            newSpecs.push({ key: k, value: v });
                           }
                         }
                       });
@@ -419,30 +421,34 @@ export default function AddProductPage() {
                       rawTokens.forEach(t => {
                         // Split by colon if it clearly divides a key/value
                         if (t.includes(':')) {
-                           const parts = t.split(':');
-                           if (parts.length === 2 && parts[0].trim() && parts[1].trim()) {
-                              processedTokens.push(parts[0].trim());
-                              processedTokens.push(parts[1].trim());
-                              return;
-                           }
+                          const colonIndex = t.indexOf(':');
+                          const k = t.substring(0, colonIndex).trim();
+                          const v = t.substring(colonIndex + 1).trim();
+                          if (k && v) {
+                            processedTokens.push(k);
+                            processedTokens.push(v);
+                            return;
+                          }
                         }
                         
                         // Split by tab or multiple spaces. NEVER split on single spaces!
                         const spaceParts = t.split(/\s{2,}|\t/);
                         if (spaceParts.length > 1) {
-                           spaceParts.forEach(p => {
-                              if (p.trim()) processedTokens.push(p.trim());
-                           });
-                           return;
+                          spaceParts.forEach(p => {
+                            if (p.trim()) processedTokens.push(p.trim());
+                          });
+                          return;
                         }
                         
                         processedTokens.push(t);
                       });
                       
-                      for (let i = 0; i < processedTokens.length - 1; i += 2) {
+                      for (let i = 0; i < processedTokens.length; i += 2) {
                         let k = processedTokens[i].replace(/:$/, '').trim();
-                        let v = processedTokens[i+1].trim();
-                        newSpecs.push({ key: k, value: v });
+                        let v = (processedTokens[i+1] || '').trim();
+                        if (k || v) {
+                          newSpecs.push({ key: k, value: v });
+                        }
                       }
                     }
                     
