@@ -147,7 +147,7 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
     setUploadingImage(true);
     try {
       const compressedFile = await compressImage(file);
-      if (compressedFile.size > 8 * 1024 * 1024) throw new Error("Image is too large even after compression. Please use a smaller image.");
+      
       
       const fileExt = compressedFile.name.split('.').pop() || 'jpg';
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
