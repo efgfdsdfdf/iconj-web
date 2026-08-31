@@ -14,6 +14,47 @@ import { ChevronLeft, Plus, Trash2, UploadCloud, CheckCircle2 , ArrowRightLeft} 
 import Link from "next/link";
 
 export default function AddProductPage() {
+
+    const compressImage = async (file: File): Promise<File> => {
+      if (!file.type.startsWith('image/') || file.type === 'image/svg+xml') return file;
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new window.Image();
+          img.src = event.target?.result as string;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 1600;
+            const MAX_HEIGHT = 1600;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > height) {
+              if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+            } else {
+              if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) ctx.drawImage(img, 0, 0, width, height);
+            
+            canvas.toBlob((blob) => {
+              if (blob) {
+                resolve(new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".jpg", { type: "image/jpeg" }));
+              } else {
+                resolve(file);
+              }
+            }, 'image/jpeg', 0.85);
+          };
+          img.onerror = () => resolve(file);
+        };
+        reader.onerror = () => resolve(file);
+      });
+    };
+
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
@@ -79,15 +120,15 @@ export default function AddProductPage() {
   }, [formData.product_cost, formData.shipping_cost]);
 
   // Image Handling
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const filesArray = Array.from(e.target.files);
-      setImageFiles(prev => [...prev, ...filesArray]);
-      
-      const previews = filesArray.map(file => URL.createObjectURL(file));
-      setImagePreviews(prev => [...prev, ...previews]);
-    }
-  };
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files) {
+        const filesArray = Array.from(e.target.files);
+        const compressedFiles = await Promise.all(filesArray.map(f => compressImage(f)));
+        setImageFiles(prev => [...prev, ...compressedFiles]);
+        const previews = compressedFiles.map(file => URL.createObjectURL(file));
+        setImagePreviews(prev => [...prev, ...previews]);
+      }
+    };
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
@@ -127,13 +168,12 @@ export default function AddProductPage() {
     try {
       // 1. Upload images via API route (no Server Action — avoids serialization issues)
       const uploadedUrls: string[] = [];
-      for (const file of imageFiles) {
+      for (let file of imageFiles) {
+          file = await compressImage(file);
         const fd = new FormData();
         fd.append("file", file);
         
-          if (file.size > 4.5 * 1024 * 1024) {
-            throw new Error(`Image ${file.name} is too large (${(file.size/1024/1024).toFixed(1)}MB). Supabase and Vercel have strict 4.5MB limits. Please compress it using tinypng.com before uploading.`);
-          }
+          if (file.size > 8 * 1024 * 1024) throw new Error("Image is too large even after compression. Please use a smaller image.");
           const fileExt = file.name.split(".").pop() || "jpg";
           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
           

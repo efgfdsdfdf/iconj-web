@@ -105,12 +105,11 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
     
     setUploadingImage(true);
     try {
+      file = await compressImage(file);
       const formData = new FormData();
       formData.append('file', file);
       
-      if (file.size > 4.5 * 1024 * 1024) {
-          throw new Error(`Image ${file.name} is too large (${(file.size/1024/1024).toFixed(1)}MB). Please compress it using tinypng.com to be under 4.5MB.`);
-        }
+      if (file.size > 8 * 1024 * 1024) throw new Error("Image is too large even after compression. Please use a smaller image.");
         const fileExt = file.name.split('.').pop() || 'jpg';
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         
