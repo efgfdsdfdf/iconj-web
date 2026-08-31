@@ -206,7 +206,14 @@ export default function EditProductPage() {
       // 2. Build product payload
       const productCost = parseFloat(formData.product_cost) || 0;
       const shippingCost = parseFloat(formData.shipping_cost) || 0;
-      const payload = {
+      
+        // Clean base64 images from description to prevent 413 Payload Too Large from Vercel
+        let cleanDescription = formData.description || "";
+        if (cleanDescription.includes("data:image")) {
+          cleanDescription = cleanDescription.replace(/<img[^>]*src=["']data:image[^>]*>/gi, "");
+          cleanDescription = cleanDescription.replace(/url\(['"]?data:image[^)]+\)/gi, "none");
+        }
+        const payload = {
         name: formData.name || "",
           sku: formData.sku || "",
         category: formData.category || "",
@@ -226,7 +233,7 @@ export default function EditProductPage() {
           supplier_product_url: formData.supplier_product_url || null,
           colors: formData.available_colors ? formData.available_colors.split(',').map(c => c.trim()).filter(Boolean) : []
         },
-        description: formData.description || "",
+        description: cleanDescription,
           enable_custom_measurements: formData.enable_custom_measurements,
           motorization_fee: formData.motorization_fee,
           installation_fee: formData.installation_fee,
