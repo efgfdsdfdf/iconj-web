@@ -148,7 +148,7 @@ export default function SellerAddProductPage() {
           name: formData.name,
           sku: formData.sku,
           selling_price: formData.selling_price,
-          description: formData.description,
+          description: (formData.description || "").replace(/data:image\/[^"\'\s>)]+/gi, "").replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, ""),
           stock_status: formData.stock_status,
           category_id: formData.category_id,
           category: categoryName,
@@ -162,7 +162,7 @@ export default function SellerAddProductPage() {
         });
 
         if (payloadStr.length > 4 * 1024 * 1024) {
-          throw new Error("Product data is too large to save. Please shorten the description or remove images.");
+          throw new Error("Product data is too large to save (" + (payloadStr.length/1024/1024).toFixed(2) + "MB). The text you pasted contains massive hidden images. Please clear the description and try again.");
         }
         
         const res = await fetch('/api/seller/products', {

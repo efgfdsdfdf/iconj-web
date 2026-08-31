@@ -147,11 +147,10 @@ export default function AddProductPage() {
       const productCost = parseFloat(formData.product_cost) || 0;
       const shippingCost = parseFloat(formData.shipping_cost) || 0;
       
-        // Clean base64 images from description to prevent 413 Payload Too Large from Vercel
-        let cleanDescription = formData.description || "";
-        if (cleanDescription.includes("data:image")) {
-          cleanDescription = cleanDescription.replace(/<img[^>]*src=["']data:image[^>]*>/gi, "");
-          cleanDescription = cleanDescription.replace(/url\(['"]?data:image[^)]+\)/gi, "none");
+                  // Clean base64 images from description to prevent 413 Payload Too Large from Vercel
+          let cleanDescription = formData.description || "";
+          cleanDescription = cleanDescription.replace(/data:image\/[^"'\s>)]+/gi, "");
+          cleanDescription = cleanDescription.replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, "");
         }
         const payload = {
         name: formData.name || "",
@@ -193,7 +192,7 @@ export default function AddProductPage() {
       // 3. Create product via API route
       const payloadStr = JSON.stringify(payload);
         if (payloadStr.length > 4 * 1024 * 1024) {
-          throw new Error("Product data is too large to save (exceeds 4MB). Please remove some text or images from the description.");
+          throw new Error("Product data is too large to save (" + (payloadStr.length/1024/1024).toFixed(2) + "MB). The text you pasted contains massive hidden images. Please clear the description and try again.");
         }
         
         const res = await fetch("/api/admin/products?v=2", {
