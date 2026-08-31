@@ -139,6 +139,7 @@ export default function AddProductPage() {
       const shippingCost = parseFloat(formData.shipping_cost) || 0;
       const payload = {
         name: formData.name || "",
+          sku: formData.sku || "",
         category: formData.category || "",
         base_supplier_cost: productCost + shippingCost,
         base_selling_price: parseFloat(formData.selling_price) || 0,
@@ -156,12 +157,16 @@ export default function AddProductPage() {
           colors: formData.available_colors ? formData.available_colors.split(',').map(c => c.trim()).filter(Boolean) : []
         },
         description: formData.description || "",
+          enable_custom_measurements: formData.enable_custom_measurements,
+          motorization_fee: formData.motorization_fee,
+          installation_fee: formData.installation_fee,
         supplier_id: formData.supplier_id || null,
         supplier_sku: formData.supplier_sku || null,
         brand: formData.brand || null,
         age_range: formData.age_range || null,
         safety_info: formData.safety_info || null,
-        is_bundle: formData.is_bundle,
+        is_featured: !!formData.is_featured,
+          is_bundle: !!formData.is_bundle,
         is_retail_enabled: formData.is_retail_enabled,
         is_wholesale_enabled: formData.is_wholesale_enabled,
         stock_status: formData.stock_status || "In Stock",
