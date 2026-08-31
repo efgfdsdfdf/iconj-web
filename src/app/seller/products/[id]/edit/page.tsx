@@ -108,12 +108,24 @@ export default function SellerEditProductPage({ params }: { params: Promise<{ id
       const formData = new FormData();
       formData.append('file', file);
       
-      const res = await fetch('/api/seller/upload', {
-        method: 'POST',
-        body: formData,
-      });
-      
-      const result = await res.json();
+      if (file.size > 4 * 1024 * 1024) {
+          throw new Error("Image " + file.name + " is too large (Max 4MB).");
+        }
+        
+        const res = await fetch('/api/seller/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!res.ok) {
+          const text = await res.text();
+          let errorMessage = text;
+          try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
+          if (text.includes("Request Entity Too Large")) errorMessage = "Image is too large for the server (Max 4MB).";
+          throw new Error(errorMessage);
+        }
+        
+        const result = await res.json();
       if (!res.ok) throw new Error(result.error || 'Upload failed');
       
       setImages([...images, result.url]);

@@ -128,8 +128,20 @@ export default function AddProductPage() {
       for (const file of imageFiles) {
         const fd = new FormData();
         fd.append("file", file);
-        const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
-        const result = await res.json();
+        if (file.size > 4 * 1024 * 1024) {
+            throw new Error(`Image ${file.name || 'pasted image'} is too large. Max size is 4MB.`);
+          }
+          const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+          
+          if (!res.ok) {
+            const text = await res.text();
+            let errorMessage = text;
+            try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
+            if (text.includes("Request Entity Too Large")) errorMessage = "Image is too large for the server (Max 4MB).";
+            throw new Error("Image upload failed: " + errorMessage);
+          }
+          
+          const result = await res.json();
         if (!res.ok || !result.url) throw new Error("Image upload failed: " + (result.error || "Unknown error"));
         uploadedUrls.push(result.url);
       }
@@ -182,12 +194,26 @@ export default function AddProductPage() {
       };
 
       // 3. Create product via API route
-      const res = await fetch("/api/admin/products", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const result = await res.json();
+      const payloadStr = JSON.stringify(payload);
+        if (payloadStr.length > 4 * 1024 * 1024) {
+          throw new Error("Product data is too large to save (exceeds 4MB). Please remove some text or images from the description.");
+        }
+        
+        const res = await fetch("/api/admin/products", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payloadStr,
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          let errorMessage = text;
+          try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
+          if (text.includes("Request Entity Too Large")) errorMessage = "Product data is too large for the server.";
+          throw new Error("Failed to save product: " + errorMessage);
+        }
+        
+        const result = await res.json();
       if (!res.ok || !result.success) throw new Error(result.error || "Failed to create product");
 
       setSuccess(true);

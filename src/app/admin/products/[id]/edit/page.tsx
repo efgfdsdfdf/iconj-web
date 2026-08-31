@@ -196,7 +196,19 @@ export default function EditProductPage() {
           // It's a new file, upload it
           const fd = new FormData();
           fd.append("file", file);
+          if (file.size > 4 * 1024 * 1024) {
+            throw new Error(`Image ${file.name || 'pasted image'} is too large. Max size is 4MB.`);
+          }
           const res = await fetch("/api/admin/upload-image", { method: "POST", body: fd });
+          
+          if (!res.ok) {
+            const text = await res.text();
+            let errorMessage = text;
+            try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
+            if (text.includes("Request Entity Too Large")) errorMessage = "Image is too large for the server (Max 4MB).";
+            throw new Error("Image upload failed: " + errorMessage);
+          }
+          
           const result = await res.json();
           if (!res.ok || !result.url) throw new Error("Image upload failed: " + (result.error || "Unknown error"));
           uploadedUrls.push(result.url);
@@ -252,12 +264,26 @@ export default function EditProductPage() {
       };
 
       // 3. Update product via API route
-      const res = await fetch(`/api/admin/products/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const result = await res.json();
+      const payloadStr = JSON.stringify(payload);
+        if (payloadStr.length > 4 * 1024 * 1024) {
+          throw new Error("Product data is too large to save (exceeds 4MB). Please remove some text or images from the description.");
+        }
+        
+        const res = await fetch(`/api/admin/products/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: payloadStr,
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          let errorMessage = text;
+          try { errorMessage = JSON.parse(text).error || text; } catch(e) {}
+          if (text.includes("Request Entity Too Large")) errorMessage = "Product data is too large for the server.";
+          throw new Error("Failed to save product: " + errorMessage);
+        }
+        
+        const result = await res.json();
       if (!res.ok || !result.success) throw new Error(result.error || "Failed to update product");
 
       setSuccess(true);
