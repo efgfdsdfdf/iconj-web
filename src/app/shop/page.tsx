@@ -44,7 +44,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     const selectedCat = categories?.find(c => c.id === category);
     if (selectedCat && selectedCat.name) {
       const safeName = selectedCat.name.replace(/,/g, '');
-      query = query.or(`category_id.eq.${category},category.eq.${safeName}`);
+      query = query.or(`category_id.eq.${category},category.ilike.%${safeName.trim()}%`);
     } else {
       query = query.eq('category_id', category);
     }
