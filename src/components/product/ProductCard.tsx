@@ -33,6 +33,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
   const isBundle = product.metadata?.is_bundle || product.is_bundle;
   const ageRange = product.metadata?.age_range || product.age_range;
   const isOutOfStock = product.stock_status === "Out of Stock";
+  const compareAtPrice = Number(product.variants?.compare_at_price) || 0;
 
   return (
     <div 
@@ -53,6 +54,11 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
           {isOutOfStock && (
             <span className="bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm uppercase tracking-wide">
               Out of Stock
+            </span>
+          )}
+          {!isOutOfStock && compareAtPrice > 0 && compareAtPrice > (product.base_selling_price || 0) && (
+            <span className="bg-rose-500 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm">
+              -{Math.round(((compareAtPrice - (product.base_selling_price || 0)) / compareAtPrice) * 100)}%
             </span>
           )}
           {!isOutOfStock && isFeatured && (
@@ -81,7 +87,12 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
           )}
         </Link>
         <div className="mt-auto pt-2 flex flex-col gap-2">
-          <p className="font-black text-rose-600 text-sm md:text-base">₦{product.base_selling_price?.toLocaleString() || "0"}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-black text-rose-600 text-sm md:text-base">₦{product.base_selling_price?.toLocaleString() || "0"}</p>
+            {compareAtPrice > 0 && compareAtPrice > (product.base_selling_price || 0) && (
+              <p className="text-[11px] text-slate-400 line-through">₦{compareAtPrice.toLocaleString()}</p>
+            )}
+          </div>
           <Button 
             disabled={isOutOfStock}
             className={`w-full text-xs py-1 h-8 shadow-sm flex items-center justify-center gap-1.5 

@@ -92,7 +92,7 @@ export default function AddProductPage() {
   const [moq, setMoq] = useState<number | "">(1);
   const [formData, setFormData] = useState({
     name: "", sku: "", category: "", available_colors: "", enable_custom_measurements: true, motorization_fee: "15000", installation_fee: "5000",
-    product_cost: "", shipping_cost: "", selling_price: "",
+    product_cost: "", shipping_cost: "", selling_price: "", compare_at_price: "",
     stock_status: "In Stock", description: "",
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
     brand: "", age_range: "", safety_info: "",
@@ -210,6 +210,7 @@ export default function AddProductPage() {
         images: uploadedUrls,
         variants: { 
           supplier_product_url: formData.supplier_product_url || null,
+            compare_at_price: formData.compare_at_price ? parseFloat(formData.compare_at_price) : null,
           colors: formData.available_colors ? formData.available_colors.split(',').map(c => c.trim()).filter(Boolean) : []
         },
         description: cleanDescription,
