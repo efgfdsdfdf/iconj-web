@@ -181,12 +181,12 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
                   Page {page} of {totalPages || 1}
                 </div>
                 <div className="flex gap-2">
-                  <Link href={hasPrev ? `/?page=${page - 1}&seed=${currentSeed}` : '#'} className={!hasPrev ? 'pointer-events-none opacity-50' : ''}>
+                  <Link href={hasPrev ? `/iconj?page=${page - 1}&seed=${currentSeed}` : '#'} className={!hasPrev ? 'pointer-events-none opacity-50' : ''}>
                     <Button variant="outline" size="lg" className="font-bold border-2">
                       <ChevronLeft className="w-5 h-5 mr-1" /> Previous
                     </Button>
                   </Link>
-                  <Link href={hasNext ? `/?page=${page + 1}&seed=${currentSeed}` : '#'} className={!hasNext ? 'pointer-events-none opacity-50' : ''}>
+                  <Link href={hasNext ? `/iconj?page=${page + 1}&seed=${currentSeed}` : '#'} className={!hasNext ? 'pointer-events-none opacity-50' : ''}>
                     <Button variant="outline" size="lg" className="font-bold border-2 text-blue-600 border-blue-200 bg-blue-50 hover:bg-blue-100 hover:text-blue-700">
                       Next <ChevronRight className="w-5 h-5 ml-1" />
                     </Button>
