@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 
 export function Footer() {
   const pathname = usePathname();
-  if (pathname === '/iconj') return null;
+  
 
   return (
     <footer className="border-t bg-blue-50 text-blue-900 py-12">

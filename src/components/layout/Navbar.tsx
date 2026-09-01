@@ -161,7 +161,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
 
   const cartCount = items.reduce((total, item) => total + item.quantity, 0);
 
-  if (pathname === '/iconj') return null;
+  
 
   return (
     <div className="w-full">
