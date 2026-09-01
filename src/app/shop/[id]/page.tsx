@@ -98,7 +98,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
       <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center text-xs font-medium text-slate-500 overflow-x-auto whitespace-nowrap">
-            <Link href="/" className="hover:text-blue-600">Home</Link>
+            <Link href="/iconj" className="hover:text-blue-600">Home</Link>
             <ChevronRight className="w-3 h-3 mx-2 shrink-0" />
             <Link href="/shop" className="hover:text-blue-600">Products</Link>
             <ChevronRight className="w-3 h-3 mx-2 shrink-0" />

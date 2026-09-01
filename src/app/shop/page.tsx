@@ -142,7 +142,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           {/* Breadcrumb */}
           <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
             <div className="container mx-auto px-4 py-3 flex items-center text-xs font-medium text-slate-500">
-              <Link href="/" className="hover:text-blue-600">Home</Link>
+              <Link href="/iconj" className="hover:text-blue-600">Home</Link>
               <ChevronRight className="w-3 h-3 mx-2 shrink-0" />
               <span className="text-slate-900 truncate">{q ? `Search Results for "${q}"` : category ? categories?.find(c => c.id === category)?.name || "Category" : "All Products"}</span>
             </div>
