@@ -16,7 +16,12 @@ export async function requestWithdrawal(formData: FormData) {
       return { error: 'Not authenticated' };
     }
 
-    const { data: seller } = await supabase
+    const adminSupabase = createAdminClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { data: seller } = await adminSupabase
       .from('sellers')
       .select('id')
       .eq('profile_id', user.id)
@@ -33,7 +38,7 @@ export async function requestWithdrawal(formData: FormData) {
       return { error: 'Invalid amount' };
     }
 
-    const { data: settings } = await supabase
+    const { data: settings } = await adminSupabase
       .from('wallet_settings')
       .select('min_withdrawal_amount, payout_mode')
       .single();
@@ -43,7 +48,7 @@ export async function requestWithdrawal(formData: FormData) {
       return { error: `Minimum withdrawal amount is ₦${minAmount}` };
     }
 
-    const { data: wallet } = await supabase
+    const { data: wallet } = await adminSupabase
       .from('seller_wallets')
       .select('id, available_balance')
       .eq('seller_id', seller.id)
@@ -57,7 +62,7 @@ export async function requestWithdrawal(formData: FormData) {
       return { error: 'Insufficient funds' };
     }
 
-    const { data: existingRequests } = await supabase
+    const { data: existingRequests } = await adminSupabase
       .from('withdrawal_requests')
       .select('id')
       .eq('seller_id', seller.id)
@@ -68,7 +73,7 @@ export async function requestWithdrawal(formData: FormData) {
       return { error: 'You already have a pending withdrawal request' };
     }
 
-    const { data: payoutAccount } = await supabase
+    const { data: payoutAccount } = await adminSupabase
       .from('seller_payout_accounts')
       .select('*')
       .eq('seller_id', seller.id)
@@ -78,11 +83,6 @@ export async function requestWithdrawal(formData: FormData) {
     if (!payoutAccount) {
       return { error: 'No primary payout account found' };
     }
-
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
 
     const requestId = crypto.randomUUID();
 
