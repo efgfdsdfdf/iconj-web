@@ -147,8 +147,8 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
 
       if (profile?.email) {
         // Send approval email
-        const { sendAdminNotification } = await import("@/lib/email");
-        await sendAdminNotification(
+        const { sendEmailTo } = await import("@/lib/email");
+        await sendEmailTo(profile.email, 
           "Your ICONJ Seller Account is Approved!",
           `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; line-height: 1.6;">
