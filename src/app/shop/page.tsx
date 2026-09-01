@@ -109,7 +109,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
             </div>
           </div>
           <div className="mb-8 border-b shadow-sm bg-white">
-            <AutoScrollingCategories categories={categories.filter(c => c.icon !== 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80')} filter="wholesale" />
+            <AutoScrollingCategories categories={categories} filter="wholesale" />
           </div>
         </>
       ) : (
@@ -136,7 +136,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           </div>
           
           <div className="border-b shadow-sm bg-white">
-            <AutoScrollingCategories categories={categories.filter(c => c.icon !== 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80')} />
+            <AutoScrollingCategories categories={categories} />
           </div>
           
           {/* Breadcrumb */}
