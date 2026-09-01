@@ -199,7 +199,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
+          <Link href="/iconj" className="flex items-center gap-2 shrink-0">
             <div onClick={handleAdminTap} className="bg-blue-600 text-white p-2 rounded-lg shadow-sm cursor-pointer select-none">
               <Package className="w-6 h-6" />
             </div>
@@ -316,7 +316,7 @@ export function Navbar({ categories = [] }: NavbarProps) {
             
             <nav className="flex-1 overflow-y-auto py-2 bg-slate-50">
               <p className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider bg-slate-100/50">Menu</p>
-              <Link href="/" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Home</Link>
+              <Link href="/iconj" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Home</Link>
               <Link href="/shop" className="block px-4 py-3.5 hover:bg-slate-100 font-medium text-slate-700 border-b border-slate-100">Shop All Products</Link>
               {!sellerStatus && (
                 <Link href="/onboarding/seller" className="block px-4 py-3.5 hover:bg-slate-100 font-bold text-orange-600 border-b border-slate-100">Sell on ICON</Link>
