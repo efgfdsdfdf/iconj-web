@@ -28,17 +28,22 @@ const siteUrl = 'https://iconj-web-rust.vercel.app';
 
 // ─── Low-level email sender ────────────────────────────────────────
 async function sendHtmlEmail(toEmail: string, subject: string, htmlContent: string) {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  if (!(process.env.SMTP_PASS || process.env.EMAIL_PASS)) {
     console.log("Email env vars not configured. Skipping email to " + toEmail);
     return false;
   }
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+      host: process.env.SMTP_HOST || "smtp.resend.com",
+      port: parseInt(process.env.SMTP_PORT || "465"),
+      secure: process.env.SMTP_PORT === "465" || !process.env.SMTP_PORT,
+      auth: { 
+        user: process.env.SMTP_USER || "resend", 
+        pass: process.env.SMTP_PASS || process.env.EMAIL_PASS 
+      },
     });
     await transporter.sendMail({
-      from: `"ICONJ Orders" <${process.env.EMAIL_USER}>`,
+      from: process.env.EMAIL_FROM || '"ICONJ Orders" <support@iconj.com.ng>',
       to: toEmail,
       subject,
       html: htmlContent,
