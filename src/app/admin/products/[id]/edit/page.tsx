@@ -443,6 +443,13 @@ export default function EditProductPage() {
                   <Label>Available Colors (Optional, comma separated)</Label>
                   <Input placeholder="e.g. Red, Blue, Matte Black" value={formData.available_colors || ""} onChange={e => setFormData({...formData, available_colors: e.target.value})} />
                 </div>
+                  
+                  <div className="space-y-2 md:col-span-2 mt-4 p-4 border rounded-lg bg-blue-50/50">
+                    <label className="flex items-center space-x-3 cursor-pointer">
+                      <input type="checkbox" className="w-5 h-5 text-blue-600 rounded border-slate-300" checked={formData.enable_custom_measurements} onChange={e => setFormData({...formData, enable_custom_measurements: e.target.checked})} />
+                      <span className="font-bold text-slate-900">Enable Custom Width & Height (Customers type their own dimensions)</span>
+                    </label>
+                  </div>
                 <div className="space-y-2">
                   <Label>Brand</Label>
                   <Input placeholder="e.g. ICONJ" value={formData.brand} onChange={e => setFormData({...formData, brand: e.target.value})} />
