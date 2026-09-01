@@ -72,7 +72,7 @@ export default async function SellerLayout({ children }: { children: React.React
           <MobileSidebar storeName={seller?.stores?.[0]?.store_name || "My Store"} />
           <h1 className="text-lg font-semibold text-slate-800 md:hidden">Seller Portal</h1>
           <div className="ml-auto flex items-center gap-4">
-            <Link href="/" className="text-sm text-blue-600 hover:underline">Back to Main Site</Link>
+            <Link href="/iconj" className="text-sm text-blue-600 hover:underline">Back to Main Site</Link>
           </div>
         </header>
         <div className="flex-1 p-4 md:p-8 overflow-auto">
