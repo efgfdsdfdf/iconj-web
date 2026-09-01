@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/layout/Navbar";
+import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { Toaster } from "react-hot-toast";
 
 import { Footer } from "@/components/layout/Footer";
@@ -44,13 +45,13 @@ export default async function RootLayout({
       <body className={`${inter.className} min-h-screen flex flex-col overflow-x-hidden w-full`}>
         <SplashScreen />
         <PwaInstallBanner />
-        <Navbar categories={categories} />
+        <ConditionalLayout hideOnPaths={['/']}><Navbar categories={categories} /></ConditionalLayout>
         <main className="flex-1">
           {children}
         <Toaster position="top-center" />
         
         </main>
-        <Footer />
+        <ConditionalLayout hideOnPaths={['/']}><Footer /></ConditionalLayout>
       </body>
     </html>
   );
