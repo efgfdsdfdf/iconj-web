@@ -94,7 +94,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   const images = product.images && product.images.length > 0 ? product.images : [getProductImage(product.category)];
 
   return (
-    <div className="bg-slate-50 min-h-screen pb-12">
+    <div className="bg-slate-50 min-h-screen pb-12 overflow-x-hidden max-w-full w-full">
       <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center text-xs font-medium text-slate-500 overflow-x-auto whitespace-nowrap">
