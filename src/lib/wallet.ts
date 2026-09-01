@@ -160,7 +160,7 @@ export async function creditSellerWallet(sellerId: string, orderId: string, amou
       pending_balance_after: wallet.pending_balance,
       reserved_balance_after: wallet.reserved_balance,
       description,
-      hold_until: null,
+      hold_until: new Date(Date.now() + (settings.hold_period_days * 24 * 60 * 60 * 1000)).toISOString(),
       idempotency_key: idempotencyKey
     }).select().single();
     
