@@ -278,6 +278,26 @@ export function generateStatusEmail(order: any, items: any[], statusType: string
       message = 'Your refund has been processed. Please allow 3-5 business days for the funds to reflect in your account.';
       iconHtml = '&#8634;'; iconBg = '#e0e7ff';
       break;
+    case 'SUPPLIER_CANNOT_FULFILL':
+      heading = 'Action Required: Update Your Customization';
+      message = 'We\'re sorry, but one of the specifications in your customized order is currently unavailable from our supplier. Please log in to your ICONJ account to review the available alternative or contact us so we can help resolve the order.';
+      if (extraData?.unavailable_spec) {
+        message += `<br><br><strong>Unavailable Specification:</strong> ${extraData.unavailable_spec}`;
+      }
+      if (extraData?.alternative_offered) {
+        message += `<br><strong>Alternative Offered:</strong> ${extraData.alternative_offered}`;
+      }
+      if (extraData?.price_difference && Number(extraData.price_difference) !== 0) {
+        message += `<br><strong>Price Difference:</strong> ₦${Number(extraData.price_difference).toLocaleString()}`;
+      }
+      message += `<br><br><a href="https://iconj.com.ng/account/orders/${order.id}" style="display:inline-block;padding:12px 24px;background-color:${BRAND.accent};color:#ffffff;text-decoration:none;border-radius:6px;font-weight:bold;">Review & Choose Alternative</a>`;
+      iconHtml = '&#9888;'; iconBg = '#fef2f2';
+      break;
+    case 'CUSTOMER_ACCEPTED_ALTERNATIVE':
+      heading = 'Alternative Accepted — Order Resuming';
+      message = 'Great news! You\'ve accepted the alternative specification for your order. We\'ve updated the order and it is now being sent back for fulfillment.';
+      iconHtml = '&#10004;'; iconBg = '#dcfce7';
+      break;
     default:
       heading = 'Order Update';
       message = `Your order status has been updated to: ${statusType.replace(/_/g, ' ')}.`;

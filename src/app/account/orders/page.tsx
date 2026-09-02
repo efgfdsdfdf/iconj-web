@@ -26,6 +26,7 @@ export default async function CustomerOrdersPage() {
     .from("orders")
     .select("*, order_items(*, products(name))")
     .eq("user_id", user.id)
+    .eq("payment_status", "PAID")
     .order("created_at", { ascending: false });
 
   const getStatusConfig = (status: string) => {

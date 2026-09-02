@@ -374,6 +374,14 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
             Request Custom Quote
           </Button>
         ) : (
+          <>
+          <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+            <p className="font-semibold text-slate-900 mb-1">Customize this product to suit your space.</p>
+            <p className="text-sm text-slate-600 mb-2">Select your preferred options and provide your measurements before placing your order.</p>
+            <p className="text-sm text-amber-700 font-bold">⚠ PLEASE CHECK YOUR MEASUREMENTS</p>
+            <p className="text-xs text-amber-600 mb-2">Customized orders are fulfilled according to the specifications you submit. Please ensure they are accurate.</p>
+            <p className="text-xs text-slate-500 italic">Please note: ICONJ currently provides the products only. Installation is not included.</p>
+          </div>
           <Button 
             size="lg" 
             onClick={handleAddToCart} 
@@ -386,6 +394,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           >
             {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Customize & Order"}
           </Button>
+          </>
         )}
       </div>
     </div>

@@ -32,7 +32,11 @@ export async function POST(req: NextRequest) {
     // Send email notification (placeholder, depends on order-emails system)
     try {
         const { sendStatusNotification } = await import("@/lib/order-emails");
-        await sendStatusNotification(orderId, "SUPPLIER_CANNOT_FULFILL");
+        await sendStatusNotification(orderId, "SUPPLIER_CANNOT_FULFILL", {
+          unavailable_spec: unavailableSpec,
+          alternative_offered: alternative,
+          price_difference: priceDifference
+        });
     } catch (e) {
         console.error("Failed to send email", e);
     }
