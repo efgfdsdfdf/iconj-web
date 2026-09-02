@@ -336,6 +336,10 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
                         <p className="text-xs text-slate-500">Legal Name</p>
                         <p className="font-medium">{seller.businesses?.business_name}</p>
                       </div>
+                        <div>
+                          <p className="text-xs text-slate-500">Email Address</p>
+                          <p className="font-medium text-blue-600">{seller.profiles?.email}</p>
+                        </div>
                       <div>
                         <p className="text-xs text-slate-500">Store Name</p>
                         <p className="font-medium">{seller.stores?.[0]?.store_name} <span className="text-xs text-slate-400">({seller.stores?.[0]?.slug})</span></p>
