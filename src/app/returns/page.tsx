@@ -22,7 +22,7 @@ export default function ReturnsPage() {
           
           <div className="bg-orange-50 border-l-4 border-orange-500 p-4 rounded-r">
             <p className="font-bold text-slate-900">Important Notice Regarding Custom Products</p>
-            <p className="text-sm mt-1">Many ICONJ products (like curated bundles or specific hygiene products\) are uniquely packaged or subject to hygiene laws. Because these items are uniquely manufactured for you, they cannot be returned simply for a "change of mind" or incorrect sizes ordered by the customer.</p>
+            <p className="text-sm mt-1">Many ICONJ products (like curated bundles or specific hygiene products\) are uniquely packaged or subject to hygiene laws. Because these items are customized to your specifications, they cannot be returned simply for a "change of mind" or incorrect sizes ordered by the customer.</p>
           </div>
 
           <section>
@@ -39,11 +39,11 @@ export default function ReturnsPage() {
 
           <section>
             <h2 className="text-xl font-bold text-slate-900 mb-4">2. Supplier Resolution Process</h2>
-            <p>Because we ship direct from the factory, we work closely with our manufacturing partners to resolve issues. Our suppliers guarantee:</p>
+            <p>Because we work directly with specialized suppliers, we coordinate closely with them to resolve issues. Our suppliers guarantee:</p>
             <blockquote className="border-l-4 border-slate-300 pl-4 italic my-4 text-slate-600 bg-slate-50 py-2 pr-2">
               "We will resend the parts or remake the item, depending on the specific situation."
             </blockquote>
-            <p>If a component is missing or damaged \(e.g., a broken bottle cap or missing toy part\), we will expedite the shipping of a replacement part. If the entire unit is defective or manufactured incorrectly, the item will be remade at no cost to you.</p>
+            <p>If a component is missing or damaged \(e.g., a broken bottle cap or missing toy part\), we will expedite the shipping of a replacement part. If the entire unit is defective or produced incorrectly based on your provided specifications, the item will be remade at no cost to you.</p>
           </section>
 
           <section>
@@ -67,7 +67,7 @@ export default function ReturnsPage() {
                 <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0">3</div>
                 <div>
                   <h3 className="font-bold text-slate-900">Review & Supplier Contact</h3>
-                  <p className="text-sm mt-1">Our support team will review your submission and contact the factory on your behalf immediately.</p>
+                  <p className="text-sm mt-1">Our support team will review your submission and contact the supplier on your behalf immediately.</p>
                 </div>
               </div>
               <div className="flex gap-3">

@@ -98,8 +98,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               </h1>
               <p className="text-blue-100 max-w-2xl text-lg mb-6">
                 {category && categories?.find(c => c.id === category) 
-                  ? `Source premium ${categories.find(c => c.id === category)?.name.toLowerCase()} in bulk directly from manufacturers and official distributors. Enjoy massive discounts and secure payments.`
-                  : "Source premium custom blinds, curtains & window treatments directly from manufacturers and official distributors. Enjoy massive bulk discounts, verified sellers, and secure escrow payments."}
+                  ? `Source premium ${categories.find(c => c.id === category)?.name.toLowerCase()} in bulk directly from trusted suppliers. Enjoy massive discounts and secure payments.`
+                  : "Source premium custom blinds, curtains & window treatments directly from trusted suppliers. Enjoy massive bulk discounts, verified sellers, and secure escrow payments."}
               </p>
               <div className="flex gap-4 items-center text-sm font-medium text-sky-200">
                 <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-amber-400"/> Verified Suppliers</span>

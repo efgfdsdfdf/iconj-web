@@ -30,7 +30,7 @@ export default function HowToMeasurePage() {
             </ul>
             <div className="bg-blue-50 p-4 rounded-md flex items-start gap-3 mt-4">
               <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-              <p className="text-sm text-blue-800">Do not make any deductions. The factory will make the necessary deductions to ensure it fits perfectly without rubbing the sides.</p>
+              <p className="text-sm text-blue-800">Do not make any deductions. The supplier will make the necessary deductions to ensure it fits perfectly without rubbing the sides.</p>
             </div>
           </CardContent>
         </Card>

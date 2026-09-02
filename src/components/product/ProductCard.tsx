@@ -102,7 +102,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
             onClick={handleAddToCart}
           >
             {!isOutOfStock && (added ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />)}
-            {isOutOfStock ? 'Out of Stock' : added ? 'Added!' : 'Add to Cart'}
+            {isOutOfStock ? 'Out of Stock' : added ? 'Added!' : 'Customize'}
           </Button>
         </div>
       </div>

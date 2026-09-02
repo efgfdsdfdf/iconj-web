@@ -10,7 +10,8 @@ export function SellerOrderStatusDropdown({ orderId, currentStatus }: { orderId:
   const [status, setStatus] = useState(currentStatus);
 
   const statuses = [
-    { value: "PROCESSING", label: "Processing" },
+    { value: "PROCESSING", label: "Customization Confirmed / In Fulfillment" },
+    { value: "READY_FOR_PICKUP", label: "Ready for Delivery" },
     { value: "SHIPPED", label: "Shipped" },
     { value: "DELIVERED", label: "Delivered" },
     { value: "CANCELLED", label: "Cancelled" }

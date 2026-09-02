@@ -31,7 +31,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
       max_height_cm: 300,
       motorization_available: true,
       motorization_fee: 15000,
-      installation_available: true,
+      installation_available: false,
       base_installation_fee: 5000
     } : null);
   }, [rules, isBlindOrShade]);
@@ -233,7 +233,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                     </ul>
                     <div className="bg-blue-50 p-3 rounded text-xs text-blue-800 flex gap-2">
                       <Info className="w-4 h-4 shrink-0" />
-                      Do not make deductions. The factory will make them to ensure it fits perfectly.
+                      Do not make deductions. The supplier will make them to ensure it fits perfectly.
                     </div>
                   </div>
                   <div className="border rounded-lg p-5">
@@ -384,7 +384,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
             }`}
           >
-            {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding to Cart..." : "Add to Cart"}
+            {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Customize & Order"}
           </Button>
         )}
       </div>

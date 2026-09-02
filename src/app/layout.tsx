@@ -10,8 +10,8 @@ import { Footer } from "@/components/layout/Footer";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "ICONJ - Premium Blinds, Curtains & Window Treatments",
-  description: "Custom-fitted blinds, elegant curtains, and smart window treatments tailored for your home and office in Nigeria.",
+  title: "ICONJ - Customizable Blinds, Curtains & Window Accessories",
+  description: "Shop customizable window d�cor online. Custom blinds, tailored curtains, and window accessories in Nigeria, ordered your way.",
   appleWebApp: {
     capable: true,
     title: "ICONJ",

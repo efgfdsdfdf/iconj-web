@@ -7,7 +7,7 @@ import { ProductCard } from '@/components/product/ProductCard';
 
 export const metadata = {
   title: 'ICONJ — Blinds, Curtains & Window Solutions',
-  description: 'Shop stylish blinds, curtains and window solutions on ICONJ. Transform your home or office with window treatments designed for comfort, privacy and style.',
+  description: 'ICONJ: Your space, your style. Customizable blinds, curtains & window accessories in Nigeria, ordered your way.',
 };
 
 export default async function IconjInteriorPage() {
@@ -109,13 +109,13 @@ export default async function IconjInteriorPage() {
         
         <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-white text-xs font-bold tracking-widest uppercase mb-8">
-            Beautiful Windows. Better Spaces.
+            YOUR SPACE. YOUR STYLE.
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-tight drop-shadow-lg">
-            Transform Your Windows.<br className="hidden sm:block" /> Transform Your Space.
+            Customizable blinds, curtains & window accessories,<br className="hidden sm:block" /> ordered your way.
           </h1>
           <p className="text-lg sm:text-xl text-slate-200 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow">
-            Discover stylish blinds, curtains and window solutions designed to give your home or office the perfect finish.
+            Choose your preferred style, colour, size and available options. Provide your specifications and we'll coordinate your customized order for fulfillment and delivery.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/shop">
@@ -140,7 +140,7 @@ export default async function IconjInteriorPage() {
             <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
             {categories.map((cat, i) => (
               <Link href={`/shop?q=${cat.name.split(' ')[0]}`} key={i} className="group block relative h-64 overflow-hidden bg-slate-900 rounded-none">
                 <img src={cat.img} alt={cat.name} className="w-full h-full object-cover opacity-80 group-hover:scale-110 group-hover:opacity-60 transition-all duration-700" />
@@ -371,12 +371,13 @@ export default async function IconjInteriorPage() {
             <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             {[
-              { num: '01', title: 'Explore', desc: 'Find the style that fits your space.' },
-              { num: '02', title: 'Choose', desc: 'Select your preferred product & size.' },
-              { num: '03', title: 'Order', desc: 'Complete your order securely.' },
-              { num: '04', title: 'Transform', desc: 'Enjoy a better-looking space.' }
+              { num: '01', title: 'CHOOSE', desc: 'Browse our collection of blinds, curtains and window accessories.' },
+                { num: '02', title: 'CUSTOMIZE', desc: 'Select your preferred colour, size, style and other available options.' },
+                { num: '03', title: 'PROVIDE SPECS', desc: 'Enter your measurements and any additional customization requirements.' },
+                { num: '04', title: 'WE COORDINATE', desc: 'ICONJ sends your specifications to the appropriate supplier for fulfillment.' },
+                { num: '05', title: 'RECEIVE', desc: 'Your customized order is prepared and delivered to you.' }
             ].map((step, i) => (
               <div key={i} className="text-center relative">
                 {i < 3 && <div className="hidden md:block absolute top-10 left-[60%] w-full h-[1px] bg-amber-200"></div>}

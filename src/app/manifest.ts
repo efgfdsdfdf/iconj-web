@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "ICONJ - Premium Window Coverings",
     short_name: "ICONJ",
-    description: "Premium motorized and manual window coverings shipped directly from manufacturer to your door in Nigeria.",
+    description: "Premium motorized and manual window coverings shipped directly from trusted suppliers to your door in Nigeria.",
     start_url: "/iconj",
     display: "standalone",
     background_color: "#ffffff",

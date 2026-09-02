@@ -25,12 +25,12 @@ export default function TermsPage() {
 
           <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">1. Introduction</h2>
           <p>
-            ICONJ Global Services operates a multi-vendor marketplace specializing in Blinds, Curtains, and Window Treatments. We connect customers with manufacturers, wholesalers, installers, and independent sellers.
+            ICONJ Global Services operates a multi-vendor marketplace specializing in Blinds, Curtains, and Window Treatments. We connect customers with wholesalers, suppliers, and independent sellers.
           </p>
 
           <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">2. Seller & Supplier Agreements</h2>
           <p>
-            By registering as a Seller, Manufacturer, or Supplier on ICONJ, you agree to:
+            By registering as a Seller or Supplier on ICONJ, you agree to:
           </p>
           <ul className="list-disc pl-6 space-y-2 marker:text-blue-500">
             <li>Provide accurate representations, custom measurement rules, and pricing for your products.</li>
@@ -45,12 +45,12 @@ export default function TermsPage() {
           </p>
           <ul className="list-disc pl-6 space-y-2 marker:text-blue-500">
             <li>Customers are responsible for providing accurate width and height measurements unless they book an official ICONJ Measurement Service.</li>
-            <li>Custom-cut or specially manufactured items cannot be returned or refunded unless there is a verifiable manufacturing defect.</li>
+            <li>Custom-cut or customized items cannot be returned or refunded unless there is a verifiable production defect.</li>
           </ul>
 
           <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">4. Installation Services</h2>
           <p>
-            Where a customer selects "Delivery + Installation," ICONJ acts as an intermediary connecting the customer with an approved independent installer. ICONJ Global Services is not directly liable for damages incurred during independent installation, though we strictly vet our professionals and enforce a dispute resolution policy.
+            ICONJ currently provides products only. Installation is not included. Customers are responsible for the installation of their customized products.
           </p>
 
           <h2 className="text-xl font-bold text-slate-900 mt-8 mb-4 border-b pb-2">5. Payments and Payouts</h2>

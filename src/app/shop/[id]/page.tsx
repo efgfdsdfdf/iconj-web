@@ -189,7 +189,7 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
                   <div className="w-10 h-10 rounded bg-emerald-50 flex items-center justify-center shrink-0"><ShieldCheck className="w-5 h-5 text-emerald-600" /></div>
                   <div>
                     <h4 className="font-semibold text-sm text-slate-900">Buyer Protection</h4>
-                    <p className="text-xs text-slate-500 mt-1">Guaranteed factory quality. Protected payments via Paystack.</p>
+                    <p className="text-xs text-slate-500 mt-1">Guaranteed quality. Protected payments via Paystack.</p>
                   </div>
                 </div>
               </div>

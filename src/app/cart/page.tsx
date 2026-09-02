@@ -107,7 +107,14 @@ export default function CartPage() {
             <Card className="sticky top-24 border-slate-200 shadow-sm">
               <CardContent className="p-6">
                 <h3 className="text-lg font-bold text-slate-900 mb-4">Order Summary</h3>
-                <div className="space-y-3 text-sm text-slate-600 pb-4 border-b">
+                
+                  <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <p className="text-sm text-amber-800 font-bold mb-1">PLEASE CHECK YOUR MEASUREMENTS</p>
+                    <p className="text-xs text-amber-700">Customized orders are fulfilled according to the specifications submitted here. Please ensure your measurements and selected options are accurate before proceeding.</p>
+                  </div>
+                  
+                  <div className="space-y-3 text-sm text-slate-600 pb-4 border-b">
+
                   <div className="flex justify-between">
                     <span>Subtotal ({items.reduce((acc, i) => acc + i.quantity, 0)} items)</span>
                     <span className="font-medium text-slate-900">₦{getTotalPrice().toLocaleString()}</span>

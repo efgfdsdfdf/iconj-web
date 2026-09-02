@@ -153,8 +153,8 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
             </div>
             <div className="flex-1 rounded-lg overflow-hidden relative shadow-sm bg-blue-50 border border-blue-100 p-5 flex flex-col justify-center group hover:shadow-md transition-all cursor-pointer">
               <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center mb-3 text-blue-600 shadow-sm"><Shield className="w-5 h-5"/></div>
-              <h3 className="font-bold text-slate-900 text-lg mb-1">Expert Installation</h3>
-              <p className="text-xs text-slate-600">Professional measuring and fitting by our certified ICONJ installers.</p>
+              <h3 className="font-bold text-slate-900 text-lg mb-1">Customized Options</h3>
+              <p className="text-xs text-slate-600">Choose the exact specifications for your space.</p>
               <ChevronRight className="w-5 h-5 text-blue-400 absolute bottom-5 right-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
             </div>
           </div>
@@ -215,7 +215,7 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <h3 className="font-bold text-lg mb-2">Premium Materials</h3>
-              <p className="text-sm text-slate-500">Sourced directly from top manufacturers globally for durability and style.</p>
+              <p className="text-sm text-slate-500">Sourced directly from trusted suppliers globally for durability and style.</p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-sm hover:shadow-md transition-shadow">
@@ -223,8 +223,8 @@ export default async function Home(props: { searchParams: Promise<{ [key: string
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 text-blue-600">
                 <Truck className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-lg mb-2">Delivery & Installation</h3>
-              <p className="text-sm text-slate-500">Fast nationwide delivery with optional professional installation available.</p>
+              <h3 className="font-bold text-lg mb-2">Delivery & Fulfillment</h3>
+              <p className="text-sm text-slate-500">Fast nationwide delivery for your customized orders.</p>
             </CardContent>
           </Card>
         </div>

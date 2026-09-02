@@ -67,7 +67,8 @@ export function SellerSubOrdersPanel({ subOrders }: { subOrders: any[] }) {
                       className="text-xs bg-white border border-slate-300 rounded px-2 py-1 text-slate-700 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50"
                     >
                       <option value="PENDING_PAYMENT">Pending Payment</option>
-                      <option value="PROCESSING">Processing</option>
+                      <option value="PROCESSING">Customization Confirmed / In Fulfillment</option>
+                        <option value="READY_FOR_PICKUP">Ready for Delivery</option>
                       <option value="SHIPPED">Shipped</option>
                       <option value="DELIVERED">Delivered</option>
                       <option value="CANCELLED">Cancelled</option>
