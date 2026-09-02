@@ -15,8 +15,7 @@ export async function resetPassword(formData: FormData) {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
   
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 
-                 (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "http://localhost:3000");
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "https://iconj.com.ng";
 
   const { data, error } = await supabaseAdmin.auth.admin.generateLink({
     type: "recovery",
@@ -48,8 +47,7 @@ export async function resetPassword(formData: FormData) {
             <a href="${resetUrl}" style="display: inline-block; background: #0f172a; color: white; padding: 14px 32px; border-radius: 6px; text-decoration: none; font-weight: bold; font-size: 16px;">Reset Password</a>
           </div>
 
-          <p style="color: #64748b; font-size: 13px; margin: 0 0 8px;">If the button doesn't work, copy and paste this link into your browser:</p>
-          <p style="color: #3b82f6; font-size: 12px; margin: 0 0 24px; word-break: break-all;">${resetUrl}</p>
+          
 
           <p style="color: #94a3b8; font-size: 12px; margin: 24px 0 0; text-align: center; border-top: 1px solid #e2e8f0; padding-top: 24px;">ICONJ — Premium Window Coverings</p>
         </div>
