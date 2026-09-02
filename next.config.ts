@@ -14,9 +14,6 @@ const nextConfig: NextConfig = {
     ],
   },
   serverExternalPackages: [],
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
