@@ -625,8 +625,13 @@ export default function AddProductPage() {
               </div>
               
               <div className="pt-4 border-t space-y-2">
-                <Label>Customer Selling Price (?)</Label>
+                <Label>Customer Selling Price (₦)</Label>
                 <Input type="number" required className="font-bold text-lg border-emerald-500 bg-emerald-50/30" value={formData.selling_price} onChange={e => setFormData({...formData, selling_price: e.target.value})} />
+              </div>
+              <div className="pt-2 space-y-2">
+                <Label>Compare at Price (₦)</Label>
+                <Input type="number" value={formData.compare_at_price} onChange={e => setFormData({...formData, compare_at_price: e.target.value})} placeholder="e.g. 25000" />
+                <p className="text-xs text-slate-500">Original price (shows as strikethrough: <s>₦25,000</s>)</p>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-lg space-y-3 text-sm border">
