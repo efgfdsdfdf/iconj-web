@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { ProductCard } from '@/components/product/ProductCard';
 
 export const metadata = {
-  title: 'ICONJ — Blinds, Curtains & Window Solutions',
+  title: 'ICONJ — Customizable Blinds, Curtains & Window Accessories in Nigeria',
   description: 'ICONJ: Your space, your style. Customizable blinds, curtains & window accessories in Nigeria, ordered your way.',
 };
 
@@ -118,14 +118,14 @@ export default async function IconjInteriorPage() {
             Choose your preferred style, colour, size and available options. Provide your specifications and we'll coordinate your customized order for fulfillment and delivery.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/shop">
+            <Link href="/shop?category=blinds">
               <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-none transition-all hover:scale-105">
-                Shop Window Solutions
+                Shop Blinds <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Link href="#collections">
+            <Link href="/shop?category=curtains">
               <Button size="lg" className="w-full sm:w-auto h-14 px-8 text-base font-bold border-2 border-white bg-transparent text-white hover:bg-white hover:text-slate-900 rounded-none transition-all">
-                Explore Collections
+                Shop Curtains
               </Button>
             </Link>
           </div>
@@ -367,7 +367,8 @@ export default async function IconjInteriorPage() {
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">From Window to Wow</h2>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">How ICONJ Works</h2>
+            <p className="text-slate-600 max-w-2xl mx-auto mb-6">Every space is different. Choose the product you love, select your preferred options and provide your measurements and requirements. ICONJ coordinates your customized order based on the specifications you provide.</p>
             <div className="w-16 h-1 bg-amber-600 mx-auto"></div>
           </div>
           
@@ -505,20 +506,20 @@ export default async function IconjInteriorPage() {
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
           <h2 className="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
-            Give Your Windows the<br />Finish They Deserve.
+            Your Space. Your Style.<br />Ordered Your Way.
           </h2>
           <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-            Discover blinds, curtains and window solutions designed to make your space feel better.
+            Customizable blinds, curtains and window accessories — choose your options, provide your specifications, and we'll coordinate your order.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/shop">
+            <Link href="/shop?category=blinds">
               <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-lg font-bold bg-amber-600 hover:bg-amber-700 text-white rounded-none">
-                Shop ICONJ
+                Shop Blinds
               </Button>
             </Link>
-            <Link href="/shop?category=blinds">
+            <Link href="/shop?category=curtains">
               <Button size="lg" className="w-full sm:w-auto h-14 px-10 text-lg font-bold bg-transparent border-2 border-white text-white hover:bg-white hover:text-slate-900 rounded-none">
-                Explore Blinds
+                Shop Curtains
               </Button>
             </Link>
           </div>
@@ -534,10 +535,10 @@ export default async function IconjInteriorPage() {
                 ICONJ<span className="text-amber-600">.</span>
               </Link>
               <p className="text-slate-500 text-sm leading-relaxed max-w-xs mb-6 font-bold uppercase tracking-widest">
-                Beautiful Windows. Better Spaces.
+                Your Space. Your Style.
               </p>
               <p className="text-slate-600 text-sm leading-relaxed max-w-sm">
-                Premium e-commerce and home-interior marketplace specializing in blinds, curtains, and elegant window treatments.
+                Customizable blinds, curtains, and window accessories — ordered your way.
               </p>
             </div>
             
