@@ -1,4 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+const fs = require('fs');
+const path = require('path');
+const file = path.join(process.cwd(), 'src/app/account/orders/[id]/page.tsx');
+
+const content = `import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckCircle2, Truck, Package, Clock, MapPin, AlertCircle, RefreshCcw } from "lucide-react";
 import Link from "next/link";
@@ -64,7 +68,7 @@ export default async function OrderTrackingPage({ params }: { params: Promise<{ 
           <h1 className="text-2xl font-bold text-slate-900">Track Your Order</h1>
           <p className="text-slate-500">Order #{id.split("-")[0].toUpperCase()} - Placed on {new Date(order.created_at).toLocaleDateString()}</p>
         </div>
-        <span className={`font-bold px-4 py-1.5 rounded-full text-sm ${order.logistics_status === 'SUPPLIER_CANNOT_FULFILL' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>
+        <span className={\`font-bold px-4 py-1.5 rounded-full text-sm \${order.logistics_status === 'SUPPLIER_CANNOT_FULFILL' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}\`}>
           {getStatusLabel(order.logistics_status || order.order_status)}
         </span>
       </div>
@@ -93,8 +97,8 @@ export default async function OrderTrackingPage({ params }: { params: Promise<{ 
                 <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Price Difference</span>
                 <span className="font-medium text-slate-900">
                   {Number(activeIssue.expected_data?.price_difference) < 0 
-                    ? `-` + Math.abs(Number(activeIssue.expected_data?.price_difference)).toLocaleString()
-                    : `+` + Number(activeIssue.expected_data?.price_difference).toLocaleString()}
+                    ? \`-\` + Math.abs(Number(activeIssue.expected_data?.price_difference)).toLocaleString()
+                    : \`+\` + Number(activeIssue.expected_data?.price_difference).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -120,7 +124,7 @@ export default async function OrderTrackingPage({ params }: { params: Promise<{ 
                   </div>
                   <div>
                     <h4 className="font-bold text-slate-900">{item.products?.name}</h4>
-                    <p className="text-sm text-slate-500 mb-2">Qty: {item.quantity} ï¿½ ?{item.price.toLocaleString()}</p>
+                    <p className="text-sm text-slate-500 mb-2">Qty: {item.quantity} × ?{item.price.toLocaleString()}</p>
                     
                     {item.configuration_details && (
                       <div className="text-xs text-slate-600 bg-slate-50 p-3 rounded-md grid grid-cols-2 gap-2 mt-2">
@@ -172,3 +176,6 @@ export default async function OrderTrackingPage({ params }: { params: Promise<{ 
     </div>
   );
 }
+`;
+fs.writeFileSync(file, content);
+console.log('Done rewriting account order details page');

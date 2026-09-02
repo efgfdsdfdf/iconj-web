@@ -11,6 +11,8 @@ import { EmailHistory } from "./components/EmailHistory";
 import { SellerSubOrdersPanel } from "./components/SellerSubOrdersPanel";
 import { getActiveForwarder, getLogisticsIssues } from "@/lib/logistics";
 import { CopyToSupplierButton } from "./CopyToSupplierButton";
+import { SupplierExceptionManager } from "./components/SupplierExceptionManager";
+import { SupplierStatusPanel } from "./components/SupplierStatusPanel";
 
 export const revalidate = 0;
 
@@ -62,13 +64,16 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-6">
           
-          {/* THE NEW COMMAND CENTER */}
+          <SupplierStatusPanel order={order} />
+            <SupplierExceptionManager orderId={order.id} currentIssues={issues} />
+
+            {/* THE NEW COMMAND CENTER */}
           <SellerSubOrdersPanel subOrders={sellerOrders || []} />
 
           {/* Customer Info Card */}
           <Card className="border-none shadow-sm mt-8">
             <CardHeader className="border-b pb-4">
-              <CardTitle className="text-lg">Order Items</CardTitle>
+              <CardTitle className="text-lg">Customer Customization & Order Specs</CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-6">

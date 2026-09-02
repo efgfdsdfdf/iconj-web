@@ -341,7 +341,7 @@ export default function CheckoutPage() {
 
                 <Button 
                   onClick={handleCheckout}
-                  disabled={loading} 
+                  disabled={loading || !termsAccepted} 
                   className="w-full h-14 text-lg font-bold bg-orange-500 hover:bg-orange-600 shadow-xl shadow-orange-500/20 uppercase tracking-wider rounded-md"
                 >
                   {loading ? "Initializing..." : "Confirm & Pay Now"}
