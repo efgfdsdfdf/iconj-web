@@ -156,10 +156,57 @@ export async function addReview(productId: string, review: { name: string, comme
 }
 
 
-export async function updateIssue(issueId: string, data: { status: string, admin_notes: string }) {
+export async function updateIssue(issueId: string, data: { status: string, admin_notes: string }, sendEmail: boolean = false) {
   try {
     const { error } = await supabaseAdmin.from("order_issues").update(data).eq("id", issueId);
     if (error) throw error;
+
+    if (sendEmail && data.admin_notes) {
+      try {
+        const { data: issue } = await supabaseAdmin
+          .from("order_issues")
+          .select("*, profiles(name, email)")
+          .eq("id", issueId)
+          .single();
+
+        if (issue?.profiles?.email) {
+          const { sendEmailTo } = await import("@/lib/email");
+          const shortOrder = issue.order_id?.substring(0, 8).toUpperCase();
+          await sendEmailTo(
+            issue.profiles.email,
+            `Update on your ICONJ Order Issue (Order #${shortOrder})`,
+            `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; background: #f8fafc; padding: 24px; border-radius: 12px;">
+              <div style="background: #1e3a5f; padding: 24px; border-radius: 8px 8px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 22px;">Order Issue Update</h1>
+              </div>
+              <div style="background: white; padding: 28px; border-radius: 0 0 8px 8px; border: 1px solid #e2e8f0; border-top: none;">
+                <p style="color: #475569; margin: 0 0 16px;">Hi ${issue.profiles.name || 'Valued Customer'},</p>
+                <p style="color: #475569; margin: 0 0 20px;">We have an update regarding your reported issue for Order <strong>#${shortOrder}</strong>.</p>
+                
+                <div style="background: #f0fdf4; border-left: 4px solid #10b981; padding: 16px; border-radius: 4px; margin: 0 0 20px;">
+                  <p style="font-size: 12px; text-transform: uppercase; color: #10b981; font-weight: bold; margin: 0 0 8px;">New Status</p>
+                  <p style="font-size: 16px; font-weight: bold; color: #0f172a; margin: 0;">${data.status}</p>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 16px; border-radius: 4px; margin: 0 0 24px;">
+                  <p style="font-size: 12px; text-transform: uppercase; color: #64748b; font-weight: bold; margin: 0 0 8px;">Message from ICONJ Support</p>
+                  <p style="color: #0f172a; margin: 0; line-height: 1.6;">${data.admin_notes}</p>
+                </div>
+
+                <div style="text-align: center;">
+                  <a href="https://iconj.com.ng/account/issues" style="display: inline-block; background: #1e3a5f; color: white; padding: 12px 28px; border-radius: 6px; text-decoration: none; font-weight: bold;">View Issue Details</a>
+                </div>
+              </div>
+            </div>
+            `
+          );
+        }
+      } catch (emailErr) {
+        console.error("Failed to send issue update email:", emailErr);
+      }
+    }
+
     revalidatePath("/admin/issues");
     revalidatePath(`/admin/issues/${issueId}`);
     revalidatePath("/account/issues");
