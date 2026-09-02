@@ -45,7 +45,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const body = await req.json();
   const {
-    name, sku, selling_price, description, stock_status,
+    name, sku, selling_price, compare_at_price, description, stock_status,
     category_id, category, images,
     moq, pricing_tiers, brand, features, weight_kg
   } = body;
