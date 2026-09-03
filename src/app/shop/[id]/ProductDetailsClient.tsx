@@ -162,6 +162,16 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
 
         <div className="mb-6 pb-6 border-b">
           <div className="flex flex-col gap-2">
+            {product.variants?.compare_at_price > 0 && product.variants?.compare_at_price > currentPrice && (
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg text-slate-400 line-through decoration-1">
+                  ₦{Number(product.variants.compare_at_price).toLocaleString()}
+                </span>
+                <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2 py-0.5 rounded">
+                  -{Math.round(((product.variants.compare_at_price - currentPrice) / product.variants.compare_at_price) * 100)}%
+                </span>
+              </div>
+            )}
             <div className="flex items-end gap-3">
               <span className="text-3xl md:text-4xl font-black text-slate-900">
                 ₦{(customConfig ? customConfig.finalPrice : currentPrice).toLocaleString()}

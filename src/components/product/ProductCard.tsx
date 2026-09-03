@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart, Heart, Check } from "lucide-react";
 import { useCartStore } from "@/store/cartStore";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function ProductCard({ product, hideOnLg = false }: { product: any, hideOnLg?: boolean }) {
   const addItem = useCartStore(state => state.addItem);
   const [added, setAdded] = useState(false);
+  const router = useRouter();
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -99,7 +101,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
               ${isOutOfStock ? 'bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200' 
               : added ? 'bg-emerald-600 hover:bg-emerald-700 text-white' 
               : 'bg-slate-900 hover:bg-slate-800 text-white'}`} 
-            onClick={handleAddToCart}
+            onClick={(e) => { e.preventDefault(); router.push(`/shop/${product.id}`); }}
           >
             {!isOutOfStock && (added ? <Check className="w-3.5 h-3.5" /> : <ShoppingCart className="w-3.5 h-3.5" />)}
             {isOutOfStock ? 'Out of Stock' : added ? 'Added!' : 'Customize'}
