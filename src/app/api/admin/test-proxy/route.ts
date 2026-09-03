@@ -1,6 +1,9 @@
+import { verifyAdmin } from "@/lib/auth/admin";
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
+    const { isAdmin } = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   const url = 'https://www.alibaba.com/product-detail/Baby-Carrier-With-Hip-Seat-Lumbar_1601075905169.html';
   try {
     const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(url));

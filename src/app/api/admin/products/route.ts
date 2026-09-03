@@ -1,3 +1,4 @@
+import { verifyAdmin } from "@/lib/auth/admin";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,6 +9,8 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
+    const { isAdmin } = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     let { enable_custom_measurements, motorization_fee, installation_fee, ...data } = await req.json();
 
     // Auto-generate SKU

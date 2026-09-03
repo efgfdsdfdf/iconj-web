@@ -1,3 +1,4 @@
+import { verifyAdmin } from "@/lib/auth/admin";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -8,6 +9,8 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
+    const { isAdmin } = await verifyAdmin();
+    if (!isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     const formData = await req.formData();
     const file = formData.get("file") as File;
     if (!file) return NextResponse.json({ error: "No file" }, { status: 400 });

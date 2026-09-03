@@ -1,3 +1,4 @@
+import { verifyAdmin } from "@/lib/auth/admin";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 

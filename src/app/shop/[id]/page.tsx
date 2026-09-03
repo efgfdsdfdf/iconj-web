@@ -40,6 +40,13 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
   let product = productRaw;
   if (product) {
+    // SECURITY: Sanitize sensitive supplier and cost data before passing to client components
+    delete product.base_supplier_cost;
+    delete product.supplier_id;
+    if (product.variants) {
+      delete product.variants.supplier_product_url;
+      delete product.variants.supplier_sku;
+    }
     // Format wholesale pricing for the client component
     if (product.wholesale_pricing && product.wholesale_pricing.length > 0) {
       product.pricing_tiers = product.wholesale_pricing.map((tier: any) => ({
