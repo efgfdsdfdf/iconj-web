@@ -45,13 +45,13 @@ export default async function RootLayout({
       <body className={`${inter.className} min-h-screen flex flex-col overflow-x-hidden w-full`}>
         <SplashScreen />
         <PwaInstallBanner />
-        <ConditionalLayout hideOnPaths={['/']}><Navbar categories={categories} /></ConditionalLayout>
+        <Navbar categories={categories} />
         <main className="flex-1">
           {children}
         <Toaster position="top-center" />
         
         </main>
-        <ConditionalLayout hideOnPaths={['/']}><Footer /></ConditionalLayout>
+        <Footer />
       </body>
     </html>
   );
