@@ -68,7 +68,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");
   const [customConfig, setCustomConfig] = useState<any>(null);
-  const [customNotes, setCustomNotes] = useState("");
+  const [customNotes, setCustomNotes] = useState("");`n  const [purchaseMode, setPurchaseMode] = useState<"standard" | "custom">("standard");
 
   const handleAddToCart = () => {
     setAdding(true);
@@ -264,7 +264,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           </div>
 
           
-          {activeRules && (
+          {activeRules && (`n            <div className="mb-6 flex p-1 bg-slate-100 rounded-lg w-full max-w-sm">`n              <button `n                onClick={() => setPurchaseMode("standard")}`n                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "standard" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}`n              >`n                Standard Option`n              </button>`n              <button `n                onClick={() => setPurchaseMode("custom")}`n                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "custom" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}`n              >`n                Customize Measurements`n              </button>`n            </div>`n          )}`n`n          {activeRules && purchaseMode === "custom" && (
             <div className="mb-6">
               <MeasurementConfigurator 
                 rules={activeRules} 
@@ -294,7 +294,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 </div>
               )}
 
-              {sizes.length > 0 && (
+              {sizes.length > 0 && purchaseMode === "standard" && (
                 <div className="space-y-3">
                   <Label className="text-base font-bold text-slate-900">Select Size / Dimension</Label>
                   <div className="flex flex-wrap gap-2">
@@ -383,7 +383,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           </div>
         </div>
 
-          {(product.requires_quote || (customConfig && customConfig.width > 0) || selectedSize?.toLowerCase().includes("custom")) ? (
+          {(product.requires_quote || purchaseMode === "custom" || (customConfig && customConfig.width > 0) || selectedSize?.toLowerCase().includes("custom")) ? (
             <Button size="lg" onClick={() => {
               let url = "/quote?product_id=" + product.id + "&product_name=" + encodeURIComponent(product.name);
               if (customConfig) {
@@ -399,10 +399,10 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           ) : (
           <>
           <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-            <p className="font-semibold text-slate-900 mb-1">Customize this product to suit your space.</p>
-            <p className="text-sm text-slate-600 mb-2">Select your preferred options and provide your measurements before placing your order.</p>
+            <p className="font-semibold text-slate-900 mb-1">Standard Product Order</p>
+            <p className="text-sm text-slate-600 mb-2">Select your preferred standard options before placing your order.</p>
             <p className="text-sm text-amber-700 font-bold">⚠ PLEASE CHECK YOUR MEASUREMENTS</p>
-            <p className="text-xs text-amber-600 mb-2">Customized orders are fulfilled according to the specifications you submit. Please ensure they are accurate.</p>
+            
             <p className="text-xs text-slate-500 italic">Please note: ICONJ currently provides the products only. Installation is not included.</p>
           </div>
           <Button 
@@ -415,7 +415,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
             }`}
           >
-            {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Customize & Order"}
+            {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Add to Cart"}
           </Button>
           </>
         )}
