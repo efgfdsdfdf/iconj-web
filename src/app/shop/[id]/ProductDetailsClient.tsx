@@ -379,11 +379,20 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           </div>
         </div>
 
-        {product.requires_quote ? (
-          <Button size="lg" onClick={() => router.push("/quote?product_id=" + product.id + "&product_name=" + encodeURIComponent(product.name))} className="w-full h-14 text-lg font-bold bg-slate-900 hover:bg-slate-800 shadow-xl rounded-md uppercase tracking-wider">
-            Request Custom Quote
-          </Button>
-        ) : (
+          {(product.requires_quote || activeRules || selectedSize?.toLowerCase().includes("custom")) ? (
+            <Button size="lg" onClick={() => {
+              let url = "/quote?product_id=" + product.id + "&product_name=" + encodeURIComponent(product.name);
+              if (customConfig) {
+                 url += `&width=${customConfig.width}&height=${customConfig.height}&motorized=${customConfig.isMotorized}`;
+              }
+              if (customNotes) {
+                 url += `&notes=${encodeURIComponent(customNotes)}`;
+              }
+              router.push(url);
+            }} className="w-full h-14 text-lg font-bold bg-slate-900 hover:bg-slate-800 shadow-xl rounded-md uppercase tracking-wider">
+              Request Custom Quote
+            </Button>
+          ) : (
           <>
           <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
             <p className="font-semibold text-slate-900 mb-1">Customize this product to suit your space.</p>
