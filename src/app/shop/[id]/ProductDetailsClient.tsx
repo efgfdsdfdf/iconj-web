@@ -264,13 +264,17 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           </div>
 
           
-          {activeRules ? (
-            <MeasurementConfigurator 
-              rules={activeRules} 
-              basePrice={Number(product.base_selling_price) || 0} 
-              onConfigChange={setCustomConfig} 
-            />
-          ) : (sizes.length > 0 || colors.length > 0) && (
+          {activeRules && (
+            <div className="mb-6">
+              <MeasurementConfigurator 
+                rules={activeRules} 
+                basePrice={Number(product.base_selling_price) || 0} 
+                onConfigChange={setCustomConfig} 
+              />
+            </div>
+          )}
+          
+          {(sizes.length > 0 || colors.length > 0) && (
             <div className="space-y-6">
               
               {colors.length > 0 && (
@@ -379,7 +383,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           </div>
         </div>
 
-          {(product.requires_quote || activeRules || selectedSize?.toLowerCase().includes("custom")) ? (
+          {(product.requires_quote || (customConfig && customConfig.width > 0) || selectedSize?.toLowerCase().includes("custom")) ? (
             <Button size="lg" onClick={() => {
               let url = "/quote?product_id=" + product.id + "&product_name=" + encodeURIComponent(product.name);
               if (customConfig) {
