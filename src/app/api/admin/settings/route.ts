@@ -10,8 +10,8 @@ const supabaseAdmin = createClient(
 
 // GET /api/admin/settings
 export async function GET(request: Request) {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { data } = await supabaseAdmin
     .from('store_settings')
@@ -27,8 +27,8 @@ export async function GET(request: Request) {
 
 // POST /api/admin/settings
 export async function POST(request: Request) {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const updates = await request.json();
   const upserts = Object.entries(updates).map(([id, value]) => ({ id, value: String(value) }));

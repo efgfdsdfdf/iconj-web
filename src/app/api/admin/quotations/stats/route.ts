@@ -10,8 +10,8 @@ const supabaseAdmin = createClient(
 
 // GET /api/admin/quotations/stats
 export async function GET() {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   // Simple stats for the dashboard header
   const { data, error } = await supabaseAdmin

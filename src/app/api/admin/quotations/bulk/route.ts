@@ -11,8 +11,8 @@ const supabaseAdmin = createClient(
 
 // POST /api/admin/quotations/bulk
 export async function POST(request: Request) {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { action, ids } = await request.json();
 

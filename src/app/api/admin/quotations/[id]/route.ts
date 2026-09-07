@@ -11,8 +11,8 @@ const supabaseAdmin = createClient(
 
 // ─── GET /api/admin/quotations/[id] ──────────────────────────────────────────
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
 
@@ -56,8 +56,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
 // ─── PATCH /api/admin/quotations/[id] ────────────────────────────────────────
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
   const updates = await request.json();

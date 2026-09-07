@@ -4,8 +4,8 @@ import { convertQuotationToOrder } from '@/lib/quotation-helpers';
 
 // POST /api/admin/quotations/[id]/convert-to-order
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
 

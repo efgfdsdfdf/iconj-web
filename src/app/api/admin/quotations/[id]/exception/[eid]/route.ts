@@ -11,8 +11,8 @@ const supabaseAdmin = createClient(
 
 // PATCH /api/admin/quotations/[id]/exception/[eid]
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string, eid: string }> }) {
-  const adminError = await verifyAdmin();
-  if (adminError) return adminError;
+  const adminAuth = await verifyAdmin();
+  if (!adminAuth.isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id, eid } = await params;
   const { status, resolution_note } = await request.json();
