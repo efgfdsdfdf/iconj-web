@@ -68,7 +68,8 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");
   const [customConfig, setCustomConfig] = useState<any>(null);
-  const [customNotes, setCustomNotes] = useState("");`n  const [purchaseMode, setPurchaseMode] = useState<"standard" | "custom">("standard");
+  const [customNotes, setCustomNotes] = useState("");
+  const [purchaseMode, setPurchaseMode] = useState<"standard" | "custom">("standard");
 
   const handleAddToCart = () => {
     setAdding(true);
@@ -264,7 +265,24 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
           </div>
 
           
-          {activeRules && (`n            <div className="mb-6 flex p-1 bg-slate-100 rounded-lg w-full max-w-sm">`n              <button `n                onClick={() => setPurchaseMode("standard")}`n                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "standard" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}`n              >`n                Standard Option`n              </button>`n              <button `n                onClick={() => setPurchaseMode("custom")}`n                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "custom" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}`n              >`n                Customize Measurements`n              </button>`n            </div>`n          )}`n`n          {activeRules && purchaseMode === "custom" && (
+          {activeRules && (
+            <div className="mb-6 flex p-1 bg-slate-100 rounded-lg w-full max-w-sm">
+              <button 
+                onClick={() => setPurchaseMode("standard")}
+                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "standard" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Standard Option
+              </button>
+              <button 
+                onClick={() => setPurchaseMode("custom")}
+                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "custom" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Customize Measurements
+              </button>
+            </div>
+          )}
+
+          {activeRules && purchaseMode === "custom" && (
             <div className="mb-6">
               <MeasurementConfigurator 
                 rules={activeRules} 
@@ -397,28 +415,26 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
               Request Custom Quote
             </Button>
           ) : (
-          <>
-          <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-            <p className="font-semibold text-slate-900 mb-1">Standard Product Order</p>
-            <p className="text-sm text-slate-600 mb-2">Select your preferred standard options before placing your order.</p>
-            <p className="text-sm text-amber-700 font-bold">⚠ PLEASE CHECK YOUR MEASUREMENTS</p>
-            
-            <p className="text-xs text-slate-500 italic">Please note: ICONJ currently provides the products only. Installation is not included.</p>
-          </div>
-          <Button 
-            size="lg" 
-            onClick={handleAddToCart} 
-            disabled={adding || product.stock_status === "Out of Stock"}
-            className={`w-full h-14 text-lg font-bold shadow-xl rounded-md uppercase tracking-wider ${
-              product.stock_status === "Out of Stock" 
-                ? "bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200" 
-                : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
-            }`}
-          >
-            {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Add to Cart"}
-          </Button>
-          </>
-        )}
+            <>
+            <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+              <p className="font-semibold text-slate-900 mb-1">Standard Product Order</p>
+              <p className="text-sm text-slate-600 mb-2">Select your preferred standard options before placing your order.</p>
+              <p className="text-xs text-slate-500 italic">Please note: ICONJ currently provides the products only. Installation is not included.</p>
+            </div>
+            <Button 
+              size="lg" 
+              onClick={handleAddToCart} 
+              disabled={adding || product.stock_status === "Out of Stock"}
+              className={`w-full h-14 text-lg font-bold shadow-xl rounded-md uppercase tracking-wider ${
+                product.stock_status === "Out of Stock" 
+                  ? "bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200" 
+                  : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
+              }`}
+            >
+              {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Add to Cart"}
+            </Button>
+            </>
+          )}
       </div>
     </div>
   );
