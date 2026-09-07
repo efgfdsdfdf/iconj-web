@@ -78,7 +78,7 @@ export async function POST(
   await logQuotationEvent(id, 'QUOTE_ACCEPTED', 'Customer accepted the quotation', 'customer');
 
   // Send acceptance emails
-  sendQuoteAcceptedEmails({ ...quotation, status: 'QUOTE_ACCEPTED', quote_accepted_at: now, payment_deadline: paymentDeadline })
+  await sendQuoteAcceptedEmails({ ...quotation, status: 'QUOTE_ACCEPTED', quote_accepted_at: now, payment_deadline: paymentDeadline })
     .catch(err => console.error('Failed to send acceptance emails:', err));
 
   return NextResponse.json({ success: true, payment_deadline: paymentDeadline });

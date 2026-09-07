@@ -67,7 +67,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   );
 
   // Send email asynchronously
-  sendQuoteSentEmail(updated).catch(err => 
+  await sendQuoteSentEmail(updated).catch(err => 
     console.error('Failed to send quote email:', err)
   );
 

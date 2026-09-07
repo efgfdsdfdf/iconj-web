@@ -44,7 +44,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   await logQuotationEvent(id, 'MANUALLY_EXPIRED', 'Admin manually expired the quotation', 'admin');
 
   if (updated) {
-    sendQuoteExpiredEmails(updated).catch(err => console.error('Failed to send expiry emails:', err));
+    // Send expiration emails
+    await sendQuoteExpiredEmails(updated).catch(err => console.error('Failed to send expiry emails:', err));
   }
 
   return NextResponse.json({ success: true, quotation: updated });

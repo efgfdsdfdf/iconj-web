@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 import { convertQuotationToOrder, logQuotationEvent, verifyPaystackTransaction, createPostPaymentException } from "@/lib/quotation-helpers";
 import { sendPaymentReceivedEmails } from "@/lib/quotation-emails";
+import { sendPaymentReceipt, sendStatusNotification } from "@/lib/order-emails";
 
 export async function POST(req: Request) {
   try {
@@ -100,7 +101,7 @@ export async function POST(req: Request) {
 
         // Send payment + order creation emails asynchronously
         if (updatedQuotation) {
-          sendPaymentReceivedEmails(updatedQuotation, orderId).catch(err =>
+          await sendPaymentReceivedEmails(updatedQuotation, orderId).catch(err =>
             console.error('Failed to send payment received emails:', err)
           );
         }
@@ -214,10 +215,13 @@ export async function POST(req: Request) {
             
             // Mark commission state as AVAILABLE/PENDING
             await supabaseAdmin.from("commissions").update({ status: 'AVAILABLE' }).eq('id', comm.id);
+            }
           }
         }
+
+        await sendPaymentReceipt(orderId).catch(err => console.error("Failed to send payment receipt:", err));
+        await sendStatusNotification(orderId, "PAYMENT_CONFIRMED").catch(err => console.error("Failed to send status notification:", err));
       }
-    }
 
     // Handle Payouts / Settlements (Transfer or Automatic Subaccount Settlement)
     if (event.event === "transfer.success" || event.event === "transfer.failed" || event.event === "settlement.successful") {

@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     await logQuotationEvent(quotation.id, 'QUOTATION_SUBMITTED', 'Customer submitted quotation request', 'customer');
 
     // Send emails (don't block response on email success)
-    sendQuotationReceivedEmails(quotation).catch(err =>
+    await sendQuotationReceivedEmails(quotation).catch(err =>
       console.error('Failed to send quotation received emails:', err)
     );
 
