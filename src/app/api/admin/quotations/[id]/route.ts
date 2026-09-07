@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   // Admin gets ALL fields, no stripping
   const { data: quotation, error } = await supabaseAdmin
     .from('quotations')
-    .select('*')
+    .select('*, products(variants)')
     .eq('id', id)
     .single();
 
@@ -28,21 +28,21 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   // Fetch exceptions
   const { data: exceptions } = await supabaseAdmin
     .from('quotation_exceptions')
-    .select('*')
+    .select('*, products(variants)')
     .eq('quotation_id', id)
     .order('created_at', { ascending: false });
 
   // Fetch timeline
   const { data: events } = await supabaseAdmin
     .from('quotation_events')
-    .select('*')
+    .select('*, products(variants)')
     .eq('quotation_id', id)
     .order('created_at', { ascending: false });
 
   // Fetch emails
   const { data: emails } = await supabaseAdmin
     .from('quotation_emails')
-    .select('*')
+    .select('*, products(variants)')
     .eq('quotation_id', id)
     .order('created_at', { ascending: false });
 
@@ -64,7 +64,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { data: current, error } = await supabaseAdmin
     .from('quotations')
-    .select('*')
+    .select('*, products(variants)')
     .eq('id', id)
     .single();
 

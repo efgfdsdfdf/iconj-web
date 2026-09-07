@@ -179,7 +179,7 @@ export default function AdminQuotationDetailPage({ params }: { params: Promise<{
       }
     });
     
-    return `Hello,\n\nPlease provide a quote for the following:\n\nProduct: ${q.product_name}\nQuantity: ${q.quantity}\n\nSpecifications:\n${specs}\nDelivery Location: ${q.delivery_location?.state}, Nigeria\n\nPlease let me know the total cost and estimated production time.\n\nThank you,\nICONJ`;
+    return `Hello,\n\nPlease provide a quote for the following:\n\nProduct: ${q.product_name}\nQuantity: ${q.quantity}\n${q.products?.variants?.supplier_product_url ? `Supplier URL: ${q.products.variants.supplier_product_url}\n` : ""}\nSpecifications:\n${specs}\nDelivery Location: ${q.delivery_location?.state}, Nigeria\n\nPlease let me know the total cost and estimated production time.\n\nThank you,\nICONJ`;
   };
 
   if (loading) return <div className="p-12 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto" /></div>;
