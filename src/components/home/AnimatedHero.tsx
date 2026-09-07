@@ -21,7 +21,20 @@ export function AnimatedHero() {
 
   return (
     <section className="relative h-[90vh] min-h-[600px] w-full flex items-center justify-center overflow-hidden">
+      
+      {/* Minimal Header */}
+      <div className="absolute top-0 left-0 right-0 z-50 p-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-10 h-10 bg-blue-600 rounded flex items-center justify-center shadow-lg group-hover:bg-blue-500 transition-colors">
+            <span className="text-white font-bold text-xl">I</span>
+          </div>
+          <span className="text-white font-bold text-2xl tracking-tight drop-shadow-md">ICONJ</span>
+        </Link>
+        
+      </div>
+
       {/* Background Image with slow zoom */}
+
       <motion.div 
         className="absolute inset-0 z-0"
         initial={{ scale: 1.1 }}

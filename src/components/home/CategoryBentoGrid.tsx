@@ -60,7 +60,7 @@ export function CategoryBentoGrid({ categories }: { categories: any[] }) {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-3 md:grid-rows-2 gap-4 md:gap-6 min-h-[600px]"
+          className="grid grid-cols-2 md:grid-cols-3 grid-rows-[auto] md:grid-rows-2 gap-4 md:gap-6 min-h-[600px]"
         >
           {displayCats.map((cat, i) => {
             // Determine bento sizing
@@ -68,9 +68,9 @@ export function CategoryBentoGrid({ categories }: { categories: any[] }) {
             // 1: Medium (span 1 col, 1 row)
             // etc
             let bentoClasses = "col-span-1 row-span-1";
-            if (i === 0) bentoClasses = "md:col-span-2 md:row-span-2 min-h-[300px] md:min-h-full";
-            else if (i === 1) bentoClasses = "md:col-span-1 md:row-span-1 min-h-[250px]";
-            else if (i === 2) bentoClasses = "md:col-span-1 md:row-span-1 min-h-[250px]";
+            if (i === 0) bentoClasses = "col-span-2 md:row-span-2 min-h-[250px] md:min-h-full";
+            else if (i === 1) bentoClasses = "col-span-1 md:row-span-1 min-h-[180px] md:min-h-[250px]";
+            else if (i === 2) bentoClasses = "col-span-1 md:row-span-1 min-h-[180px] md:min-h-[250px]";
             // If more, they just stack. Let's stick to max 5 for a clean 3-col bento.
             if (i > 2) bentoClasses = "md:col-span-1 md:row-span-1 min-h-[250px] hidden md:block";
 
