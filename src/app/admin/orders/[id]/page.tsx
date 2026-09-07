@@ -13,6 +13,7 @@ import { getActiveForwarder, getLogisticsIssues } from "@/lib/logistics";
 import { CopyToSupplierButton } from "./CopyToSupplierButton";
 import { SupplierExceptionManager } from "./components/SupplierExceptionManager";
 import { SupplierStatusPanel } from "./components/SupplierStatusPanel";
+import { EmailLogsPanel } from "./components/EmailLogsPanel";
 
 export const revalidate = 0;
 
@@ -66,6 +67,8 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
           
           <SupplierStatusPanel order={order} />
             <SupplierExceptionManager orderId={order.id} currentIssues={issues} />
+
+            <EmailLogsPanel orderId={order.id} />
 
             {/* THE NEW COMMAND CENTER */}
           <SellerSubOrdersPanel subOrders={sellerOrders || []} />

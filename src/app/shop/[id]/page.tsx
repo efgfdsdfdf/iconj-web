@@ -219,8 +219,11 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
           <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory no-scrollbar">
             {recommended?.map((rec: any) => {
-              const p = { ...rec, images: rec.images || [] };
-              return (
+                const p = { ...rec, images: rec.images || [] };
+                delete p.base_supplier_cost;
+                delete p.supplier_id;
+                if (p.variants) { delete p.variants.supplier_product_url; delete p.variants.supplier_sku; }
+                return (
                 <div key={rec.id} className="w-[160px] md:w-[220px] lg:w-[240px] shrink-0 snap-start">
                   <ProductCard product={p} />
                 </div>

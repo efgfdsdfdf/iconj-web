@@ -24,7 +24,7 @@ const BRAND = {
   text: '#0f172a'
 };
 
-const siteUrl = 'https://iconj-web-rust.vercel.app';
+const siteUrl = 'https://iconj.com.ng';
 
 // ─── Low-level email sender ────────────────────────────────────────
 async function sendHtmlEmail(toEmail: string, subject: string, htmlContent: string) {
