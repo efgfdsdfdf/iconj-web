@@ -47,7 +47,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!isOwner) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
   // Must be QUOTE_ACCEPTED
-  if (quotation.status !== 'QUOTE_ACCEPTED') {
+  if (quotation.status !== 'QUOTE_ACCEPTED' && quotation.status !== 'PAYMENT_PENDING') {
     return NextResponse.json({
       error: `Quotation must be accepted before payment. Current status: ${quotation.status}`,
     }, { status: 400 });

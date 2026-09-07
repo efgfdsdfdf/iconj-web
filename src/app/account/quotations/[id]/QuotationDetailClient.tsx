@@ -34,6 +34,7 @@ export default function QuotationDetailClient({ quotation, token, paymentStatus 
     } catch (err: any) {
       setError(err.message);
       setLoading(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -49,6 +50,7 @@ export default function QuotationDetailClient({ quotation, token, paymentStatus 
     } catch (err: any) {
       setError(err.message);
       setLoading(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
@@ -64,6 +66,7 @@ export default function QuotationDetailClient({ quotation, token, paymentStatus 
     } catch (err: any) {
       setError(err.message);
       setLoading(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
