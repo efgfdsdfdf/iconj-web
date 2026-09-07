@@ -1,7 +1,9 @@
-﻿import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth/admin";
 import { PayoutModeSettings } from "./PayoutModeSettings";
+
+import { QuotationSettings } from "./QuotationSettings";
 
 export const revalidate = 0;
 
@@ -27,16 +29,7 @@ export default async function AdminSettingsPage() {
       
       <div className="space-y-6 max-w-4xl">
         <PayoutModeSettings currentMode={walletSettings?.payout_mode || 'MANUAL'} />
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Catalog Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-slate-500 mb-4">Target Profit Margin: 30%</p>
-            <p className="text-sm text-slate-500">Global Supplier: Qingyuan Leyou Household Products</p>
-          </CardContent>
-        </Card>
+        <QuotationSettings />
       </div>
     </main>
   );

@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, Truck, CheckCircle2, Clock, User, MapPin, AlertCircle, MessageCircle } from "lucide-react";
+import { Package, FileText, Truck, CheckCircle2, Clock, User, MapPin, AlertCircle, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";

@@ -17,6 +17,13 @@ export default async function AdminDashboardPage() {
     .select("*", { count: "exact", head: true })
     .eq("status", "pending_verification");
 
+  // 1b. Urgent Quotations
+  const { count: urgentQuotationsCount } = await supabaseAdmin
+    .from("quotations")
+    .select("*", { count: "exact", head: true })
+    .eq("priority", "URGENT");
+  const urgentQuotations = urgentQuotationsCount || 0;
+
   // 2. Disputed/Issue Orders
   const { count: disputedOrders } = await supabaseAdmin
     .from("orders")
@@ -110,6 +117,24 @@ export default async function AdminDashboardPage() {
         <h2 className="text-sm font-bold text-slate-800 flex items-center gap-2 uppercase tracking-wider">
           <AlertCircle className="w-4 h-4 text-red-500" /> Action Required
         </h2>
+
+        {urgentQuotations > 0 && (
+          <Link href="/admin/quotations?status=ALL" className="block mb-4">
+            <div className="bg-red-50 hover:bg-red-100 border-2 border-red-500 rounded-xl p-5 transition-colors group relative overflow-hidden shadow-sm flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+                  <AlertCircle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-red-900 text-lg">URGENT: Quotation Action Required</h3>
+                  <p className="text-sm text-red-700 mt-1">There are {urgentQuotations} quotation(s) requiring immediate admin attention (e.g. exceptions or paid quotes awaiting fulfillment).</p>
+                </div>
+              </div>
+              <Button variant="destructive" className="shrink-0">View Inbox <ArrowRight className="w-4 h-4 ml-2"/></Button>
+            </div>
+          </Link>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           
           <Link href="/admin/orders?filter=unviewed" className="bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl p-5 transition-colors group relative overflow-hidden">

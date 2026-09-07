@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
+import { convertQuotationToOrder, logQuotationEvent, verifyPaystackTransaction, createPostPaymentException } from "@/lib/quotation-helpers";
+import { sendPaymentReceivedEmails } from "@/lib/quotation-emails";
 
 export async function POST(req: Request) {
   try {
@@ -17,10 +19,98 @@ export async function POST(req: Request) {
     const event = JSON.parse(bodyText);
     const supabaseAdmin = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!);
 
-    // Handle Charge Success (Customer Paid Platform)
+    // Handle Charge Success
     if (event.event === "charge.success") {
       const data = event.data;
+
+      // ── QUOTATION PAYMENT BRANCH ─────────────────────────────────────────
+      // Check if this is a quotation payment (has quotation_id in metadata)
+      if (data.metadata?.quotation_id) {
+        const quotationId = data.metadata.quotation_id;
+        const paystackRef = data.reference;
+
+        // SAFEGUARD 3 — Idempotency: check if already processed
+        const { data: existingQuotation } = await supabaseAdmin
+          .from('quotations')
+          .select('id, payment_status, payment_reference, customer_total, status')
+          .eq('id', quotationId)
+          .single();
+
+        if (!existingQuotation) {
+          console.error('Quotation not found for payment:', quotationId);
+          return NextResponse.json({ received: true, message: 'Quotation not found' });
+        }
+
+        if (existingQuotation.payment_status === 'PAID') {
+          return NextResponse.json({ received: true, message: 'Quotation payment already processed' });
+        }
+
+        // SAFEGUARD 3 — Server-side Paystack verification
+        const expectedKobo = Math.round(Number(existingQuotation.customer_total) * 100);
+        const verification = await verifyPaystackTransaction(paystackRef, expectedKobo, 'NGN');
+
+        if (!verification.valid) {
+          console.error('Paystack verification failed for quotation payment:', verification.error);
+          await supabaseAdmin.from('quotations').update({ payment_status: 'FAILED' }).eq('id', quotationId);
+          await logQuotationEvent(quotationId, 'PAYMENT_FAILED', `Payment verification failed: ${verification.error}`, 'system');
+          return NextResponse.json({ received: true, message: 'Payment verification failed' });
+        }
+
+        // All checks passed — mark quotation as PAID and lock price/specs
+        const now = new Date().toISOString();
+        await supabaseAdmin
+          .from('quotations')
+          .update({
+            payment_status: 'PAID',
+            payment_reference: paystackRef,
+            payment_amount: Number(existingQuotation.customer_total),
+            payment_currency: 'NGN',
+            payment_date: now,
+            price_locked_at: now,
+            specs_locked_at: now,
+            status: 'PAID',
+            priority: 'URGENT',
+            next_action: '🟢 URGENT: Copy supplier fulfillment order and mark as submitted',
+          })
+          .eq('id', quotationId);
+
+        await logQuotationEvent(quotationId, 'PAYMENT_RECEIVED', `Payment confirmed via Paystack (ref: ${paystackRef})`, 'system', { reference: paystackRef });
+
+        // ATOMICALLY convert to order (idempotent — safe if called twice)
+        let orderId: string;
+        try {
+          const result = await convertQuotationToOrder(quotationId);
+          orderId = result.orderId;
+          if (result.wasAlreadyConverted) {
+            console.log('Order already existed for quotation:', quotationId);
+          }
+        } catch (convErr: any) {
+          console.error('Failed to convert quotation to order:', convErr.message);
+          // Create an exception so admin is alerted
+          await createPostPaymentException(quotationId, 'OTHER', `Order conversion failed: ${convErr.message}`);
+          return NextResponse.json({ received: true });
+        }
+
+        // Fetch updated quotation for emails
+        const { data: updatedQuotation } = await supabaseAdmin
+          .from('quotations')
+          .select('*')
+          .eq('id', quotationId)
+          .single();
+
+        // Send payment + order creation emails asynchronously
+        if (updatedQuotation) {
+          sendPaymentReceivedEmails(updatedQuotation, orderId).catch(err =>
+            console.error('Failed to send payment received emails:', err)
+          );
+        }
+
+        return NextResponse.json({ received: true });
+      }
+
+      // ── EXISTING CART ORDER BRANCH (completely untouched below) ──────────
       const orderId = data.metadata?.order_id || data.reference;
+
 
       // 1. Idempotency Check: Did we already process this exact charge?
       const { data: existingLedger } = await supabaseAdmin

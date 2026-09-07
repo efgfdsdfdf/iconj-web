@@ -380,7 +380,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
         </div>
 
         {product.requires_quote ? (
-          <Button size="lg" onClick={() => router.push("/quote")} className="w-full h-14 text-lg font-bold bg-slate-900 hover:bg-slate-800 shadow-xl rounded-md uppercase tracking-wider">
+          <Button size="lg" onClick={() => router.push("/quote?product_id=" + product.id + "&product_name=" + encodeURIComponent(product.name))} className="w-full h-14 text-lg font-bold bg-slate-900 hover:bg-slate-800 shadow-xl rounded-md uppercase tracking-wider">
             Request Custom Quote
           </Button>
         ) : (
