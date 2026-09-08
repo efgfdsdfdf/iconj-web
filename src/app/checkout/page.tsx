@@ -313,6 +313,11 @@ export default function CheckoutPage() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <h4 className="font-medium text-sm text-slate-900 truncate">{item.name}</h4>
+                              <div className="mt-1">
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${(item.pricingTiers && item.pricingTiers.some((t: any) => item.quantity >= t.minQty)) ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'}`}>
+                                  {(item.pricingTiers && item.pricingTiers.some((t: any) => item.quantity >= t.minQty)) ? 'Wholesale Price' : 'Retail Price'}
+                                </span>
+                              </div>
                             <div className="flex justify-between mt-2 items-center">
                               <span className="text-xs font-bold text-slate-700">Qty: {item.quantity}</span>
                               <span className="text-sm font-bold text-slate-900">₦{(item.price * item.quantity).toLocaleString()}</span>

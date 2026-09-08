@@ -45,8 +45,13 @@ export default function CartPage() {
                       <div className="flex justify-between items-start gap-4">
                         <div>
                           <Link href={`/shop/${item.id}`} className="font-bold text-lg text-slate-900 hover:text-blue-600 transition-colors line-clamp-2">
-                            {item.name}
-                          </Link>
+                              {item.name}
+                            </Link>
+                            <div className="mt-1.5 mb-2">
+                              <span className={`text-xs font-bold px-2 py-1 rounded uppercase tracking-wider ${(item.pricingTiers && item.pricingTiers.some((t: any) => item.quantity >= t.minQty)) ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-slate-100 text-slate-600 border border-slate-200'}`}>
+                                {(item.pricingTiers && item.pricingTiers.some((t: any) => item.quantity >= t.minQty)) ? 'Wholesale Price' : 'Retail Price'}
+                              </span>
+                            </div>
                           {item.configuration && (
                             <div className="text-sm text-slate-500 mt-1 space-y-0.5">
                               {Object.entries(item.configuration).map(([key, val]) => (
