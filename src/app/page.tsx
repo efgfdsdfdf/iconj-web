@@ -37,17 +37,13 @@ export default async function IconjInteriorPage() {
     { name: 'Zebra Blinds', desc: 'Flexible light control.', img: '/images/zebra_blinds_hero.jpg' },
   ];
 
-  const categories = defaultCategories.map(cat => {
-    const customMatch = adminCategories.find((ac: any) => 
-      ac.name.toLowerCase().trim() === cat.name.toLowerCase().trim() || 
-      ac.name.toLowerCase().includes(cat.name.toLowerCase()) ||
-      cat.name.toLowerCase().includes(ac.name.toLowerCase())
-    );
-    return {
-      ...cat,
-      img: customMatch?.icon || cat.img
-    };
-  });
+  const categories = adminCategories.length > 0 
+    ? adminCategories.map((ac: any) => ({
+        name: ac.name,
+        desc: ac.description || `Explore our premium ${ac.name}`,
+        img: ac.icon || '/images/venetian_blinds_card.jpg'
+      }))
+    : defaultCategories;
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-950 overflow-x-hidden selection:bg-blue-200">
