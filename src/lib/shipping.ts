@@ -145,14 +145,14 @@ export async function getShippingSettings(): Promise<ShippingSettings> {
   }
 
   _settingsCache = {
-    volumetricDivisor: map['ddp_volumetric_divisor'] ?? null,
-    divisorStatus: map['ddp_divisor_status'] ?? 'PENDING_CONFIRMATION',
-    formulaStatus: map['ddp_formula_status'] ?? 'PENDING_CONFIRMATION',
-    chargeableWeightMethod: map['ddp_chargeable_weight_method'] ?? 'MAX',
-    markupPct: Number(map['ddp_shipping_markup_pct'] ?? 10),
+    volumetricDivisor: map['ddp_volumetric_divisor'] ?? map['ddp_volumetricDivisor'] ?? null,
+    divisorStatus: map['ddp_divisor_status'] ?? map['ddp_divisorStatus'] ?? 'PENDING_CONFIRMATION',
+    formulaStatus: map['ddp_formula_status'] ?? map['ddp_formulaStatus'] ?? 'PENDING_CONFIRMATION',
+    chargeableWeightMethod: map['ddp_chargeable_weight_method'] ?? map['ddp_chargeableWeightMethod'] ?? 'MAX',
+    markupPct: Number(map['ddp_shipping_markup_pct'] ?? map['ddp_markupPct'] ?? 10),
     defaultOrigin: map['ddp_default_origin'] ?? 'China',
-    defaultDestination: map['ddp_default_destination'] ?? 'Nigeria',
-    roundingMethod: map['ddp_rounding_method'] ?? 'CEIL_0.5',
+    defaultDestination: map['ddp_default_destination'] ?? map['ddp_defaultDestination'] ?? 'NG',
+    roundingMethod: map['ddp_rounding_method'] ?? map['ddp_roundingMethod'] ?? 'CEIL_0.5',
   };
   _settingsCacheTime = now;
 
@@ -169,8 +169,8 @@ export function invalidateSettingsCache() {
 // ============================================================
 
 export async function getActiveDDPRates(
-  destination = 'Nigeria',
-  method = 'DDP'
+  destination = 'NG',
+  method = 'AIR_CARGO'
 ): Promise<DDPRate[]> {
   const supabase = getAdminClient();
   const now = new Date().toISOString();
