@@ -9,7 +9,7 @@ export function FeaturedShowcase({ products }: { products: any[] }) {
   if (!products || products.length === 0) return null;
 
   return (
-    <section className="py-24 bg-white px-4">
+    <section className="py-24 bg-slate-950 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <motion.div
@@ -17,15 +17,15 @@ export function FeaturedShowcase({ products }: { products: any[] }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <span className="text-blue-600 font-semibold tracking-wider uppercase text-sm mb-2 block">Trending</span>
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight">Featured Treatments</h2>
+            <span className="text-blue-400 font-semibold tracking-wider uppercase text-sm mb-2 block">Trending</span>
+            <h2 className="text-3xl md:text-5xl font-bold text-white tracking-tight">Featured Treatments</h2>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <Link href="/shop" className="group inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors text-lg">
+            <Link href="/shop" className="group inline-flex items-center text-blue-400 font-semibold hover:text-blue-300 transition-colors text-lg">
               Shop All
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>

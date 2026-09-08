@@ -29,7 +29,7 @@ export function CategoryBentoGrid({ categories }: { categories: any[] }) {
   };
 
   return (
-    <section className="py-24 bg-slate-50 px-4">
+    <section className="py-24 bg-slate-950 relative overflow-hidden px-4">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
           <motion.div 
@@ -38,8 +38,8 @@ export function CategoryBentoGrid({ categories }: { categories: any[] }) {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4 tracking-tight">Explore the <br/>Collections</h2>
-            <p className="text-slate-600 max-w-md text-lg">Curated styles to elevate every room in your home or office.</p>
+            <h2 className="text-3xl md:text-5xl font-bold text-white mb-4 tracking-tight">Explore the <br/>Collections</h2>
+            <p className="text-slate-400 max-w-md text-lg">Curated styles to elevate every room in your home or office.</p>
           </motion.div>
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -47,7 +47,7 @@ export function CategoryBentoGrid({ categories }: { categories: any[] }) {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <Link href="/shop" className="group inline-flex items-center text-blue-600 font-semibold hover:text-blue-700 transition-colors text-lg">
+            <Link href="/shop" className="group inline-flex items-center text-blue-400 font-semibold hover:text-blue-700 transition-colors text-lg">
               View All Categories
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
@@ -75,7 +75,7 @@ export function CategoryBentoGrid({ categories }: { categories: any[] }) {
             if (i > 2) bentoClasses = "md:col-span-1 md:row-span-1 min-h-[250px] hidden md:block";
 
             return (
-              <motion.div key={cat.name} variants={itemVariants} className={`relative group overflow-hidden rounded-3xl bg-slate-200 ${bentoClasses}`}>
+              <motion.div key={cat.name} variants={itemVariants} className={`relative group overflow-hidden rounded-3xl bg-slate-900 border border-slate-800 shadow-[0_0_15px_rgba(255,255,255,0.05)] ${bentoClasses}`}>
                 <Link href={`/shop?category=${encodeURIComponent(cat.name)}`} className="absolute inset-0 z-20">
                   <span className="sr-only">Shop {cat.name}</span>
                 </Link>

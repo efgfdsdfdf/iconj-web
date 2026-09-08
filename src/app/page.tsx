@@ -50,7 +50,7 @@ export default async function IconjInteriorPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 overflow-x-hidden selection:bg-blue-200">
+    <div className="min-h-screen flex flex-col bg-slate-950 overflow-x-hidden selection:bg-blue-200">
       <AnimatedHero />
       <InfiniteMarquee />
       <CategoryBentoGrid categories={categories} />
@@ -58,7 +58,7 @@ export default async function IconjInteriorPage() {
       <FeaturedShowcase products={featuredProducts} />
 
       {/* Value Props Section (Static) */}
-      <section className="py-24 bg-slate-900 text-white px-4">
+      <section className="py-24 bg-slate-950 border-t border-white/5 text-white px-4">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
             <div>
