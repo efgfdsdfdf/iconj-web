@@ -75,6 +75,18 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const [shippingStatus, setShippingStatus] = useState<string>("CALCULATING");
 
   React.useEffect(() => {
+    // Fire tracking event for product view
+    fetch('/api/marketing/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_type: 'VIEWED_PRODUCT',
+        metadata: { product_id: product.id, name: product.name }
+      })
+    }).catch(err => console.error("Tracking error:", err));
+  }, [product.id, product.name]);
+
+  React.useEffect(() => {
     let isCancelled = false;
     const fetchShipping = async () => {
       setShippingStatus("CALCULATING");
@@ -106,6 +118,17 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
 
   const handleAddToCart = () => {
     setAdding(true);
+    
+    // Fire tracking event
+    fetch('/api/marketing/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event_type: 'ADDED_TO_CART',
+        metadata: { product_id: product.id, name: product.name, price: currentPrice, quantity: qty }
+      })
+    }).catch(err => console.error("Tracking error:", err));
+
     addItem({
       id: product.id,
       name: product.name,

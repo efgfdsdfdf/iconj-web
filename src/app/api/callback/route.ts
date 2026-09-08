@@ -51,6 +51,21 @@ export async function GET(request: Request) {
             description: `Payment confirmed via Paystack (Ref: ${reference}).`
           });
 
+          // Update marketing profiles and events
+          const { data: ord } = await supabaseAdmin.from("orders").select("user_id, total_amount").eq("id", orderId).single();
+          if (ord && ord.user_id) {
+            // Track PURCHASE event
+            await supabaseAdmin.from('marketing_events').insert({
+              user_id: ord.user_id,
+              event_type: 'PURCHASE',
+              metadata: { order_id: orderId, amount: ord.total_amount }
+            });
+            // Update profile last_purchase_date
+            await supabaseAdmin.from('profiles').update({
+              last_purchase_date: new Date().toISOString()
+            }).eq('id', ord.user_id);
+          }
+
           // 4. Create internal admin notification
           await supabaseAdmin.from('admin_notifications').insert({
             type: 'NEW_PAID_ORDER',
