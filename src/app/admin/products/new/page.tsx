@@ -97,7 +97,8 @@ export default function AddProductPage() {
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
     brand: "", age_range: "", safety_info: "",
     is_featured: false, is_bundle: false,
-    is_retail_enabled: true, is_wholesale_enabled: false
+    is_retail_enabled: true, is_wholesale_enabled: false,
+    shipping_weight_kg: "", shipping_length_cm: "", shipping_width_cm: "", shipping_height_cm: "", shipping_packaging_type: "", shipping_origin: "China", shipping_notes: ""
   });
 
   // 2. Images (Files to upload)
@@ -227,6 +228,13 @@ export default function AddProductPage() {
         is_retail_enabled: formData.is_retail_enabled,
         is_wholesale_enabled: formData.is_wholesale_enabled,
         stock_status: formData.stock_status || "In Stock",
+        shipping_weight_kg: formData.shipping_weight_kg ? parseFloat(formData.shipping_weight_kg) : null,
+        shipping_length_cm: formData.shipping_length_cm ? parseFloat(formData.shipping_length_cm) : null,
+        shipping_width_cm: formData.shipping_width_cm ? parseFloat(formData.shipping_width_cm) : null,
+        shipping_height_cm: formData.shipping_height_cm ? parseFloat(formData.shipping_height_cm) : null,
+        shipping_packaging_type: formData.shipping_packaging_type || null,
+        shipping_origin: formData.shipping_origin || "China",
+        shipping_notes: formData.shipping_notes || null,
         features: [],
         specifications: specifications.filter(s => s.key && s.value),
       };
@@ -688,6 +696,42 @@ export default function AddProductPage() {
               <div className="flex items-center gap-2">
                 <input type="checkbox" id="bundle" className="w-4 h-4 rounded text-blue-600" checked={formData.is_bundle} onChange={e => setFormData({...formData, is_bundle: e.target.checked})} />
                 <Label htmlFor="bundle" className="font-normal cursor-pointer">Tag as "Premium Quality"</Label>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-none shadow-sm mt-8">
+            <CardHeader><CardTitle>Shipping Information</CardTitle></CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Weight (kg)</Label>
+                  <Input type="number" step="0.01" value={formData.shipping_weight_kg} onChange={e => setFormData({...formData, shipping_weight_kg: e.target.value})} placeholder="e.g. 2.5" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Packaging Type</Label>
+                  <Input value={formData.shipping_packaging_type} onChange={e => setFormData({...formData, shipping_packaging_type: e.target.value})} placeholder="e.g. Carton, Wooden Crate" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Length (cm)</Label>
+                  <Input type="number" value={formData.shipping_length_cm} onChange={e => setFormData({...formData, shipping_length_cm: e.target.value})} placeholder="e.g. 150" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Width (cm)</Label>
+                  <Input type="number" value={formData.shipping_width_cm} onChange={e => setFormData({...formData, shipping_width_cm: e.target.value})} placeholder="e.g. 20" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Height (cm)</Label>
+                  <Input type="number" value={formData.shipping_height_cm} onChange={e => setFormData({...formData, shipping_height_cm: e.target.value})} placeholder="e.g. 20" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Shipping Origin</Label>
+                  <Input value={formData.shipping_origin} onChange={e => setFormData({...formData, shipping_origin: e.target.value})} placeholder="e.g. China" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Shipping Notes</Label>
+                  <Textarea value={formData.shipping_notes} onChange={e => setFormData({...formData, shipping_notes: e.target.value})} placeholder="e.g. Fragile, Requires special handling" />
+                </div>
               </div>
             </CardContent>
           </Card>

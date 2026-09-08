@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Box, LayoutDashboard, Settings, ShoppingCart, Users, Truck, Menu, AlertCircle, Image as ImageIcon, WalletCards, MessageCircle, FileText } from "lucide-react";
+import { Box, LayoutDashboard, Settings, ShoppingCart, Users, Truck, Menu, AlertCircle, Image as ImageIcon, WalletCards, MessageCircle, FileText, Package } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { verifyAdmin } from "@/lib/auth/admin";
 import { RealtimeAdminUpdates } from "@/components/admin/RealtimeAdminUpdates";
@@ -46,6 +46,9 @@ async function AdminNavLinks() {
       </Link>
       <Link href="/admin/categories" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
         <ImageIcon className="w-5 h-5" /> Categories
+      </Link>
+      <Link href="/admin/shipping" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors text-purple-400">
+        <Package className="w-5 h-5" /> Shipping
       </Link>
       <Link href="/admin/customers" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
         <Users className="w-5 h-5" /> Customers

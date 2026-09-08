@@ -13,11 +13,63 @@ export default function CartPage() {
   const router = useRouter();
   const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore();
 
+  const [shippingEstimate, setShippingEstimate] = useState<number | null>(null);
+  const [shippingStatus, setShippingStatus] = useState<string>("CALCULATING");
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (items.length === 0) return;
+    
+    let isCancelled = false;
+    const fetchShipping = async () => {
+      setShippingStatus("CALCULATING");
+      let total = 0;
+      let hasError = false;
+      let blocksCheckout = false;
+      
+      for (const item of items) {
+        try {
+          const isCustomSize = !!item.width && !!item.height && item.width !== '0cm' && item.height !== '0cm' && item.width !== 'Standard' && item.height !== 'Standard';
+          const res = await fetch("/api/shipping/calculate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_id: item.id, quantity: item.quantity, is_custom_size: isCustomSize })
+          });
+          const data = await res.json();
+          if (data.status === 'CUSTOM_REQUIRED' || data.status === 'MISSING_DATA' || data.status === 'NO_RATES' || data.error) {
+            hasError = true;
+            blocksCheckout = true;
+            break;
+          }
+          total += data.customerShippingPrice || 0;
+        } catch (e) {
+          hasError = true;
+        }
+      }
+      
+      if (!isCancelled) {
+        if (blocksCheckout) {
+          setShippingStatus("BLOCKED");
+        } else if (hasError) {
+          setShippingStatus("ERROR");
+        } else {
+          setShippingEstimate(total);
+          setShippingStatus("READY");
+        }
+      }
+    };
+    
+    fetchShipping();
+    return () => { isCancelled = true; };
+  }, [items]);
+
   if (!mounted) return null;
+
+  const subtotal = getTotalPrice();
+  const total = subtotal + (shippingEstimate || 0);
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-6xl">
@@ -122,16 +174,26 @@ export default function CartPage() {
 
                   <div className="flex justify-between">
                     <span>Subtotal ({items.reduce((acc, i) => acc + i.quantity, 0)} items)</span>
-                    <span className="font-medium text-slate-900">₦{getTotalPrice().toLocaleString()}</span>
+                    <span className="font-medium text-slate-900">₦{subtotal.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span>Shipping</span>
-                    <span className="text-emerald-600 font-bold uppercase text-sm tracking-wider">Free</span>
+                    {shippingStatus === "CALCULATING" ? (
+                      <span className="text-slate-400 text-sm">Calculating...</span>
+                    ) : shippingStatus === "READY" ? (
+                      shippingEstimate === 0 ? (
+                        <span className="text-emerald-600 font-bold uppercase text-sm tracking-wider">Free</span>
+                      ) : (
+                        <span className="font-bold text-slate-900 text-sm tracking-wider">Est. ₦{shippingEstimate?.toLocaleString()}</span>
+                      )
+                    ) : (
+                      <span className="text-slate-500 text-sm italic">Calculated at checkout</span>
+                    )}
                   </div>
                 </div>
                 <div className="flex justify-between items-center py-4 text-lg font-bold text-slate-900">
                   <span>Total</span>
-                  <span>₦{getTotalPrice().toLocaleString()}</span>
+                  <span>₦{total.toLocaleString()}</span>
                 </div>
                 
                 <Button onClick={() => router.push("/checkout")} size="lg" className="w-full bg-blue-600 hover:bg-blue-700 mb-4 group">

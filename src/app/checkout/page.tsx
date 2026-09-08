@@ -51,28 +51,82 @@ export default function CheckoutPage() {
           }
         });
 
-                  // Fetch user's address book from auth metadata
-          const addresses = data.user.user_metadata?.addresses || [];
-          addresses.sort((a: any, b: any) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
-          
-          if (addresses && addresses.length > 0) {
-            setUserAddresses(addresses);
-            setSelectedAddressId(addresses[0].id);
-            setSavedAddress({
-              street: addresses[0].street,
-              city: addresses[0].city,
-              state: addresses[0].state,
-              phone: addresses[0].phone,
-              name: addresses[0].label
-            });
-            setUseSavedAddress(true);
-          }
+        // Fetch user's address book from auth metadata
+        const addresses = data.user.user_metadata?.addresses || [];
+        addresses.sort((a: any, b: any) => (b.is_default ? 1 : 0) - (a.is_default ? 1 : 0));
+        
+        if (addresses && addresses.length > 0) {
+          setUserAddresses(addresses);
+          setSelectedAddressId(addresses[0].id);
+          setSavedAddress({
+            street: addresses[0].street,
+            city: addresses[0].city,
+            state: addresses[0].state,
+            phone: addresses[0].phone,
+            name: addresses[0].label
+          });
+          setUseSavedAddress(true);
+        }
         setCheckingAuth(false);
       } else {
         router.push("/login?redirect=/checkout");
       }
     });
   }, [supabase, router]);
+
+  const [shippingEstimate, setShippingEstimate] = useState<number | null>(null);
+  const [shippingStatus, setShippingStatus] = useState<string>("CALCULATING");
+  const [shippingError, setShippingError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (items.length === 0) return;
+    
+    let isCancelled = false;
+    const fetchShipping = async () => {
+      setShippingStatus("CALCULATING");
+      let total = 0;
+      let hasError = false;
+      let blocksCheckout = false;
+      let errorReason = null;
+      
+      for (const item of items) {
+        try {
+          const isCustomSize = !!item.width && !!item.height && item.width !== '0cm' && item.height !== '0cm' && item.width !== 'Standard' && item.height !== 'Standard';
+          const res = await fetch("/api/shipping/calculate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ product_id: item.id, quantity: item.quantity, is_custom_size: isCustomSize })
+          });
+          const data = await res.json();
+          if (data.status === 'CUSTOM_REQUIRED' || data.status === 'MISSING_DATA' || data.status === 'NO_RATES' || data.error) {
+            hasError = true;
+            blocksCheckout = true;
+            errorReason = data.note || data.error || "One or more items require shipping confirmation before payment. Please request a quote via our quotation system.";
+            break;
+          }
+          total += data.customerShippingPrice || 0;
+        } catch (e) {
+          hasError = true;
+        }
+      }
+      
+      if (!isCancelled) {
+        if (blocksCheckout) {
+          setShippingStatus("BLOCKED");
+          setShippingError(errorReason || "One or more items require shipping confirmation before payment. Please request a quote via our quotation system.");
+        } else if (hasError) {
+          setShippingStatus("ERROR");
+          setShippingError("Failed to calculate shipping. Please try again.");
+        } else {
+          setShippingEstimate(total);
+          setShippingStatus("READY");
+        }
+      }
+    };
+    
+    fetchShipping();
+    return () => { isCancelled = true; };
+  }, [items]);
 
   if (!mounted || checkingAuth) {
     return (
@@ -92,7 +146,7 @@ export default function CheckoutPage() {
   }
 
   const subtotal = getTotalPrice();
-  const shipping = 0;
+  const shipping = shippingEstimate || 0;
   const total = subtotal + shipping;
 
   const handleContinueToPayment = (e: React.FormEvent) => {
@@ -109,8 +163,8 @@ export default function CheckoutPage() {
           street: selected.street,
           city: selected.city,
           state: selected.state,
-            phone: selected.phone,
-            name: selected.label
+          phone: selected.phone,
+          name: selected.label
         });
         setUseSavedAddress(true);
       }
@@ -293,6 +347,16 @@ export default function CheckoutPage() {
               </CardHeader>
               <CardContent className="pt-6 space-y-6">
                 
+                {shippingStatus === "BLOCKED" && (
+                  <div className="bg-red-50 border border-red-200 p-4 rounded-lg text-sm text-red-800">
+                    <p className="font-bold mb-2">Shipping Confirmation Required</p>
+                    <p>{shippingError}</p>
+                    <Link href="/quote" className="mt-3 inline-block font-bold text-blue-600 hover:underline">
+                      Request a Quote
+                    </Link>
+                  </div>
+                )}
+
                 <div className="space-y-6 max-h-[350px] overflow-y-auto pr-2 no-scrollbar">
                   {Object.entries(
                     items.reduce((acc: any, item: any) => {
@@ -335,8 +399,16 @@ export default function CheckoutPage() {
                     <span className="font-medium text-slate-900">₦{subtotal.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between text-slate-600">
-                    <span>Shipping Fee</span>
-                    <span className="font-bold text-emerald-600 uppercase text-sm tracking-wider">Free</span>
+                    <span className="flex items-center gap-1 cursor-help" title="DDP shipping includes delivery to Nigeria. This is an estimate subject to supplier confirmation.">
+                      Estimated DDP Shipping <span className="w-4 h-4 inline-flex items-center justify-center rounded-full bg-slate-200 text-[10px] text-slate-600">i</span>
+                    </span>
+                    {shippingStatus === "CALCULATING" ? (
+                      <span className="text-slate-400 text-sm">Calculating...</span>
+                    ) : shippingStatus === "READY" ? (
+                      <span className="font-bold text-slate-900 text-sm tracking-wider">₦{shipping.toLocaleString()}</span>
+                    ) : (
+                      <span className="text-red-500 text-sm">Requires Quote</span>
+                    )}
                   </div>
                   <div className="flex justify-between text-slate-900 font-bold text-lg border-t pt-3">
                     <span>Total</span>
@@ -346,7 +418,7 @@ export default function CheckoutPage() {
 
                 <Button 
                   onClick={handleCheckout}
-                  disabled={loading} 
+                  disabled={loading || shippingStatus === "CALCULATING" || shippingStatus === "BLOCKED"} 
                   className="w-full h-14 text-lg font-bold bg-orange-500 hover:bg-orange-600 shadow-xl shadow-orange-500/20 uppercase tracking-wider rounded-md"
                 >
                   {loading ? "Initializing..." : "Confirm & Pay Now"}
@@ -365,4 +437,3 @@ export default function CheckoutPage() {
     </div>
   );
 }
-

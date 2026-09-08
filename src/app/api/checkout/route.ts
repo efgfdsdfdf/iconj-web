@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { calculateDDPShippingForCart, snapshotShippingForOrder } from "@/lib/shipping";
 
 export async function POST(request: Request) {
   try {
@@ -64,7 +65,18 @@ export async function POST(request: Request) {
       return verifiedItem;
     });
 
-    const shippingFee = 0; // Configurable later
+    const cartItemsForShipping = verifiedItems.map((item: any) => ({
+      productId: item.dbProduct.id,
+      quantity: item.quantity,
+      isCustomSize: !!item.width && !!item.height && item.width !== '0cm' && item.height !== '0cm' && item.width !== 'Standard' && item.height !== 'Standard'
+    }));
+
+    const shippingResult = await calculateDDPShippingForCart(cartItemsForShipping);
+    if (shippingResult.blocksCheckout) {
+      return NextResponse.json({ error: shippingResult.blocksCheckoutReason, requiresQuote: true }, { status: 400 });
+    }
+
+    const shippingFee = shippingResult.totalCustomerShipping;
     const totalAmount = subtotal + shippingFee;
 
     if (body.saveAddress && userId) {
@@ -84,12 +96,16 @@ export async function POST(request: Request) {
       user_id: userId || null,
       total_amount: totalAmount,
       shipping_cost: shippingFee,
+      estimated_shipping: shippingResult.totalCustomerShipping,
+      shipping_status: shippingResult.worstStatus === 'FORMULA_CONFIRMED' ? 'FORMULA_CONFIRMED' : 'ESTIMATED',
       payment_status: "PENDING",
       order_status: "NEW",
       delivery_address: { ...body.address, name: body.name, phone: body.phone, email: email },
     }]).select().single();
 
     if (orderError) throw orderError;
+
+    await snapshotShippingForOrder(orderData.id, shippingResult);
 
     const splitSubaccounts: any[] = [];
 

@@ -40,6 +40,42 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const [qty, setQty] = useState(moq);
   const [adding, setAdding] = useState(false);
 
+  const [shippingEstimate, setShippingEstimate] = useState<number | null>(null);
+  const [shippingStatus, setShippingStatus] = useState<string>("CALCULATING");
+  const [purchaseMode, setPurchaseMode] = useState<"standard" | "custom">("standard");
+  const [selectedSize, setSelectedSize] = useState("");
+  const [customConfig, setCustomConfig] = useState<any>(null);
+
+  React.useEffect(() => {
+    let isCancelled = false;
+    const fetchShipping = async () => {
+      setShippingStatus("CALCULATING");
+      try {
+        const isCustomSize = purchaseMode === "custom" || selectedSize?.toLowerCase().includes("custom") || (customConfig && customConfig.width > 0);
+        const res = await fetch("/api/shipping/calculate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ product_id: product.id, quantity: qty, is_custom_size: isCustomSize })
+        });
+        const data = await res.json();
+        
+        if (!isCancelled) {
+          if (data.status === 'CUSTOM_REQUIRED' || data.status === 'MISSING_DATA' || data.status === 'NO_RATES' || data.error) {
+            setShippingStatus("BLOCKED");
+          } else {
+            setShippingEstimate(data.customerShippingPrice);
+            setShippingStatus("READY");
+          }
+        }
+      } catch (e) {
+        if (!isCancelled) setShippingStatus("ERROR");
+      }
+    };
+    
+    const timeoutId = setTimeout(fetchShipping, 300); // debounce
+    return () => { isCancelled = true; clearTimeout(timeoutId); };
+  }, [product.id, qty, purchaseMode, customConfig, selectedSize]);
+
   const getCurrentPrice = () => {
     const basePrice = Number(product.base_selling_price) || 0;
     if (!pricingTiers || pricingTiers.length === 0) return basePrice;
@@ -67,9 +103,9 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const [selectedSize, setSelectedSize] = useState(sizes[0] || "");
   const [selectedMotor, setSelectedMotor] = useState(motors[0] || "");
   const [selectedFabric, setSelectedFabric] = useState(fabrics[0] || "");
-  const [customConfig, setCustomConfig] = useState<any>(null);
   const [customNotes, setCustomNotes] = useState("");
   const [purchaseMode, setPurchaseMode] = useState<"standard" | "custom">("standard");
+  const [customConfig, setCustomConfig] = useState<any>(null);
 
   const handleAddToCart = () => {
     setAdding(true);
@@ -181,6 +217,20 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 / unit
               </span>
             </div>
+
+            {shippingStatus === "CALCULATING" ? (
+              <p className="text-sm text-slate-500 mt-2">Calculating shipping...</p>
+            ) : shippingStatus === "READY" ? (
+              <div className="flex items-center gap-2 mt-2 text-sm text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-md inline-flex border border-emerald-100 max-w-max">
+                <Truck className="w-4 h-4" />
+                <span className="font-medium">Estimated DDP Shipping: ₦{shippingEstimate?.toLocaleString()}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 mt-2 text-sm text-amber-700 bg-amber-50 px-3 py-1.5 rounded-md inline-flex border border-amber-100 max-w-max">
+                <Truck className="w-4 h-4" />
+                <span className="font-medium">Shipping calculated at checkout</span>
+              </div>
+            )}
             
             {pricingTiers.length > 0 && (
               <div className="mt-4 bg-blue-50/50 rounded-lg p-4 border border-blue-100">
