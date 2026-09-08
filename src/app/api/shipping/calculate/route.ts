@@ -10,7 +10,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing product_id or quantity' }, { status: 400 });
     }
 
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: product } = await supabase
       .from('products')
       .select('id, shipping_weight_kg, shipping_length_cm, shipping_width_cm, shipping_height_cm, is_configurable')
@@ -27,8 +27,8 @@ export async function POST(req: Request) {
       shippingLengthCm: product.shipping_length_cm,
       shippingWidthCm: product.shipping_width_cm,
       shippingHeightCm: product.shipping_height_cm,
-      shippingDataStatus: 'COMPLETE', // or calculate based on fields
-      isConfigurable: product.is_configurable || is_custom_size,
+      shippingDataStatus: 'COMPLETE', 
+      isConfigurable: is_custom_size,
     }, quantity);
 
     return NextResponse.json({

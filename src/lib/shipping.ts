@@ -278,7 +278,6 @@ export function getProductShippingStatus(product: {
   is_configurable?: boolean;
   shipping_data_status?: string;
 }): 'MISSING' | 'PARTIAL' | 'COMPLETE' | 'CUSTOM_REQUIRED' {
-  if (product.is_configurable) return 'CUSTOM_REQUIRED';
   if (!product.shipping_weight_kg) return 'MISSING';
   if (
     !product.shipping_length_cm ||
@@ -495,7 +494,7 @@ export async function calculateDDPShippingForCart(
       shippingWidthCm: item.customWidthCm ?? p.shipping_width_cm,
       shippingHeightCm: item.customHeightCm ?? p.shipping_height_cm,
       shippingDataStatus: p.shipping_data_status,
-      isConfigurable: item.isCustomSize || p.is_configurable,
+      isConfigurable: item.isCustomSize,
     };
 
     const result = await calculateDDPShipping(productData, item.quantity);
