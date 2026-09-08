@@ -30,6 +30,7 @@ export const viewport: Viewport = {
 import { PwaInstallBanner } from "@/components/layout/PwaInstallBanner";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { createClient } from "@/lib/supabase/server";
+import { CartSync } from "@/components/cart/CartSync";
 
 export default async function RootLayout({
   children,
@@ -48,6 +49,7 @@ export default async function RootLayout({
         <ConditionalLayout hideOnPaths={['/']}><Navbar categories={categories} /></ConditionalLayout>
         <main className="flex-1">
           {children}
+        <CartSync />
         <Toaster position="top-center" />
         
         </main>

@@ -123,7 +123,7 @@ export default function CartPage() {
                             </div>
                           )}
                           <div className="text-sm text-emerald-600 mt-2 font-medium bg-emerald-50 px-2 py-1 rounded-md inline-block">
-                            Wholesale Unit Price: ₦{item.price.toLocaleString()}
+                            {(item.pricingTiers && item.pricingTiers.some((t: any) => item.quantity >= t.minQty)) ? 'Wholesale Unit Price' : 'Unit Price'}: ₦{item.price.toLocaleString()}
                           </div>
                         </div>
                         <div className="text-right">
