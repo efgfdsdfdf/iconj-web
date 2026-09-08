@@ -1,6 +1,7 @@
 import { verifyAdmin } from "@/lib/auth/admin";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { getProductShippingStatus } from "@/lib/shipping";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,6 +12,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
     let { enable_custom_measurements, motorization_fee, installation_fee, ...data } = await req.json();
+
+    data.shipping_data_status = getProductShippingStatus({
+      ...data,
+      is_configurable: enable_custom_measurements
+    });
 
     const { error } = await supabaseAdmin.from("products").update(data).eq("id", id);
     if (!error) {

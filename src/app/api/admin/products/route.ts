@@ -1,6 +1,7 @@
 import { verifyAdmin } from "@/lib/auth/admin";
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
+import { getProductShippingStatus } from "@/lib/shipping";
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -36,6 +37,11 @@ export async function POST(req: NextRequest) {
     }
 
     data.sku = `ICONJ-${prefix}-${String(maxNum + 1).padStart(3, "0")}`;
+
+    data.shipping_data_status = getProductShippingStatus({
+      ...data,
+      is_configurable: enable_custom_measurements
+    });
 
     const { data: newProduct, error } = await supabaseAdmin.from("products").insert([data]).select().single();
     if (newProduct && enable_custom_measurements) {
