@@ -91,19 +91,7 @@ export function AnimatedHero() {
       </motion.div>
 
       <div className="relative z-20 text-center px-4 max-w-5xl mx-auto flex flex-col items-center mt-12">
-        <motion.div
-          custom={0}
-          initial="hidden"
-          animate="visible"
-          variants={textVariants}
-          className="inline-flex items-center gap-2 mb-6 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/30 text-blue-300 text-sm font-medium tracking-wide uppercase shadow-[0_0_20px_rgba(59,130,246,0.2)]"
-        >
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-          </span>
-          Next-Gen Window Treatments
-        </motion.div>
+        
 
         <motion.h1 
           custom={1}
