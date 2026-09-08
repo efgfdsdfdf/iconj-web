@@ -124,7 +124,7 @@ export function AnimatedHero() {
           className="flex flex-col sm:flex-row gap-6 w-full sm:w-auto items-center"
         >
           <Button asChild size="lg" className="relative group overflow-hidden bg-blue-600 hover:bg-blue-500 text-white rounded-full px-8 h-14 text-lg w-full sm:w-auto transition-all shadow-[0_0_40px_rgba(37,99,235,0.4)] hover:shadow-[0_0_60px_rgba(37,99,235,0.6)]">
-            <Link href="/shop">
+            <Link href="/categories">
               <span className="relative z-10 flex items-center">
                 Explore Collection <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </span>

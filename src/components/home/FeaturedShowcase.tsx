@@ -25,7 +25,7 @@ export function FeaturedShowcase({ products }: { products: any[] }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
           >
-            <Link href="/shop" className="group inline-flex items-center text-blue-400 font-semibold hover:text-blue-300 transition-colors text-lg">
+            <Link href="/categories" className="group inline-flex items-center text-blue-400 font-semibold hover:text-blue-300 transition-colors text-lg">
               Shop All
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>

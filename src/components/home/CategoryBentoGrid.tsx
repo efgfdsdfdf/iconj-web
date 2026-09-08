@@ -47,7 +47,7 @@ export function CategoryBentoGrid({ categories }: { categories: any[] }) {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <Link href="/shop" className="group inline-flex items-center text-blue-400 font-semibold hover:text-blue-700 transition-colors text-lg">
+            <Link href="/categories" className="group inline-flex items-center text-blue-400 font-semibold hover:text-blue-700 transition-colors text-lg">
               View All Categories
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
