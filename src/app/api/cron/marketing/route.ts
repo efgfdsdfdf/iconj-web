@@ -1,5 +1,11 @@
 ﻿import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { 
+  sendWelcomeEmail, 
+  sendAbandonedCartEmail, 
+  sendBrowseAbandonedEmail,
+  sendReviewRequestEmail 
+} from '@/lib/marketing-emails';
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -17,21 +23,29 @@ export async function GET(request: Request) {
   }
 
   const now = new Date();
-  const results = { welcomeSent: 0, abandonedCartSent: 0, errors: [] as string[] };
+  const results = { 
+    welcomeSent: 0, 
+    abandonedCartSent: 0, 
+    browseAbandonedSent: 0,
+    reviewRequestsSent: 0,
+    errors: [] as string[] 
+  };
 
   try {
-    // 1. WELCOME FLOW (Phase 1)
-    // Find profiles created in the last 24h that haven't received a WELCOME email.
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-    
-    // Get recent profiles
+    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
+
+    // ==========================================
+    // 1. WELCOME FLOW
+    // ==========================================
     const { data: newProfiles } = await supabaseAdmin
       .from('profiles')
-      .select('id, email, full_name, created_at')
+      .select('id, email, full_name, created_at, marketing_opt_in')
       .gte('created_at', oneDayAgo);
 
     if (newProfiles && newProfiles.length > 0) {
-      // Get who already received it
       const { data: sentEvents } = await supabaseAdmin
         .from('marketing_events')
         .select('user_id')
@@ -41,25 +55,25 @@ export async function GET(request: Request) {
       const sentUserIds = new Set(sentEvents?.map(e => e.user_id) || []);
 
       for (const profile of newProfiles) {
-        if (!sentUserIds.has(profile.id)) {
-          // Send Welcome Email (Placeholder for Resend API call)
-          console.log(`Sending Welcome Email to ${profile.email}`);
-          
-          await supabaseAdmin.from('marketing_events').insert({
-            user_id: profile.id,
-            event_type: 'EMAIL_SENT',
-            metadata: { campaign: 'WELCOME', target_email: profile.email }
-          });
-          results.welcomeSent++;
+        if (!sentUserIds.has(profile.id) && profile.marketing_opt_in !== false) {
+          try {
+            await sendWelcomeEmail({ email: profile.email, full_name: profile.full_name || '' });
+            await supabaseAdmin.from('marketing_events').insert({
+              user_id: profile.id,
+              event_type: 'EMAIL_SENT',
+              metadata: { campaign: 'WELCOME', target_email: profile.email }
+            });
+            results.welcomeSent++;
+          } catch (e: any) {
+            results.errors.push(`Welcome ${profile.email}: ${e.message}`);
+          }
         }
       }
     }
 
-    // 2. CART ABANDONMENT FLOW (Phase 1)
-    // Find ADDED_TO_CART events in the last 2-24 hours.
-    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
-    
-    // We get unique user_ids who abandoned cart
+    // ==========================================
+    // 2. CART ABANDONMENT FLOW
+    // ==========================================
     const { data: abandonedEvents } = await supabaseAdmin
       .from('marketing_events')
       .select('user_id, created_at')
@@ -71,7 +85,7 @@ export async function GET(request: Request) {
       const abandonedUserIds = [...new Set(abandonedEvents.map(e => e.user_id))];
 
       for (const uid of abandonedUserIds) {
-        // Did they purchase AFTER they added to cart?
+        // Did they purchase AFTER adding?
         const { data: purchaseEvents } = await supabaseAdmin
           .from('marketing_events')
           .select('id')
@@ -79,25 +93,135 @@ export async function GET(request: Request) {
           .eq('event_type', 'PURCHASE')
           .gte('created_at', oneDayAgo);
 
-        // Did we already send an abandoned cart email in the last 24h?
+        // Did we already send an abandoned cart email in the last 7 days?
         const { data: alreadySent } = await supabaseAdmin
           .from('marketing_events')
           .select('id')
           .eq('user_id', uid)
           .eq('event_type', 'EMAIL_SENT')
           .contains('metadata', { campaign: 'ABANDONED_CART' })
-          .gte('created_at', oneDayAgo);
+          .gte('created_at', sevenDaysAgo);
 
         if ((!purchaseEvents || purchaseEvents.length === 0) && (!alreadySent || alreadySent.length === 0)) {
-          // Send Abandoned Cart Email (Placeholder for Resend API call)
-          console.log(`Sending Abandoned Cart Email to user ${uid}`);
+          const { data: profile } = await supabaseAdmin.from('profiles').select('email, full_name, marketing_opt_in').eq('id', uid).single();
           
-          await supabaseAdmin.from('marketing_events').insert({
-            user_id: uid,
-            event_type: 'EMAIL_SENT',
-            metadata: { campaign: 'ABANDONED_CART' }
-          });
-          results.abandonedCartSent++;
+          if (profile && profile.marketing_opt_in !== false) {
+            try {
+              await sendAbandonedCartEmail({ email: profile.email, full_name: profile.full_name || '' });
+              await supabaseAdmin.from('marketing_events').insert({
+                user_id: uid,
+                event_type: 'EMAIL_SENT',
+                metadata: { campaign: 'ABANDONED_CART' }
+              });
+              results.abandonedCartSent++;
+            } catch (e: any) {
+              results.errors.push(`Cart ${profile.email}: ${e.message}`);
+            }
+          }
+        }
+      }
+    }
+
+    // ==========================================
+    // 3. BROWSE ABANDONMENT FLOW
+    // ==========================================
+    // Users who viewed a product 2-24h ago
+    const { data: viewEvents } = await supabaseAdmin
+      .from('marketing_events')
+      .select('user_id, metadata, created_at')
+      .eq('event_type', 'VIEWED_PRODUCT')
+      .gte('created_at', oneDayAgo)
+      .lte('created_at', twoHoursAgo)
+      .order('created_at', { ascending: false });
+
+    if (viewEvents && viewEvents.length > 0) {
+      // Group by user, keep most recent view
+      const userLatestView = new Map();
+      viewEvents.forEach(e => {
+        if (!userLatestView.has(e.user_id)) {
+          userLatestView.set(e.user_id, e);
+        }
+      });
+
+      for (const [uid, event] of Array.from(userLatestView.entries())) {
+        // Did they add to cart or purchase in last 24h?
+        const { data: actionEvents } = await supabaseAdmin
+          .from('marketing_events')
+          .select('id')
+          .eq('user_id', uid)
+          .in('event_type', ['ADDED_TO_CART', 'PURCHASE'])
+          .gte('created_at', oneDayAgo);
+
+        // Already sent browse email in last 7 days?
+        const { data: alreadySent } = await supabaseAdmin
+          .from('marketing_events')
+          .select('id')
+          .eq('user_id', uid)
+          .eq('event_type', 'EMAIL_SENT')
+          .contains('metadata', { campaign: 'BROWSE_ABANDONMENT' })
+          .gte('created_at', sevenDaysAgo);
+
+        if ((!actionEvents || actionEvents.length === 0) && (!alreadySent || alreadySent.length === 0)) {
+          const { data: profile } = await supabaseAdmin.from('profiles').select('email, full_name, marketing_opt_in').eq('id', uid).single();
+          const productName = event.metadata?.name || 'product';
+          
+          if (profile && profile.marketing_opt_in !== false) {
+            try {
+              await sendBrowseAbandonedEmail({ email: profile.email, full_name: profile.full_name || '' }, productName);
+              await supabaseAdmin.from('marketing_events').insert({
+                user_id: uid,
+                event_type: 'EMAIL_SENT',
+                metadata: { campaign: 'BROWSE_ABANDONMENT', product: productName }
+              });
+              results.browseAbandonedSent++;
+            } catch (e: any) {
+              results.errors.push(`Browse ${profile.email}: ${e.message}`);
+            }
+          }
+        }
+      }
+    }
+
+    // ==========================================
+    // 4. REVIEW REQUEST FLOW
+    // ==========================================
+    // Find orders delivered ~7-14 days ago. (Using order_status = DELIVERED as a proxy, 
+    // assuming updated_at reflects delivery time roughly, or we just check DELIVERED orders)
+    const { data: deliveredOrders } = await supabaseAdmin
+      .from('orders')
+      .select('id, user_id, updated_at')
+      .eq('order_status', 'DELIVERED')
+      .gte('updated_at', fourteenDaysAgo)
+      .lte('updated_at', sevenDaysAgo);
+
+    if (deliveredOrders && deliveredOrders.length > 0) {
+      for (const order of deliveredOrders) {
+        if (!order.user_id) continue;
+        
+        // Already sent review request for this order?
+        const { data: alreadySent } = await supabaseAdmin
+          .from('marketing_events')
+          .select('id')
+          .eq('user_id', order.user_id)
+          .eq('event_type', 'EMAIL_SENT')
+          .contains('metadata', { campaign: 'REVIEW_REQUEST', order_id: order.id });
+
+        if (!alreadySent || alreadySent.length === 0) {
+          const { data: profile } = await supabaseAdmin.from('profiles').select('email, full_name, marketing_opt_in').eq('id', order.user_id).single();
+          
+          if (profile && profile.marketing_opt_in !== false) {
+            try {
+              await sendReviewRequestEmail({ email: profile.email, full_name: profile.full_name || '' }, order.id);
+              await supabaseAdmin.from('marketing_events').insert({
+                user_id: order.user_id,
+                event_type: 'EMAIL_SENT',
+                metadata: { campaign: 'REVIEW_REQUEST', order_id: order.id }
+              });
+              results.reviewRequestsSent++;
+            } catch (e: any) {
+              results.errors.push(`Review ${profile.email}: ${e.message}`);
+            }
+          }
         }
       }
     }
