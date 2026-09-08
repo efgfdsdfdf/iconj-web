@@ -722,6 +722,42 @@ export default function EditProductPage() {
             </CardContent>
           </Card>
 
+          <Card className="border-none shadow-sm mt-8">
+            <CardHeader><CardTitle>Shipping Information</CardTitle></CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Weight (kg)</Label>
+                  <Input type="number" step="0.01" value={formData.shipping_weight_kg} onChange={e => setFormData({...formData, shipping_weight_kg: e.target.value})} placeholder="e.g. 2.5" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Packaging Type</Label>
+                  <Input value={formData.shipping_packaging_type} onChange={e => setFormData({...formData, shipping_packaging_type: e.target.value})} placeholder="e.g. Carton, Wooden Crate" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Length (cm)</Label>
+                  <Input type="number" value={formData.shipping_length_cm} onChange={e => setFormData({...formData, shipping_length_cm: e.target.value})} placeholder="e.g. 150" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Width (cm)</Label>
+                  <Input type="number" value={formData.shipping_width_cm} onChange={e => setFormData({...formData, shipping_width_cm: e.target.value})} placeholder="e.g. 20" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Height (cm)</Label>
+                  <Input type="number" value={formData.shipping_height_cm} onChange={e => setFormData({...formData, shipping_height_cm: e.target.value})} placeholder="e.g. 20" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Shipping Origin</Label>
+                  <Input value={formData.shipping_origin} onChange={e => setFormData({...formData, shipping_origin: e.target.value})} placeholder="e.g. China" />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label>Shipping Notes</Label>
+                  <Textarea value={formData.shipping_notes} onChange={e => setFormData({...formData, shipping_notes: e.target.value})} placeholder="e.g. Fragile, Requires special handling" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
             <Card className="border-none shadow-sm">
               <CardHeader><CardTitle>Status & Visibility</CardTitle></CardHeader>
               <CardContent className="space-y-6">

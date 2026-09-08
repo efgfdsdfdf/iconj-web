@@ -69,7 +69,7 @@ export default function MissingDataPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <Link href={`/admin/products/${p.id}`}>
+                      <Link href={`/admin/products/${p.id}/edit`}>
                         <Button variant="ghost" size="sm"><Edit2 className="w-4 h-4" /></Button>
                       </Link>
                     </td>
