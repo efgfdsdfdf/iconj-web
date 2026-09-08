@@ -133,3 +133,10 @@ export async function sendReviewRequestEmail(profile: { email: string; full_name
     baseTemplate("How do you like your new blinds?", content, "We'd love to hear your thoughts on your recent order.")
   );
 }
+export async function sendCampaignEmail(profile: { email: string; full_name?: string }, subject: string, htmlContent: string) {
+  return sendEmailTo(
+    profile.email,
+    subject,
+    baseTemplate(subject, htmlContent, subject)
+  );
+}

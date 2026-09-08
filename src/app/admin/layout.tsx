@@ -32,6 +32,9 @@ async function AdminNavLinks() {
       <Link href="/admin/supplier" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
         <Truck className="w-5 h-5" /> Supplier Balance
       </Link>
+      <Link href="/admin/marketing" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors text-purple-400">
+        <MessageCircle className="w-5 h-5" /> Marketing
+      </Link>
       <Link href="/admin/issues" className="flex items-center gap-3 hover:bg-white/5 hover:text-white px-4 py-2.5 rounded-lg transition-colors text-orange-400">
         <AlertCircle className="w-5 h-5" /> Order Issues
       </Link>

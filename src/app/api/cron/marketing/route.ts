@@ -1,10 +1,11 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { 
   sendWelcomeEmail, 
   sendAbandonedCartEmail, 
   sendBrowseAbandonedEmail,
-  sendReviewRequestEmail 
+  sendReviewRequestEmail,
+  sendCampaignEmail
 } from '@/lib/marketing-emails';
 
 const supabaseAdmin = createClient(
@@ -222,6 +223,57 @@ export async function GET(request: Request) {
               results.errors.push(`Review ${profile.email}: ${e.message}`);
             }
           }
+        }
+      }
+    }
+
+    // ==========================================
+    // 5. SEASONAL BROADCASTS (PHASE 3)
+    // ==========================================
+    const { data: scheduledCampaigns } = await supabaseAdmin
+      .from('email_campaigns')
+      .select('*')
+      .eq('status', 'SCHEDULED')
+      .lte('scheduled_for', now.toISOString());
+
+    if (scheduledCampaigns && scheduledCampaigns.length > 0) {
+      for (const camp of scheduledCampaigns) {
+        try {
+          // Fetch target users
+          let profileQuery = supabaseAdmin.from('profiles').select('id, email, full_name, marketing_opt_in, total_spent');
+          
+          if (camp.target_audience === 'VIP') {
+            profileQuery = profileQuery.gte('total_spent', 500000); // 500k NGN threshold for VIP
+          } else if (camp.target_audience === 'NO_PURCHASE') {
+            profileQuery = profileQuery.or('total_spent.eq.0,total_spent.is.null');
+          }
+
+          const { data: targets } = await profileQuery;
+          
+          if (targets && targets.length > 0) {
+            for (const t of targets) {
+              if (t.marketing_opt_in !== false) {
+                await supabaseAdmin.from('marketing_events').insert({
+                  user_id: t.id,
+                  event_type: 'EMAIL_SENT',
+                  metadata: { campaign: camp.id, type: 'BROADCAST' }
+                });
+                
+                // Call Resend to actually deliver the HTML broadcast
+                await sendCampaignEmail(t, camp.subject, camp.html_content);
+                console.log(`Sending Broadcast '${camp.title}' to ${t.email}`);
+              }
+            }
+          }
+          
+          // Mark campaign as sent
+          await supabaseAdmin.from('email_campaigns').update({
+            status: 'SENT',
+            sent_at: now.toISOString()
+          }).eq('id', camp.id);
+
+        } catch (campErr: any) {
+          results.errors.push(`Campaign ${camp.title}: ${campErr.message}`);
         }
       }
     }
