@@ -24,13 +24,23 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const { data: settings } = await supabase.from("store_settings").select("value").eq("id", "homepage_categories").single();
   const adminCategories: { name: string, icon: string }[] = settings?.value || [];
   
-  const categories = (dbCategories || []).map(cat => {
-    const customMatch = adminCategories.find(ac => ac.name.toLowerCase().trim() === cat.name.toLowerCase().trim() || ac.name.toLowerCase().includes(cat.name.toLowerCase()));
-    return {
+  let categories: any[] = [];
+  if (adminCategories.length > 0) {
+    categories = adminCategories.map(ac => {
+      const dbMatch = (dbCategories || []).find(db => db.name.toLowerCase().trim() === ac.name.toLowerCase().trim());
+      return {
+        ...dbMatch,
+        name: ac.name,
+        id: dbMatch ? dbMatch.id : ac.name,
+        icon: ac.icon || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
+      };
+    });
+  } else {
+    categories = (dbCategories || []).map(cat => ({
       ...cat,
-      icon: customMatch?.icon || 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
-    };
-  });
+      icon: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=200&q=80'
+    }));
+  }
 
   let query = supabase
     .from("products")
