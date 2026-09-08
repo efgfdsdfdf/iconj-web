@@ -100,7 +100,9 @@ export default function EditProductPage() {
     supplier_id: "", supplier_sku: "", supplier_product_url: "",
     brand: "", age_range: "", safety_info: "",
     is_featured: false, is_bundle: false,
-    is_retail_enabled: true, is_wholesale_enabled: false
+    is_retail_enabled: true, is_wholesale_enabled: false,
+    shipping_weight_kg: "", shipping_length_cm: "", shipping_width_cm: "", shipping_height_cm: "",
+    shipping_packaging_type: "", shipping_origin: "China", shipping_notes: ""
   });
 
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -141,7 +143,14 @@ export default function EditProductPage() {
           is_featured: !!data.is_featured,
           is_bundle: !!data.is_bundle,
           is_retail_enabled: data.is_retail_enabled !== false,
-          is_wholesale_enabled: !!data.is_wholesale_enabled
+          is_wholesale_enabled: !!data.is_wholesale_enabled,
+          shipping_weight_kg: data.shipping_weight_kg?.toString() || "",
+          shipping_length_cm: data.shipping_length_cm?.toString() || "",
+          shipping_width_cm: data.shipping_width_cm?.toString() || "",
+          shipping_height_cm: data.shipping_height_cm?.toString() || "",
+          shipping_packaging_type: data.shipping_packaging_type || "",
+          shipping_origin: data.shipping_origin || "China",
+          shipping_notes: data.shipping_notes || ""
         });
         if (data.specifications && Array.isArray(data.specifications)) {
           setSpecifications(data.specifications);
@@ -297,6 +306,13 @@ export default function EditProductPage() {
         stock_status: formData.stock_status || "In Stock",
         features: [],
         specifications: specifications.filter(s => s.key && s.value),
+        shipping_weight_kg: formData.shipping_weight_kg ? parseFloat(formData.shipping_weight_kg) : null,
+        shipping_length_cm: formData.shipping_length_cm ? parseFloat(formData.shipping_length_cm) : null,
+        shipping_width_cm: formData.shipping_width_cm ? parseFloat(formData.shipping_width_cm) : null,
+        shipping_height_cm: formData.shipping_height_cm ? parseFloat(formData.shipping_height_cm) : null,
+        shipping_packaging_type: formData.shipping_packaging_type || null,
+        shipping_origin: formData.shipping_origin || "China",
+        shipping_notes: formData.shipping_notes || null
       };
 
       // 3. Update product via API route
