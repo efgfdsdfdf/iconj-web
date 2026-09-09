@@ -51,10 +51,10 @@ function generateSessionId(): string {
 
 function getOrCreateSessionId(): string {
   if (typeof window === 'undefined') return generateSessionId();
-  let sessionId = sessionStorage.getItem('iconj_session_id');
+  let sessionId = localStorage.getItem('iconj_session_id');
   if (!sessionId) {
     sessionId = generateSessionId();
-    sessionStorage.setItem('iconj_session_id', sessionId);
+    localStorage.setItem('iconj_session_id', sessionId);
   }
   return sessionId;
 }
