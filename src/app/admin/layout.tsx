@@ -94,8 +94,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="w-64 bg-slate-900 text-slate-300 hidden md:block shrink-0 z-10">
-        <div className="p-6 fixed w-64 h-[calc(100vh-130px)] overflow-y-auto">
+      <aside className="w-64 bg-slate-900 text-slate-300 hidden md:block shrink-0 z-10 sticky top-20 h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar">
+        <div className="p-6 pb-24">
           <div className="mb-8">
             <h2 className="text-white font-bold text-lg tracking-tight">ICONJ Admin</h2>
             <p className="text-xs text-slate-500">Superuser Portal</p>
