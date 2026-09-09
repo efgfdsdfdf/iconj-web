@@ -3,8 +3,16 @@ import Link from "next/link";
 
 const formatDate = (dateString: string) => {
   if (!dateString) return '-';
-  // Use deterministic string slice to avoid any Server/Client locale mismatches
-  return dateString.replace('T', ' ').slice(0, 16);
+  try {
+    const d = new Date(dateString);
+    return new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Africa/Lagos',
+      dateStyle: 'medium',
+      timeStyle: 'short'
+    }).format(d);
+  } catch (e) {
+    return '-';
+  }
 };
 
 export default async function MarketingDashboard() {

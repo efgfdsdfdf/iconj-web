@@ -9,13 +9,26 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Helper to convert DB UTC string to local browser YYYY-MM-DDThh:mm for the input
+  const getLocalDatetime = (utcString?: string) => {
+    if (!utcString) return "";
+    try {
+      const d = new Date(utcString);
+      const tzOffset = d.getTimezoneOffset() * 60000;
+      return new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+    } catch (e) {
+      return "";
+    }
+  };
+
   const [formData, setFormData] = useState({
     title: campaign?.title || "",
     subject: campaign?.subject || "",
     html_content: campaign?.html_content || "<h1>Hello!</h1><p>Your content here</p>",
     status: campaign?.status || "DRAFT",
     target_audience: campaign?.target_audience || "ALL",
-    scheduled_for: campaign?.scheduled_for ? campaign.scheduled_for.replace(' ', 'T').slice(0, 16) : "",
+    scheduled_for: getLocalDatetime(campaign?.scheduled_for),
   });
 
   useEffect(() => setMounted(true), []);
