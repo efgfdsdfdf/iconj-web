@@ -1,6 +1,11 @@
-﻿import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { format } from "date-fns";
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return '-';
+  const d = new Date(dateString);
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+};
 
 export default async function MarketingDashboard() {
   const supabase = await createClient();
@@ -62,10 +67,10 @@ export default async function MarketingDashboard() {
                     </span>
                   </td>
                   <td className="p-4 text-sm text-slate-600">
-                    {camp.scheduled_for ? format(new Date(camp.scheduled_for), 'MMM d, yyyy HH:mm') : '-'}
+                    {formatDate(camp.scheduled_for)}
                   </td>
                   <td className="p-4 text-sm text-slate-600">
-                    {camp.sent_at ? format(new Date(camp.sent_at), 'MMM d, yyyy HH:mm') : '-'}
+                    {formatDate(camp.sent_at)}
                   </td>
                   <td className="p-4 text-right">
                     <Link href={`/admin/marketing/${camp.id}/edit`} className="text-blue-600 hover:underline text-sm font-medium">
