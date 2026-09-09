@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -14,7 +14,7 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
     html_content: campaign?.html_content || "<h1>Hello!</h1><p>Your content here</p>",
     status: campaign?.status || "DRAFT",
     target_audience: campaign?.target_audience || "ALL",
-    scheduled_for: campaign?.scheduled_for ? new Date(campaign.scheduled_for).toISOString().slice(0, 16) : "",
+    scheduled_for: campaign?.scheduled_for ? campaign.scheduled_for.replace(' ', 'T').slice(0, 16) : "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
