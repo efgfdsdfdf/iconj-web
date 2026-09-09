@@ -1,9 +1,12 @@
-﻿import { CampaignForm } from "@/components/admin/CampaignForm";
-import { createClient } from "@/lib/supabase/server";
+import { CampaignForm } from "@/components/admin/CampaignForm";
+import { createClient } from "@supabase/supabase-js";
 import { notFound } from "next/navigation";
 
 export default async function EditCampaignPage({ params }: { params: { id: string } }) {
-  const supabase = await createClient();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   const { data: campaign, error } = await supabase
     .from('email_campaigns')
     .select('*')

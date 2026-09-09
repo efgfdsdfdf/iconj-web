@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
 
 const formatDate = (dateString: string) => {
@@ -8,7 +8,10 @@ const formatDate = (dateString: string) => {
 };
 
 export default async function MarketingDashboard() {
-  const supabase = await createClient();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
   const { data: campaigns, error } = await supabase
     .from("email_campaigns")
     .select("*")
