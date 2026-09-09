@@ -38,8 +38,7 @@ export async function sendAdminNotification(subject: string, htmlContent: string
 export async function sendEmailTo(toEmail: string, subject: string, htmlContent: string) {
   const apiKey = process.env.SMTP_PASS || process.env.EMAIL_PASS;
   if (!apiKey) {
-    console.log("Email env vars not configured. Skipping email to " + toEmail);
-    return false;
+    throw new Error("Email env vars (SMTP_PASS) not configured.");
   }
 
   try {
@@ -59,13 +58,11 @@ export async function sendEmailTo(toEmail: string, subject: string, htmlContent:
 
     if (!res.ok) {
       const errorData = await res.text();
-      console.error("Resend API rejected email to " + toEmail + ":", errorData);
-      return false;
+      throw new Error(`Resend API Error: ${res.status} - ${errorData}`);
     }
 
     return true;
-  } catch (error) {
-    console.error("Failed to send email to " + toEmail + ":", error);
-    return false;
+  } catch (error: any) {
+    throw new Error(error.message || "Failed to fetch Resend API");
   }
 }
