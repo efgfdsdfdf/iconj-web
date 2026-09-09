@@ -3,8 +3,8 @@ import Link from "next/link";
 
 const formatDate = (dateString: string) => {
   if (!dateString) return '-';
-  const d = new Date(dateString);
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  // Use deterministic string slice to avoid any Server/Client locale mismatches
+  return dateString.replace('T', ' ').slice(0, 16);
 };
 
 export default async function MarketingDashboard() {
