@@ -31,6 +31,8 @@ import { PwaInstallBanner } from "@/components/layout/PwaInstallBanner";
 import { SplashScreen } from "@/components/layout/SplashScreen";
 import { createClient } from "@/lib/supabase/server";
 import { CartSync } from "@/components/cart/CartSync";
+import { Suspense } from "react";
+import { AnalyticsProvider } from "@/components/analytics/AnalyticsProvider";
 
 export default async function RootLayout({
   children,
@@ -44,16 +46,23 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col overflow-x-hidden w-full`}>
-        <SplashScreen />
-        <PwaInstallBanner />
-        <ConditionalLayout hideOnPaths={['/']}><Navbar categories={categories} /></ConditionalLayout>
-        <main className="flex-1">
-          {children}
-        <CartSync />
-        <Toaster position="top-center" />
-        
-        </main>
-        <Footer />
+        <Suspense fallback={null}>
+          <AnalyticsProvider>
+            <SplashScreen />
+            <PwaInstallBanner />
+            <ConditionalLayout hideOnPaths={['/', '/lp/*']}>
+              <Navbar categories={categories} />
+            </ConditionalLayout>
+            <main className="flex-1">
+              {children}
+              <CartSync />
+              <Toaster position="top-center" />
+            </main>
+            <ConditionalLayout hideOnPaths={['/lp/*']}>
+              <Footer />
+            </ConditionalLayout>
+          </AnalyticsProvider>
+        </Suspense>
       </body>
     </html>
   );

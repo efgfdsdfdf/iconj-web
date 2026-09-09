@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Package, FileText, User, MapPin, Heart, Clock, ChevronRight, CheckCircle2, AlertCircle, MessageCircle, Store } from "lucide-react";
+import { Package, FileText, User, MapPin, Heart, Clock, ChevronRight, CheckCircle2, AlertCircle, MessageCircle, Store, Bell } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -69,6 +69,12 @@ export default async function CustomerDashboard() {
                 </Link>
                 <Link href="/account/issues" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
                   <AlertCircle className="w-5 h-5 text-slate-400" /> Returns & Issues
+                </Link>
+                <Link href="/account/wishlist" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
+                  <Heart className="w-5 h-5 text-rose-400" /> My Wishlist
+                </Link>
+                <Link href="/account/preferences" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
+                  <Bell className="w-5 h-5 text-slate-400" /> Communication Preferences
                 </Link>
                 <Link href="/account/support" className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 border-l-4 border-transparent text-slate-700 font-medium border-t">
                   <MessageCircle className="w-5 h-5 text-slate-400" /> Contact Support

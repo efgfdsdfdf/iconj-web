@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, CheckCircle2, Plus } from "lucide-react";
+import { ChevronRight, ShieldCheck, Truck, Lock, CreditCard, CheckCircle2, Plus, Tag, X, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -31,8 +31,34 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<"address" | "payment">("address");
   const [checkingAuth, setCheckingAuth] = useState(true);
 
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    coupon_id: string;
+    discount_type: string;
+    discount_amount: number;
+    description?: string;
+  } | null>(null);
+  const [couponError, setCouponError] = useState("");
+
   useEffect(() => {
     setMounted(true);
+
+    // Track checkout_started analytics event
+    fetch('/api/analytics/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventType: 'checkout_started',
+        sessionId: sessionStorage.getItem('iconj_session_id') || '',
+        properties: {
+          cart_value: getTotalPrice(),
+          item_count: items.length,
+        },
+      }),
+    }).catch(() => {});
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) {
         setUserId(data.user.id);
@@ -174,6 +200,31 @@ export default function CheckoutPage() {
     setStep("payment");
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError("");
+    setAppliedCoupon(null);
+    try {
+      const res = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim(), subtotal }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setAppliedCoupon(data);
+        setCouponCode("");
+      } else {
+        setCouponError(data.error || "Invalid coupon.");
+      }
+    } catch {
+      setCouponError("Failed to validate coupon. Try again.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
   const handleCheckout = async () => {
     setLoading(true);
     try {
@@ -186,6 +237,9 @@ export default function CheckoutPage() {
         body: JSON.stringify({ 
           email: formData.email, 
           userId: userId,
+          sessionId: typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('iconj_session_id') : null,
+          coupon_id: appliedCoupon?.coupon_id || null,
+          discount_amount: appliedCoupon?.discount_amount || 0,
           name: isNewAddress ? `${formData.firstName} ${formData.lastName}`.trim() : (selectedAddr?.label || `${formData.firstName} ${formData.lastName}`.trim()),
           phone: isNewAddress ? formData.phone : (selectedAddr?.phone || formData.phone),
           address: isNewAddress ? {
@@ -410,9 +464,61 @@ export default function CheckoutPage() {
                       <span className="text-red-500 text-sm">Requires Quote</span>
                     )}
                   </div>
+
+                  {/* Coupon Input */}
+                  {!appliedCoupon ? (
+                    <div className="space-y-2 pt-1">
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                          <Input
+                            placeholder="Coupon code"
+                            value={couponCode}
+                            onChange={(e) => { setCouponCode(e.target.value.toUpperCase()); setCouponError(""); }}
+                            onKeyDown={(e) => e.key === 'Enter' && handleApplyCoupon()}
+                            className="pl-9 uppercase text-sm font-mono"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={handleApplyCoupon}
+                          disabled={couponLoading || !couponCode.trim()}
+                          className="text-sm font-bold shrink-0"
+                        >
+                          {couponLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                        </Button>
+                      </div>
+                      {couponError && <p className="text-xs text-red-600 font-medium">{couponError}</p>}
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between bg-emerald-50 border border-emerald-200 rounded-md px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <Tag className="w-4 h-4 text-emerald-600" />
+                        <div>
+                          <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider font-mono">{appliedCoupon.code}</span>
+                          {appliedCoupon.description && <p className="text-xs text-emerald-600">{appliedCoupon.description}</p>}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold text-emerald-700">-₦{appliedCoupon.discount_amount.toLocaleString()}</span>
+                        <button onClick={() => { setAppliedCoupon(null); setCouponError(""); }} className="text-slate-400 hover:text-red-500 transition-colors">
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {appliedCoupon && (
+                    <div className="flex justify-between text-emerald-600 font-medium">
+                      <span>Discount</span>
+                      <span>-₦{appliedCoupon.discount_amount.toLocaleString()}</span>
+                    </div>
+                  )}
+
                   <div className="flex justify-between text-slate-900 font-bold text-lg border-t pt-3">
                     <span>Total</span>
-                    <span className="text-orange-600">₦{total.toLocaleString()}</span>
+                    <span className="text-orange-600">₦{Math.max(0, total - (appliedCoupon?.discount_amount || 0)).toLocaleString()}</span>
                   </div>
                 </div>
 

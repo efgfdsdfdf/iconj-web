@@ -5,8 +5,57 @@ import { ProductDetailsClient } from "./ProductDetailsClient";
 import { Reviews } from "./Reviews";
 import { ProductCard } from "@/components/product/ProductCard";
 import { ProductDescription } from "./ProductDescription";
+import type { Metadata } from "next";
 
-export const revalidate = 0;
+export const revalidate = 3600; // Revalidate hourly for SEO pages
+
+// ==========================================
+// DYNAMIC SEO METADATA
+// ==========================================
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const { createClient: createAdminClient } = require('@supabase/supabase-js');
+  const supabaseAdmin = createAdminClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+
+  const { data: product } = await supabaseAdmin
+    .from("products")
+    .select("name, description, images, base_selling_price, category")
+    .eq("id", id)
+    .single();
+
+  if (!product) return { title: "Product Not Found | ICONJ" };
+
+  const image = product.images?.[0] || "https://iconj.com.ng/og-image.jpg";
+  const title = `${product.name} | Buy Window Blinds & Curtains Nigeria — ICONJ`;
+  const description = product.description
+    ? product.description.replace(/<[^>]+>/g, "").slice(0, 155) + "..."
+    : `Shop ${product.name} at ICONJ — Nigeria's trusted source for custom window blinds and curtains. Fast delivery nationwide.`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: [{ url: image, width: 1200, height: 630, alt: product.name }],
+      type: "website",
+      siteName: "ICONJ",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
+    alternates: {
+      canonical: `https://iconj.com.ng/shop/${id}`,
+    },
+  };
+}
+
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -100,7 +149,33 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
   
   const images = product.images && product.images.length > 0 ? product.images : [getProductImage(product.category)];
 
+  // JSON-LD structured data for Google rich results
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description?.replace(/<[^>]+>/g, "").slice(0, 500) || product.name,
+    image: images,
+    sku: product.sku || product.id,
+    brand: { "@type": "Brand", name: "ICONJ" },
+    offers: {
+      "@type": "Offer",
+      url: `https://iconj.com.ng/shop/${product.id}`,
+      priceCurrency: "NGN",
+      price: Number(product.base_selling_price).toFixed(2),
+      availability: product.stock_status === "Out of Stock"
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+      seller: { "@type": "Organization", name: product.stores?.store_name || "ICONJ" },
+    },
+  };
+
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <div className="bg-slate-50 min-h-screen pb-12 overflow-x-hidden max-w-full w-full">
       <div className="bg-white border-b shadow-sm mb-4 lg:mb-8">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
@@ -234,5 +309,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
 
       </div>
     </div>
+    </>
   );
 }

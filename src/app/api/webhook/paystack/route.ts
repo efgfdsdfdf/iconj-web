@@ -4,6 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 import { convertQuotationToOrder, logQuotationEvent, verifyPaystackTransaction, createPostPaymentException } from "@/lib/quotation-helpers";
 import { sendPaymentReceivedEmails } from "@/lib/quotation-emails";
 import { sendPaymentReceipt, sendStatusNotification } from "@/lib/order-emails";
+import { trackEvent, incrementProfileStats } from "@/lib/analytics";
 
 export async function POST(req: Request) {
   try {
@@ -149,6 +150,32 @@ export async function POST(req: Request) {
         payment_status: "PAID",
         order_status: "PROCESSING" 
       }).eq("id", orderId);
+
+      // Track purchase analytics event and update profile lifetime value
+      const { data: paidOrder } = await supabaseAdmin
+        .from("orders")
+        .select("total_amount, user_id, attribution_snapshot")
+        .eq("id", orderId)
+        .single();
+
+      if (paidOrder) {
+        const sessionId = paidOrder.attribution_snapshot?.session_id || 'webhook';
+        await trackEvent({
+          eventType: 'purchase',
+          sessionId,
+          userId: paidOrder.user_id || null,
+          properties: {
+            order_id: orderId,
+            revenue: paidOrder.total_amount,
+            paystack_reference: data.reference,
+          },
+          idempotencyKey: `purchase_${orderId}`,
+        });
+
+        if (paidOrder.user_id) {
+          await incrementProfileStats(paidOrder.user_id, Number(paidOrder.total_amount));
+        }
+      }
 
       await supabaseAdmin.from("seller_orders").update({
         status: "PROCESSING"

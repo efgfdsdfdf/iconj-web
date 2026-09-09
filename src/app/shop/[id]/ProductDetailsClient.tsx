@@ -75,15 +75,33 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const [shippingStatus, setShippingStatus] = useState<string>("CALCULATING");
 
   React.useEffect(() => {
-    // Fire tracking event for product view
+    // Fire tracking event for product view — both legacy and new analytics endpoint
+    const body = JSON.stringify({
+      event_type: 'VIEWED_PRODUCT',
+      metadata: { product_id: product.id, name: product.name }
+    });
     fetch('/api/marketing/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      body,
+    }).catch(() => {});
+
+    // New analytics endpoint — supports guests + UTM attribution
+    fetch('/api/analytics/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        event_type: 'VIEWED_PRODUCT',
-        metadata: { product_id: product.id, name: product.name }
-      })
-    }).catch(err => console.error("Tracking error:", err));
+        eventType: 'product_view',
+        sessionId: sessionStorage.getItem('iconj_session_id') || '',
+        properties: {
+          product_id: product.id,
+          product_name: product.name,
+          category: product.category,
+          price: product.base_selling_price,
+        },
+        idempotencyKey: `pv_${product.id}_${sessionStorage.getItem('iconj_session_id') || ''}_${Date.now().toString().slice(0, -3)}`,
+      }),
+    }).catch(() => {});
   }, [product.id, product.name]);
 
   React.useEffect(() => {
@@ -119,7 +137,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
   const handleAddToCart = () => {
     setAdding(true);
     
-    // Fire tracking event
+    // Fire tracking event (legacy marketing events)
     fetch('/api/marketing/track', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -127,7 +145,24 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
         event_type: 'ADDED_TO_CART',
         metadata: { product_id: product.id, name: product.name, price: currentPrice, quantity: qty }
       })
-    }).catch(err => console.error("Tracking error:", err));
+    }).catch(() => {});
+
+    // New analytics endpoint — supports guests + UTM attribution
+    fetch('/api/analytics/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        eventType: 'add_to_cart',
+        sessionId: sessionStorage.getItem('iconj_session_id') || '',
+        properties: {
+          product_id: product.id,
+          product_name: product.name,
+          price: currentPrice,
+          quantity: qty,
+          purchase_mode: purchaseMode,
+        },
+      }),
+    }).catch(() => {});
 
     addItem({
       id: product.id,
@@ -468,43 +503,285 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
                 </button>
               </div>
             </div>
+            {moq > 1 && (
+              <p className="text-sm font-medium text-orange-600 mt-2">Minimum Order Quantity: {moq} units</p>
+            )}
           </div>
         </div>
 
-          {(product.requires_quote || purchaseMode === "custom" || (customConfig && customConfig.width > 0) || selectedSize?.toLowerCase().includes("custom")) ? (
-            <Button size="lg" onClick={() => {
-              let url = "/quote?product_id=" + product.id + "&product_name=" + encodeURIComponent(product.name);
-              if (customConfig) {
-                 url += `&width=${customConfig.width}&height=${customConfig.height}&motorized=${customConfig.isMotorized}`;
-              }
-              if (customNotes) {
-                 url += `&notes=${encodeURIComponent(customNotes)}`;
-              }
-              router.push(url);
-            }} className="w-full h-14 text-lg font-bold bg-slate-900 hover:bg-slate-800 shadow-xl rounded-md uppercase tracking-wider">
-              Request Custom Quote
-            </Button>
-          ) : (
-            <>
-            <div className="mb-4 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-              <p className="font-semibold text-slate-900 mb-1">Standard Product Order</p>
-              <p className="text-sm text-slate-600 mb-2">Select your preferred standard options before placing your order.</p>
-              <p className="text-xs text-slate-500 italic">Please note: ICONJ currently provides the products only. Installation is not included.</p>
+        {/* Dynamic Configurator */}
+        <div className="space-y-6 mb-8">
+          
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-white p-2 rounded-md shadow-sm">
+                <Ruler className="w-5 h-5 text-amber-600" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 text-sm">Need a perfect fit?</h4>
+                <p className="text-xs text-slate-600 mt-0.5">Learn how to accurately measure your windows.</p>
+              </div>
             </div>
-            <Button 
-              size="lg" 
-              onClick={handleAddToCart} 
-              disabled={adding || product.stock_status === "Out of Stock"}
-              className={`w-full h-14 text-lg font-bold shadow-xl rounded-md uppercase tracking-wider ${
-                product.stock_status === "Out of Stock" 
-                  ? "bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200" 
-                  : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
-              }`}
-            >
-              {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Add to Cart"}
-            </Button>
-            </>
+            <Dialog>
+              <DialogTrigger className="text-xs font-bold uppercase tracking-wider text-amber-700 bg-white border border-amber-200 px-3 py-1.5 rounded hover:bg-amber-100 transition-colors">
+                Guide
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl font-bold">How to Measure</DialogTitle>
+                  <DialogDescription>
+                    Follow our simple guide to get the perfect fit for your window.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-6 md:grid-cols-2 mt-4">
+                  <div className="border rounded-lg p-5">
+                    <h3 className="font-bold flex items-center gap-2 mb-3"><Ruler className="w-4 h-4 text-amber-600"/> Inside Mount (Recess)</h3>
+                    <p className="text-sm text-slate-600 mb-3">For a clean, built-in look where the blind fits inside the window frame.</p>
+                    <ul className="text-sm list-disc pl-4 space-y-2 text-slate-600 mb-4">
+                      <li><strong>Width:</strong> Measure inside width at top, middle, and bottom. Use narrowest.</li>
+                      <li><strong>Drop:</strong> Measure inside length at left, middle, right. Use longest.</li>
+                    </ul>
+                    <div className="bg-blue-50 p-3 rounded text-xs text-blue-800 flex gap-2">
+                      <Info className="w-4 h-4 shrink-0" />
+                      Do not make deductions. The supplier will make them to ensure it fits perfectly.
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-5">
+                    <h3 className="font-bold flex items-center gap-2 mb-3"><Ruler className="w-4 h-4 text-amber-600"/> Outside Mount (Exact)</h3>
+                    <p className="text-sm text-slate-600 mb-3">The blind sits outside the frame to make the window look larger or block maximum light.</p>
+                    <ul className="text-sm list-disc pl-4 space-y-2 text-slate-600 mb-4">
+                      <li><strong>Width:</strong> Add at least 10cm to each side past the window frame to minimize light gap.</li>
+                      <li><strong>Drop:</strong> Measure from where headrail will sit, down to where blind finishes.</li>
+                    </ul>
+                    <div className="bg-amber-50 p-3 rounded text-xs text-amber-800 flex gap-2">
+                      <Info className="w-4 h-4 shrink-0" />
+                      We will make the blind exactly to your measurements. No deductions will be made.
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          
+          {activeRules && (
+            <div className="mb-6 flex p-1 bg-slate-100 rounded-lg w-full max-w-sm">
+              <button 
+                onClick={() => setPurchaseMode("standard")}
+                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "standard" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Standard Option
+              </button>
+              <button 
+                onClick={() => setPurchaseMode("custom")}
+                className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${purchaseMode === "custom" ? "bg-white shadow-sm text-slate-900" : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Customize Measurements
+              </button>
+            </div>
           )}
+
+          {activeRules && purchaseMode === "custom" && (
+            <div className="mb-6">
+              <MeasurementConfigurator 
+                rules={activeRules} 
+                basePrice={Number(product.base_selling_price) || 0} 
+                onConfigChange={setCustomConfig} 
+              />
+            </div>
+          )}
+          
+          {(sizes.length > 0 || colors.length > 0) && (
+            <div className="space-y-6">
+              
+              {colors.length > 0 && (
+                <div className="space-y-3">
+                  <Label className="text-base font-bold text-slate-900">Select Color</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {colors.map((c: string, idx: number) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => setSelectedColor(c)}
+                        className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${selectedColor === c ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-700 hover:border-slate-300"}`}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {sizes.length > 0 && purchaseMode === "standard" && (
+                <div className="space-y-3">
+                  <Label className="text-base font-bold text-slate-900">Select Size / Dimension</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {sizes.map((s: string, idx: number) => (
+                      <button 
+                        key={idx} 
+                        onClick={() => setSelectedSize(s)}
+                        className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${selectedSize === s ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-700 hover:border-slate-300"}`}
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {motors.length > 0 && (
+            <div className="space-y-3">
+              <Label className="text-base font-bold text-slate-900">Select Motor Type</Label>
+              <div className="flex flex-wrap gap-2">
+                {motors.map((m: string, idx: number) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setSelectedMotor(m)}
+                    className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${selectedMotor === m ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-700 hover:border-slate-300"}`}
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {fabrics.length > 0 && (
+            <div className="space-y-3">
+              <Label className="text-base font-bold text-slate-900">Select Fabric</Label>
+              <div className="flex flex-wrap gap-2">
+                {fabrics.map((f: string, idx: number) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setSelectedFabric(f)}
+                    className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${selectedFabric === f ? "border-orange-500 bg-orange-50 text-orange-700" : "border-slate-200 text-slate-700 hover:border-slate-300"}`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-3">
+            <Label className="text-base font-bold text-slate-900">Customization / Delivery Notes (Optional)</Label>
+            <textarea 
+              value={customNotes}
+              onChange={(e) => setCustomNotes(e.target.value)}
+              placeholder="e.g. Please ensure proper packaging, or specific customization request..."
+              className="w-full border rounded-md p-3 text-sm min-h-[80px] focus:ring-1 focus:ring-orange-500 focus:outline-none"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <Label className="text-base font-bold text-slate-900">Quantity</Label>
+            <div className="flex flex-col gap-1 w-1/3">
+              <div className="flex items-center border rounded-md h-12 bg-white">
+                <button 
+                  onClick={() => setQty(Math.max(moq, qty - 1))} 
+                  disabled={qty <= moq}
+                  className={`p-2 transition-colors ${qty <= moq ? 'text-slate-300 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`}
+                >
+                  <Minus className="w-5 h-5" />
+                </button>
+                <input 
+                  type="number"
+                  min={moq}
+                  value={qty}
+                  onChange={(e) => setQty(Math.max(moq, parseInt(e.target.value) || moq))}
+                  className="w-full text-center py-2 font-medium bg-slate-50 border-x focus:outline-none" 
+                />
+                <button onClick={() => setQty(qty + 1)} className="p-2 hover:bg-slate-100 text-slate-600 transition-colors">
+                  <Plus className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+          <div className="flex gap-4">
+            {(product.requires_quote || purchaseMode === "custom" || (customConfig && customConfig.width > 0) || selectedSize?.toLowerCase().includes("custom")) ? (
+              <>
+                <Button size="lg" onClick={() => {
+                  let url = "/quote?product_id=" + product.id + "&product_name=" + encodeURIComponent(product.name);
+                  if (customConfig) {
+                     url += `&width=${customConfig.width}&height=${customConfig.height}&motorized=${customConfig.isMotorized}`;
+                  }
+                  if (customNotes) {
+                     url += `&notes=${encodeURIComponent(customNotes)}`;
+                  }
+                  router.push(url);
+                }} className="flex-1 h-14 text-lg font-bold bg-slate-900 hover:bg-slate-800 shadow-xl rounded-md uppercase tracking-wider">
+                  Request Custom Quote
+                </Button>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  onClick={async () => {
+                    const res = await fetch('/api/wishlist', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ productId: product.id })
+                    });
+                    if (res.ok) {
+                      const data = await res.json();
+                      alert(data.action === 'added' ? 'Added to wishlist!' : 'Removed from wishlist!');
+                    } else {
+                      router.push('/login');
+                    }
+                  }}
+                  className="h-14 w-14 border-slate-300 text-slate-700 hover:bg-slate-50"
+                  title="Save to Wishlist"
+                >
+                  <Heart className="w-6 h-6" />
+                </Button>
+              </>
+            ) : (
+              <div className="flex-1 flex flex-col gap-4">
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                  <p className="font-semibold text-slate-900 mb-1">Standard Product Order</p>
+                  <p className="text-sm text-slate-600 mb-2">Select your preferred standard options before placing your order.</p>
+                  <p className="text-xs text-slate-500 italic">Please note: ICONJ currently provides the products only. Installation is not included.</p>
+                </div>
+                <div className="flex gap-4">
+                  <Button 
+                    size="lg" 
+                    onClick={handleAddToCart} 
+                    disabled={adding || product.stock_status === "Out of Stock"}
+                    className={`flex-1 h-14 text-lg font-bold shadow-xl rounded-md uppercase tracking-wider ${
+                      product.stock_status === "Out of Stock" 
+                        ? "bg-slate-200 text-slate-500 cursor-not-allowed hover:bg-slate-200" 
+                        : "bg-orange-500 hover:bg-orange-600 shadow-orange-500/20"
+                    }`}
+                  >
+                    {product.stock_status === "Out of Stock" ? "Out of Stock" : adding ? "Adding..." : "Add to Cart"}
+                  </Button>
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    onClick={async () => {
+                      const res = await fetch('/api/wishlist', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ productId: product.id })
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        alert(data.action === 'added' ? 'Added to wishlist!' : 'Removed from wishlist!');
+                      } else {
+                        router.push('/login');
+                      }
+                    }}
+                    className="h-14 px-6 border-rose-200 text-rose-500 hover:bg-rose-50 hover:text-rose-600"
+                    title="Save to Wishlist"
+                  >
+                    <Heart className="w-6 h-6" />
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
       </div>
     </div>
   );

@@ -27,3 +27,15 @@ export async function createClient() {
     }
   );
 }
+
+export async function requireAdmin() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // ICONJ Admin condition: specific email
+  if (!user || user.email !== "ezeilodavid292@gmail.com") {
+    const { redirect } = await import("next/navigation");
+    redirect("/login");
+  }
+}
+

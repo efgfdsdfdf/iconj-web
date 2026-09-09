@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { calculateDDPShippingForCart, snapshotShippingForOrder } from "@/lib/shipping";
+import { freezeOrderAttribution, incrementProfileStats } from "@/lib/analytics";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { items, email, name, userId } = body;
+    const { items, email, name, userId, sessionId, coupon_id, discount_amount } = body;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -77,7 +78,8 @@ export async function POST(request: Request) {
     }
 
     const shippingFee = shippingResult.totalCustomerShipping;
-    const totalAmount = subtotal + shippingFee;
+    const couponDiscount = Math.max(0, Number(discount_amount) || 0);
+    const totalAmount = Math.max(0, subtotal + shippingFee - couponDiscount);
 
     if (body.saveAddress && userId) {
       await supabaseAdmin.from('addresses').insert([{
@@ -106,6 +108,22 @@ export async function POST(request: Request) {
     if (orderError) throw orderError;
 
     await snapshotShippingForOrder(orderData.id, shippingResult);
+
+    // Freeze attribution snapshot onto this order
+    if (sessionId) {
+      await freezeOrderAttribution(orderData.id, sessionId, userId || null);
+    }
+
+    // Record coupon usage (increment times_used + log usage)
+    if (coupon_id && couponDiscount > 0) {
+      await supabaseAdmin.rpc('increment_coupon_usage', { c_id: coupon_id }).catch(() => {});
+      await supabaseAdmin.from('coupon_usages').insert([{
+        coupon_id,
+        user_id: userId || null,
+        order_id: orderData.id,
+        discount_applied: couponDiscount
+      }]).catch(() => {});
+    }
 
     const splitSubaccounts: any[] = [];
 

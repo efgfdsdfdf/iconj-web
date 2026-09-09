@@ -7,11 +7,13 @@ import Link from "next/link";
 import { useCartStore } from "@/store/cartStore";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useAnalytics } from "@/components/analytics/AnalyticsProvider";
 
 export default function CartPage() {
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { items, removeItem, updateQuantity, getTotalPrice } = useCartStore();
+  const { trackEvent } = useAnalytics();
 
   const [shippingEstimate, setShippingEstimate] = useState<number | null>(null);
   const [shippingStatus, setShippingStatus] = useState<string>("CALCULATING");
@@ -136,20 +138,37 @@ export default function CartPage() {
                         <div className="flex items-center gap-4">
                           <div className="flex items-center border rounded-md">
                             <button 
-                              onClick={() => updateQuantity(item.id, item.quantity - 1)} 
+                              onClick={() => {
+                                updateQuantity(item.id, item.quantity - 1);
+                                trackEvent('update_cart_quantity', { product_id: item.id, new_quantity: item.quantity - 1 });
+                              }} 
                               disabled={item.quantity <= (item.moq || 1)}
                               className={`px-3 py-1 transition-colors ${item.quantity <= (item.moq || 1) ? 'bg-slate-50 text-slate-300 cursor-not-allowed' : 'hover:bg-slate-100 text-slate-600'}`}
                             >
                               -
                             </button>
                             <span className="px-4 py-1 border-l border-r text-sm font-medium bg-slate-50">{item.quantity}</span>
-                            <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="px-3 py-1 hover:bg-slate-100 text-slate-600 transition-colors">+</button>
+                            <button 
+                              onClick={() => {
+                                updateQuantity(item.id, item.quantity + 1);
+                                trackEvent('update_cart_quantity', { product_id: item.id, new_quantity: item.quantity + 1 });
+                              }} 
+                              className="px-3 py-1 hover:bg-slate-100 text-slate-600 transition-colors"
+                            >
+                              +
+                            </button>
                           </div>
                           {item.moq && item.moq > 1 && (
                             <span className="text-xs text-slate-500 font-medium">MOQ: {item.moq} units</span>
                           )}
                         </div>
-                        <button onClick={() => removeItem(item.id)} className="text-sm font-medium text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors">
+                        <button 
+                          onClick={() => {
+                            trackEvent('remove_from_cart', { product_id: item.id, product_name: item.name });
+                            removeItem(item.id);
+                          }} 
+                          className="text-sm font-medium text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
+                        >
                           <Trash2 className="w-4 h-4" /> Remove
                         </button>
                       </div>

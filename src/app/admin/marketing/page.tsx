@@ -1,5 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Plus, BarChart3, Users, Workflow, Handshake, Ticket, LayoutTemplate } from "lucide-react";
 
 const formatDate = (dateString: string) => {
   if (!dateString) return '-';
@@ -36,12 +38,43 @@ export default async function MarketingDashboard() {
           <h1 className="text-2xl font-bold">Marketing Campaigns</h1>
           <p className="text-slate-600">Schedule seasonal broadcasts and email blasts.</p>
         </div>
-        <Link 
-          href="/admin/marketing/new" 
-          className="bg-orange-600 text-white px-4 py-2 rounded font-medium hover:bg-orange-700 transition"
-        >
-          + New Campaign
-        </Link>
+        <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
+          <Link href="/admin/marketing/analytics">
+            <Button variant="outline" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" /> Analytics Dashboard
+            </Button>
+          </Link>
+          <Link href="/admin/marketing/segments">
+            <Button variant="outline" className="flex items-center gap-2">
+              <Users className="w-4 h-4" /> Segments
+            </Button>
+          </Link>
+          <Link href="/admin/marketing/automations">
+            <Button variant="outline" className="flex items-center gap-2 text-purple-600 hover:text-purple-700">
+              <Workflow className="w-4 h-4" /> Automations
+            </Button>
+          </Link>
+          <Link href="/admin/marketing/referrals">
+            <Button variant="outline" className="flex items-center gap-2 text-emerald-600 hover:text-emerald-700">
+              <Handshake className="w-4 h-4" /> Referrals
+            </Button>
+          </Link>
+          <Link href="/admin/marketing/coupons">
+            <Button variant="outline" className="flex items-center gap-2 text-amber-600 hover:text-amber-700">
+              <Ticket className="w-4 h-4" /> Coupons
+            </Button>
+          </Link>
+          <Link href="/admin/marketing/landing-pages">
+            <Button variant="outline" className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700">
+              <LayoutTemplate className="w-4 h-4" /> Landing Pages
+            </Button>
+          </Link>
+          <Link href="/admin/marketing/new">
+            <Button className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700">
+              <Plus className="w-4 h-4" /> New Campaign
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="bg-white rounded-lg shadow-sm border border-slate-200">
