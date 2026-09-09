@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { createCampaign, updateCampaign } from "@/app/admin/marketing/actions";
 
 export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: campaign?.title || "",
@@ -16,6 +17,12 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
     target_audience: campaign?.target_audience || "ALL",
     scheduled_for: campaign?.scheduled_for ? campaign.scheduled_for.replace(' ', 'T').slice(0, 16) : "",
   });
+
+  useEffect(() => setMounted(true), []);
+
+  if (!mounted) {
+    return <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200 h-96 flex items-center justify-center text-slate-500">Loading editor...</div>;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
