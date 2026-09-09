@@ -24,9 +24,7 @@ export default async function AutomationsPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/admin/marketing"><Button variant="outline">Back to Marketing</Button></Link>
-          <Button className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Create Flow
-          </Button>
+          <Link href="/admin/marketing/automations/new"><Button className="bg-purple-600 hover:bg-purple-700 flex items-center gap-2"><Plus className="w-4 h-4" /> Create Flow</Button></Link>
         </div>
       </div>
 

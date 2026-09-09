@@ -25,9 +25,7 @@ export default async function SegmentsPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/admin/marketing"><Button variant="outline">Back to Marketing</Button></Link>
-          <Button className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Create Segment
-          </Button>
+          <Link href="/admin/marketing/segments/new"><Button className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2"><Plus className="w-4 h-4" /> Create Segment</Button></Link>
         </div>
       </div>
 
