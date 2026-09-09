@@ -24,9 +24,11 @@ export default async function LandingPagesAdmin() {
         </div>
         <div className="flex items-center gap-3">
           <Link href="/admin/marketing"><Button variant="outline">Back to Marketing</Button></Link>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2">
-            <Plus className="w-4 h-4" /> Create Page
-          </Button>
+          <Link href="/admin/marketing/landing-pages/new">
+            <Button className="bg-indigo-600 hover:bg-indigo-700 flex items-center gap-2">
+              <Plus className="w-4 h-4" /> Create Page
+            </Button>
+          </Link>
         </div>
       </div>
 
