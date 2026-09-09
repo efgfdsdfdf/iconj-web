@@ -33,12 +33,12 @@ export default async function MarketingDashboard() {
 
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h1 className="text-2xl font-bold">Marketing Campaigns</h1>
           <p className="text-slate-600">Schedule seasonal broadcasts and email blasts.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3 mt-4 md:mt-0">
+        <div className="flex flex-wrap items-center gap-2 md:gap-3">
           <Link href="/admin/marketing/analytics">
             <Button variant="outline" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" /> Analytics Dashboard
@@ -77,8 +77,8 @@ export default async function MarketingDashboard() {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-slate-200">
-        <table className="w-full text-left border-collapse">
+      <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-x-auto">
+        <table className="w-full text-left border-collapse min-w-[800px]">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50 text-slate-500 text-sm">
               <th className="p-4 font-medium">Campaign Title</th>
