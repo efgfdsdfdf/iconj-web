@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { createCampaign, updateCampaign } from "@/app/admin/marketing/actions";
+import { createCampaign, updateCampaign, deleteCampaign } from "@/app/admin/marketing/actions";
 
 export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
   const router = useRouter();
@@ -59,6 +59,22 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
     } catch (err: any) {
       toast.error(err.message || "Something went wrong");
     } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!campaign?.id) return;
+    if (!window.confirm("Are you sure you want to delete this campaign? This action cannot be undone.")) return;
+    
+    setLoading(true);
+    try {
+      await deleteCampaign(campaign.id);
+      toast.success("Campaign deleted");
+      router.push('/admin/marketing');
+      router.refresh();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete");
       setLoading(false);
     }
   };
@@ -142,21 +158,35 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-6">
-        <button 
-          type="button" 
-          onClick={() => router.push('/admin/marketing')}
-          className="px-4 py-2 border rounded font-medium text-slate-700 hover:bg-slate-50"
-        >
-          Cancel
-        </button>
-        <button 
-          type="submit" 
-          disabled={loading}
-          className="px-6 py-2 bg-orange-600 text-white rounded font-medium hover:bg-orange-700 disabled:opacity-50"
-        >
-          {loading ? 'Saving...' : 'Save Campaign'}
-        </button>
+      <div className="flex justify-between items-center pt-6">
+        <div>
+          {campaign?.id && (
+            <button 
+              type="button" 
+              onClick={handleDelete}
+              disabled={loading}
+              className="px-4 py-2 border border-red-200 text-red-600 rounded font-medium hover:bg-red-50 disabled:opacity-50"
+            >
+              Delete Campaign
+            </button>
+          )}
+        </div>
+        <div className="flex gap-3">
+          <button 
+            type="button" 
+            onClick={() => router.push('/admin/marketing')}
+            className="px-4 py-2 border rounded font-medium text-slate-700 hover:bg-slate-50"
+          >
+            Cancel
+          </button>
+          <button 
+            type="submit" 
+            disabled={loading}
+            className="px-6 py-2 bg-orange-600 text-white rounded font-medium hover:bg-orange-700 disabled:opacity-50"
+          >
+            {loading ? 'Saving...' : 'Save Campaign'}
+          </button>
+        </div>
       </div>
 
     </form>
