@@ -147,8 +147,18 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     return "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&q=80";
   };
   
-  const images = product.images && product.images.length > 0 ? product.images : [getProductImage(product.category)];
-
+  let parsedImages = [];
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    parsedImages = product.images;
+  } else if (typeof product.images === 'string') {
+    try {
+      parsedImages = JSON.parse(product.images);
+      if (!Array.isArray(parsedImages)) parsedImages = [product.images];
+    } catch {
+      parsedImages = [product.images];
+    }
+  }
+  const images = parsedImages.length > 0 ? parsedImages : [getProductImage(product.category)];
   // JSON-LD structured data for Google rich results
   const jsonLd = {
     "@context": "https://schema.org",

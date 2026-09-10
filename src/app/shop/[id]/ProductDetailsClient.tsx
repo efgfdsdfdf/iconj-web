@@ -92,14 +92,14 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         eventType: 'product_view',
-        sessionId: sessionStorage.getItem('iconj_session_id') || '',
+        sessionId: typeof window !== 'undefined' ? (localStorage.getItem('iconj_session_id') || '') : '',
         properties: {
           product_id: product.id,
           product_name: product.name,
           category: product.category,
           price: product.base_selling_price,
         },
-        idempotencyKey: `pv_${product.id}_${sessionStorage.getItem('iconj_session_id') || ''}_${Date.now().toString().slice(0, -3)}`,
+        idempotencyKey: `pv_${product.id}_${typeof window !== 'undefined' ? (localStorage.getItem('iconj_session_id') || '') : ''}_${Date.now().toString().slice(0, -3)}`,
       }),
     }).catch(() => {});
   }, [product.id, product.name]);
@@ -153,7 +153,7 @@ export function ProductDetailsClient({ product, images, rules }: { product: any,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         eventType: 'add_to_cart',
-        sessionId: sessionStorage.getItem('iconj_session_id') || '',
+        sessionId: typeof window !== 'undefined' ? (localStorage.getItem('iconj_session_id') || '') : '',
         properties: {
           product_id: product.id,
           product_name: product.name,
