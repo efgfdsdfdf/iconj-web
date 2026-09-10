@@ -25,7 +25,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
       moq: product.moq || 1,
       pricingTiers: product.pricing_tiers || [],
       storeName: product.stores?.store_name || "ICON Official",
-      image: product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"
+      image: (Array.isArray(product.images) ? product.images[0] : product.images) || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"
     });
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
@@ -43,7 +43,7 @@ export function ProductCard({ product, hideOnLg = false }: { product: any, hideO
     >
       <Link href={`/shop/${product.id}`} className="block relative aspect-[4/5] bg-slate-100 rounded-none sm:rounded mb-2 sm:mb-3 overflow-hidden">
         <Image 
-          src={product.images?.[0] || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"} 
+          src={(Array.isArray(product.images) ? product.images[0] : product.images) || "https://images.unsplash.com/photo-1555252834-406eb1be18f4?w=600&q=80"}
           alt={product.name}
           fill
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"

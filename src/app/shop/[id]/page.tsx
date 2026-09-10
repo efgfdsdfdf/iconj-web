@@ -304,8 +304,18 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
           </div>
           <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory no-scrollbar">
             {recommended?.map((rec: any) => {
-                const p = { ...rec, images: rec.images || [] };
-                delete p.base_supplier_cost;
+                let parsedRecImages = [];
+                if (Array.isArray(rec.images)) {
+                  parsedRecImages = rec.images;
+                } else if (typeof rec.images === 'string') {
+                  try {
+                    parsedRecImages = JSON.parse(rec.images);
+                    if (!Array.isArray(parsedRecImages)) parsedRecImages = [rec.images];
+                  } catch {
+                    parsedRecImages = [rec.images];
+                  }
+                }
+                const p = { ...rec, images: parsedRecImages };
                 delete p.supplier_id;
                 if (p.variants) { delete p.variants.supplier_product_url; delete p.variants.supplier_sku; }
                 return (
