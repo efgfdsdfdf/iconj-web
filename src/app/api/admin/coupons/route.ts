@@ -9,7 +9,7 @@ const supabaseAdmin = createClient(
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { code, discount_type, discount_value, min_order_amount, usage_limit, expires_at } = body;
+    const { code, discount_type, discount_value, min_order_amount, usage_limit, end_date } = body;
 
     if (!code || !discount_type || !discount_value) {
       return NextResponse.json({ error: 'code, discount_type, and discount_value are required' }, { status: 400 });
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
         discount_value: Number(discount_value),
         min_order_amount: min_order_amount || null,
         usage_limit: usage_limit || null,
-        expires_at: expires_at || null,
+        end_date: end_date || null,
         times_used: 0,
         is_active: true,
       }])

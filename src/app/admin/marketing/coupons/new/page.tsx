@@ -23,7 +23,7 @@ export default function NewCouponPage() {
     discount_value: '',
     min_order_amount: '',
     usage_limit: '',
-    expires_at: '',
+    end_date: '',
   });
 
   const set = (field: string, value: string) =>
@@ -46,7 +46,7 @@ export default function NewCouponPage() {
           discount_value: Number(form.discount_value),
           min_order_amount: form.min_order_amount ? Number(form.min_order_amount) : null,
           usage_limit: form.usage_limit ? Number(form.usage_limit) : null,
-          expires_at: form.expires_at || null,
+          end_date: form.end_date || null,
         }),
       });
       const data = await res.json();
@@ -155,12 +155,12 @@ export default function NewCouponPage() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="expires_at">Expiry Date — optional</Label>
+            <Label htmlFor="end_date">Expiry Date — optional</Label>
             <Input
-              id="expires_at"
+              id="end_date"
               type="date"
-              value={form.expires_at}
-              onChange={e => set('expires_at', e.target.value)}
+              value={form.end_date}
+              onChange={e => set('end_date', e.target.value)}
             />
           </div>
         </div>
@@ -171,7 +171,7 @@ export default function NewCouponPage() {
             <strong>Preview:</strong> Code <span className="font-mono font-bold text-blue-700">{form.code}</span> gives{' '}
             {form.discount_type === 'percentage' ? `${form.discount_value}% off` : `₦${Number(form.discount_value).toLocaleString()} off`}
             {form.min_order_amount ? ` on orders over ₦${Number(form.min_order_amount).toLocaleString()}` : ''}
-            {form.expires_at ? ` — expires ${form.expires_at}` : ''}
+            {form.end_date ? ` — expires ${form.end_date}` : ''}
             {form.usage_limit ? `, max ${form.usage_limit} uses` : ''}
           </div>
         )}
