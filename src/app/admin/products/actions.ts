@@ -6,10 +6,8 @@ export async function getProductsForDdpEstimate(productIds: string[]) {
   const supabase = await createClient();
   
   // 1. Verify admin authorization
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user || user.email !== "ezeilodavid292@gmail.com") {
-    throw new Error("Unauthorized");
-  }
+  const { requireAdmin } = await import("@/lib/auth/admin");
+  await requireAdmin();
 
   // Use service role to ensure we bypass any RLS for admin operations
   const { createClient: createAdminClient } = require('@supabase/supabase-js');
@@ -23,10 +21,11 @@ export async function getProductsForDdpEstimate(productIds: string[]) {
   // Fetch all requested products
   const { data: products, error } = await supabaseAdmin
     .from("products")
-    .select("id, name, sku, slug, category, variants, specifications, weight_kg, package_dimensions, package_weight_kg")
+    .select("id, name, sku, category, variants, specifications, weight_kg, shipping_weight_kg, shipping_length_cm, shipping_width_cm, shipping_height_cm")
     .in("id", productIds);
 
   if (error || !products) {
+    console.error("DDP Estimate DB Error:", error);
     throw new Error("Failed to fetch products for DDP estimate");
   }
 
@@ -58,6 +57,12 @@ export async function getProductsForDdpEstimate(productIds: string[]) {
       }
     }
 
+    // Format package dimensions
+    let packageDimensions = "Not provided";
+    if (p.shipping_length_cm && p.shipping_width_cm && p.shipping_height_cm) {
+      packageDimensions = `${p.shipping_length_cm} × ${p.shipping_width_cm} × ${p.shipping_height_cm} cm`;
+    }
+
     return {
       id: p.id,
       name: p.name || "Not provided",
@@ -67,8 +72,8 @@ export async function getProductsForDdpEstimate(productIds: string[]) {
       standardSize: standardSize,
       quantity: "1 set", // Default as requested
       productWeight: p.weight_kg ? `${p.weight_kg} kg` : "Not provided",
-      packageDimensions: p.package_dimensions || "Not provided",
-      packageWeight: p.package_weight_kg ? `${p.package_weight_kg} kg` : "Not provided",
+      packageDimensions: packageDimensions,
+      packageWeight: p.shipping_weight_kg ? `${p.shipping_weight_kg} kg` : "Not provided",
       variantInfo: variantInfo
     };
   });
