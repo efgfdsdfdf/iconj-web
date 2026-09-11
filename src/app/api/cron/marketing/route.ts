@@ -33,8 +33,10 @@ export async function GET(request: Request) {
   };
 
   try {
+    const { data: activeFlows } = await supabaseAdmin.from('automation_flows').select('*').eq('is_active', true);
+    
+    // Default Fallbacks
     const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();
-    const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString();
     const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
@@ -75,48 +77,65 @@ export async function GET(request: Request) {
     // ==========================================
     // 2. CART ABANDONMENT FLOW
     // ==========================================
-    const { data: abandonedEvents } = await supabaseAdmin
-      .from('marketing_events')
-      .select('user_id, created_at')
-      .eq('event_type', 'ADDED_TO_CART')
-      .gte('created_at', oneDayAgo)
-      .lte('created_at', twoHoursAgo);
+    const cartFlow = activeFlows?.find((f: any) => f.trigger_event === 'abandoned_cart');
+    
+    // Only run if the flow exists and is active, or default to yes if none exist (for backwards compatibility)
+    if (cartFlow !== null) {
+      let waitHours = 2;
+      let emailSubject = undefined;
 
-    if (abandonedEvents && abandonedEvents.length > 0) {
-      const abandonedUserIds = [...new Set(abandonedEvents.map(e => e.user_id))];
+      if (cartFlow) {
+        const waitStep = cartFlow.steps?.find((s: any) => s.type === 'wait');
+        const emailStep = cartFlow.steps?.find((s: any) => s.type === 'email');
+        if (waitStep?.unit === 'hours') waitHours = Number(waitStep.value) || 2;
+        if (emailStep?.subject) emailSubject = emailStep.subject;
+      }
 
-      for (const uid of abandonedUserIds) {
-        // Did they purchase AFTER adding?
-        const { data: purchaseEvents } = await supabaseAdmin
-          .from('marketing_events')
-          .select('id')
-          .eq('user_id', uid)
-          .eq('event_type', 'PURCHASE')
-          .gte('created_at', oneDayAgo);
+      const triggerTime = new Date(now.getTime() - waitHours * 60 * 60 * 1000).toISOString();
+      // Only look for items added before the trigger time, up to 24h before
+      const maxAgeTime = new Date(now.getTime() - (waitHours + 24) * 60 * 60 * 1000).toISOString();
 
-        // Did we already send an abandoned cart email in the last 7 days?
-        const { data: alreadySent } = await supabaseAdmin
-          .from('marketing_events')
-          .select('id')
-          .eq('user_id', uid)
-          .eq('event_type', 'EMAIL_SENT')
-          .contains('metadata', { campaign: 'ABANDONED_CART' })
-          .gte('created_at', sevenDaysAgo);
+      const { data: abandonedEvents } = await supabaseAdmin
+        .from('marketing_events')
+        .select('user_id, created_at')
+        .eq('event_type', 'ADDED_TO_CART')
+        .gte('created_at', maxAgeTime)
+        .lte('created_at', triggerTime);
 
-        if ((!purchaseEvents || purchaseEvents.length === 0) && (!alreadySent || alreadySent.length === 0)) {
-          const { data: profile } = await supabaseAdmin.from('profiles').select('email, full_name, marketing_opt_in').eq('id', uid).single();
-          
-          if (profile && profile.marketing_opt_in !== false) {
-            try {
-              await sendAbandonedCartEmail({ email: profile.email, full_name: profile.full_name || '' });
-              await supabaseAdmin.from('marketing_events').insert({
-                user_id: uid,
-                event_type: 'EMAIL_SENT',
-                metadata: { campaign: 'ABANDONED_CART' }
-              });
-              results.abandonedCartSent++;
-            } catch (e: any) {
-              results.errors.push(`Cart ${profile.email}: ${e.message}`);
+      if (abandonedEvents && abandonedEvents.length > 0) {
+        const abandonedUserIds = [...new Set(abandonedEvents.map((e: any) => e.user_id))];
+
+        for (const uid of abandonedUserIds) {
+          const { data: purchaseEvents } = await supabaseAdmin
+            .from('marketing_events')
+            .select('id')
+            .eq('user_id', uid)
+            .eq('event_type', 'PURCHASE')
+            .gte('created_at', maxAgeTime);
+
+          const { data: alreadySent } = await supabaseAdmin
+            .from('marketing_events')
+            .select('id')
+            .eq('user_id', uid)
+            .eq('event_type', 'EMAIL_SENT')
+            .contains('metadata', { campaign: 'ABANDONED_CART' })
+            .gte('created_at', sevenDaysAgo);
+
+          if ((!purchaseEvents || purchaseEvents.length === 0) && (!alreadySent || alreadySent.length === 0)) {
+            const { data: profile } = await supabaseAdmin.from('profiles').select('email, full_name, marketing_opt_in').eq('id', uid).single();
+            
+            if (profile && profile.marketing_opt_in !== false) {
+              try {
+                await sendAbandonedCartEmail({ email: profile.email, full_name: profile.full_name || '' }, emailSubject);
+                await supabaseAdmin.from('marketing_events').insert({
+                  user_id: uid,
+                  event_type: 'EMAIL_SENT',
+                  metadata: { campaign: 'ABANDONED_CART' }
+                });
+                results.abandonedCartSent++;
+              } catch (e: any) {
+                results.errors.push(`Cart ${profile.email}: ${e.message}`);
+              }
             }
           }
         }

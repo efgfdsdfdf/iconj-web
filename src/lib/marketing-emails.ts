@@ -1,4 +1,4 @@
-﻿import { sendEmailTo } from "./email";
+import { sendEmailTo } from "./email";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://iconj.com.ng";
 const LOGO_URL = `${SITE_URL}/icon.svg`; // Replace with actual logo URL if available
@@ -67,7 +67,7 @@ export async function sendWelcomeEmail(profile: { email: string; full_name: stri
   );
 }
 
-export async function sendAbandonedCartEmail(profile: { email: string; full_name: string }) {
+export async function sendAbandonedCartEmail(profile: { email: string; full_name: string }, customSubject?: string) {
   const firstName = profile.full_name?.split(' ')[0] || 'there';
   
   const content = `
@@ -84,7 +84,7 @@ export async function sendAbandonedCartEmail(profile: { email: string; full_name
 
   return sendEmailTo(
     profile.email,
-    "Did you forget something? Your cart is waiting.",
+    customSubject || "Did you forget something? Your cart is waiting.",
     baseTemplate("Your Cart is Waiting", content, "We've saved the items in your cart. Come back and complete your order.")
   );
 }
