@@ -8,6 +8,8 @@ import { getProductsForDdpEstimate } from "./actions";
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 
+import { Document, Packer, Paragraph, TextRun, ExternalHyperlink, Table, TableRow, TableCell, WidthType, BorderStyle, HeadingLevel } from "docx";
+
 interface DdpEstimateModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -68,6 +70,164 @@ export function DdpEstimateModal({ isOpen, onClose, selectedProductIds }: DdpEst
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error("Failed to copy text: ", err);
+    }
+  };
+
+  const handleDownloadWord = async () => {
+    try {
+      const children: any[] = [
+        new Paragraph({
+          text: "ICONJ - NIGERIA DDP ESTIMATE REQUEST",
+          heading: HeadingLevel.HEADING_1,
+          spacing: { after: 200 },
+        }),
+        new Paragraph({
+          text: `Date: ${new Date().toLocaleDateString()}`,
+          spacing: { after: 100 },
+        }),
+        new Paragraph({
+          text: `Products Included: ${data.length}`,
+          spacing: { after: 400 },
+        }),
+        new Paragraph({
+          text: "The requested amounts are estimates for pricing purposes. Final DDP costs will be based on actual shipment costs/invoices.",
+          spacing: { after: 400 },
+        }),
+      ];
+
+      data.forEach((p, index) => {
+        children.push(
+          new Paragraph({
+            text: `PRODUCT ${index + 1}`,
+            heading: HeadingLevel.HEADING_3,
+            spacing: { before: 400, after: 200 },
+          })
+        );
+
+        const addField = (label: string, value: string, linkUrl?: string) => {
+          const safeVal = value || "Not provided";
+          if (linkUrl && safeVal !== "Not provided" && safeVal !== "MISSING") {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `${label} `, bold: true }),
+                  new ExternalHyperlink({
+                    children: [
+                      new TextRun({
+                        text: safeVal,
+                        style: "Hyperlink",
+                      }),
+                    ],
+                    link: safeVal,
+                  }),
+                ],
+                spacing: { after: 100 },
+              })
+            );
+          } else {
+            children.push(
+              new Paragraph({
+                children: [
+                  new TextRun({ text: `${label} `, bold: true }),
+                  new TextRun({ text: safeVal }),
+                ],
+                spacing: { after: 100 },
+              })
+            );
+          }
+        };
+
+        addField("Product Name:", p.name);
+        addField("Product ID/SKU:", `${p.id} / ${p.sku}`);
+        addField("ICONJ Product URL:", p.iconjUrl, true);
+        addField("Alibaba Supplier URL:", p.alibabaUrl, true);
+        addField("Standard Size:", p.standardSize);
+        addField("Requested Quantity:", p.quantity);
+        addField("Product Weight:", p.productWeight);
+        addField("Package Dimensions:", p.packageDimensions);
+        addField("Package Weight:", p.packageWeight);
+        addField("Variant Info:", p.variantInfo);
+        
+        children.push(
+          new Paragraph({
+            text: "--------------------------------------------------",
+            spacing: { before: 200, after: 200 },
+          })
+        );
+      });
+
+      children.push(
+        new Paragraph({
+          text: "SUPPLIER RESPONSE TABLE",
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 400, after: 200 },
+        })
+      );
+
+      const tableRows = [
+        new TableRow({
+          children: [
+            new TableCell({ children: [new Paragraph({ text: "Product", bold: true })] }),
+            new TableCell({ children: [new Paragraph({ text: "Std Size", bold: true })] }),
+            new TableCell({ children: [new Paragraph({ text: "Qty", bold: true })] }),
+            new TableCell({ children: [new Paragraph({ text: "Est. DDP Cost", bold: true })] }),
+            new TableCell({ children: [new Paragraph({ text: "Courier", bold: true })] }),
+            new TableCell({ children: [new Paragraph({ text: "Supplier Notes", bold: true })] }),
+          ],
+        }),
+      ];
+
+      data.forEach((p, i) => {
+        tableRows.push(
+          new TableRow({
+            children: [
+              new TableCell({ children: [new Paragraph(`Prod ${i + 1}`)] }),
+              new TableCell({ children: [new Paragraph(p.standardSize !== "Not provided" ? p.standardSize.substring(0, 15) : "-")] }),
+              new TableCell({ children: [new Paragraph("1")] }),
+              new TableCell({ children: [new Paragraph("")] }),
+              new TableCell({ children: [new Paragraph("")] }),
+              new TableCell({ children: [new Paragraph("")] }),
+            ],
+          })
+        );
+      });
+
+      children.push(
+        new Table({
+          width: { size: 100, type: WidthType.PERCENTAGE },
+          rows: tableRows,
+        })
+      );
+
+      children.push(
+        new Paragraph({
+          text: "DDP Estimate Request Note:",
+          bold: true,
+          spacing: { before: 400, after: 100 },
+        })
+      );
+      children.push(
+        new Paragraph({
+          text: "The requested DDP amounts are estimates for ICONJ's standard product pricing. The supplier has advised that the final DDP cost may vary depending on actual package dimensions, weight, courier selection, shipping conditions, taxes and other applicable costs.",
+          spacing: { after: 100 },
+        })
+      );
+
+      const doc = new Document({
+        sections: [{ properties: {}, children }],
+      });
+
+      const blob = await Packer.toBlob(doc);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ICONJ_DDP_Estimate_Request.docx";
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+    } catch (err) {
+      console.error("Failed to generate Word document: ", err);
+      alert("Failed to generate Word document. Please try copying the text instead.");
     }
   };
 
@@ -240,7 +400,15 @@ export function DdpEstimateModal({ isOpen, onClose, selectedProductIds }: DdpEst
               disabled={loading || data.length === 0}
             >
               {copied ? <Check className="w-4 h-4 mr-2 text-emerald-600" /> : <Copy className="w-4 h-4 mr-2" />}
-              {copied ? "Copied!" : "Copy Request Text"}
+              {copied ? "Copied!" : "Copy Text"}
+            </Button>
+            <Button 
+              className="bg-emerald-600 hover:bg-emerald-700" 
+              onClick={handleDownloadWord}
+              disabled={loading || data.length === 0}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Word (.docx)
             </Button>
             <Button 
               className="bg-blue-600 hover:bg-blue-700" 
@@ -248,7 +416,7 @@ export function DdpEstimateModal({ isOpen, onClose, selectedProductIds }: DdpEst
               disabled={loading || data.length === 0}
             >
               <Download className="w-4 h-4 mr-2" />
-              Download DDP Estimate PDF
+              PDF (.pdf)
             </Button>
           </div>
         </DialogFooter>
