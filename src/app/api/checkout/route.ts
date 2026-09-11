@@ -82,7 +82,30 @@ export async function POST(request: Request) {
     }
 
     const shippingFee = shippingResult.totalCustomerShipping;
-    const couponDiscount = Math.max(0, Number(discount_amount) || 0);
+    
+    // Server-side Coupon Validation
+    let couponDiscount = 0;
+    if (coupon_id) {
+      const { data: coupon } = await supabaseAdmin.from("coupons").select("*").eq("id", coupon_id).eq("is_active", true).single();
+      if (coupon) {
+        const now = new Date();
+        const isStarted = !coupon.start_date || new Date(coupon.start_date) <= now;
+        const isExpired = coupon.end_date && new Date(coupon.end_date) < now;
+        const isLimitReached = coupon.usage_limit !== null && coupon.times_used >= coupon.usage_limit;
+        const isMinMet = !coupon.min_order_amount || subtotal >= Number(coupon.min_order_amount);
+        
+        if (isStarted && !isExpired && !isLimitReached && isMinMet) {
+          if (coupon.discount_type === "percentage") {
+            couponDiscount = (subtotal * Number(coupon.discount_value)) / 100;
+            if (coupon.max_discount_amount) couponDiscount = Math.min(couponDiscount, Number(coupon.max_discount_amount));
+          } else if (coupon.discount_type === "fixed_amount") {
+            couponDiscount = Math.min(Number(coupon.discount_value), subtotal);
+          }
+        }
+      }
+    }
+    couponDiscount = Math.round(couponDiscount);
+
     const totalAmount = Math.max(0, subtotal + shippingFee - couponDiscount);
 
     if (body.saveAddress && userId) {

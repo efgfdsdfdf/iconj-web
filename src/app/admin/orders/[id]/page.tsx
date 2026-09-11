@@ -45,6 +45,19 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
 
   const address = order.delivery_address || {};
 
+  // Fetch marketing data
+  const { data: couponUsage } = await supabaseAdmin.from("coupon_usages")
+    .select("discount_applied, coupons(code)")
+    .eq("order_id", order.id)
+    .single();
+
+  const { data: referralTracking } = await supabaseAdmin.from("referral_tracking")
+    .select("status, commission_earned, referral_partners(referral_code)")
+    .eq("order_id", order.id)
+    .single();
+
+  const subtotal = items?.reduce((sum, item) => sum + (item.unit_price * item.quantity), 0) || 0;
+
   return (
     <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
       <OrderReadMarker orderId={order.id} adminViewed={!!order.admin_viewed} />
@@ -139,7 +152,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                     </div>
                       <div className="text-right flex flex-col items-end gap-2">
                         <div className="font-bold text-slate-900">₦{(item.unit_price * item.quantity).toLocaleString()}</div>
-                        <div className="text-sm text-slate-500">Qty: {item.quantity} × ₦{item.unit_price.toLocaleString()}</div>
+                        <div className="text-sm text-slate-500">Qty: {item.quantity} x ₦{item.unit_price.toLocaleString()}</div>
                         <CopyToSupplierButton item={item} address={address} />
                       </div>
                     </div>
@@ -154,6 +167,40 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
 
         {/* Right Column */}
         <div className="space-y-6">
+          <Card className="border-none shadow-sm bg-slate-900 text-white">
+            <CardHeader className="border-b border-slate-800 pb-4">
+              <CardTitle className="text-lg">Order Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Subtotal</span>
+                <span>₦{subtotal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-slate-400">Shipping</span>
+                <span>₦{Number(order.shipping_cost || 0).toLocaleString()}</span>
+              </div>
+              
+              {couponUsage && (
+                <div className="flex justify-between text-sm text-emerald-400">
+                  <span>Coupon: <span className="uppercase border border-emerald-400/30 px-1 rounded ml-1 bg-emerald-400/10">{(couponUsage.coupons as any)?.code}</span></span>
+                  <span>-₦{Number(couponUsage.discount_applied).toLocaleString()}</span>
+                </div>
+              )}
+              
+              <div className="pt-3 border-t border-slate-800 flex justify-between font-bold text-lg">
+                <span>Total Paid</span>
+                <span>₦{Number(order.total_amount).toLocaleString()}</span>
+              </div>
+
+              {referralTracking && (
+                <div className="mt-4 pt-4 border-t border-slate-800 border-dashed text-xs text-slate-400">
+                  <p className="mb-1 text-slate-300">Referred by Partner: <span className="font-mono text-white">{(referralTracking.referral_partners as any)?.referral_code}</span></p>
+                  <p>Commission: ₦{Number(referralTracking.commission_earned).toLocaleString()} ({referralTracking.status})</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
           <Card className="border-none shadow-sm">
             <CardHeader className="border-b pb-4">
               <CardTitle className="text-lg flex items-center"><User className="w-5 h-5 mr-2 text-slate-500" /> Customer Details</CardTitle>
