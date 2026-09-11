@@ -116,7 +116,7 @@ export default function AdminQuotationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-slate-900">Quotations (RFQ)</h1>
           <p className="text-slate-500">Manage customer quotation requests and supplier orders.</p>
@@ -172,8 +172,8 @@ export default function AdminQuotationsPage() {
       <Card>
         <CardHeader className="pb-3 border-b flex flex-row items-center justify-between">
           <CardTitle className="text-lg">Quotation Operations Inbox</CardTitle>
-          <div className="flex items-center gap-3">
-            <form onSubmit={handleSearch} className="relative w-64">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
+            <form onSubmit={handleSearch} className="relative w-full sm:w-64">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
               <Input 
                 placeholder="Search reference, email, name..." 
@@ -183,7 +183,7 @@ export default function AdminQuotationsPage() {
               />
             </form>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="Filter by status" />
               </SelectTrigger>
               <SelectContent>
@@ -273,7 +273,7 @@ export default function AdminQuotationsPage() {
           
           {/* Pagination Controls */}
           {total > limit && (
-            <div className="flex justify-between items-center p-4 border-t">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t">
               <p className="text-sm text-slate-500">
                 Showing {Math.min((page - 1) * limit + 1, total)} to {Math.min(page * limit, total)} of {total}
               </p>

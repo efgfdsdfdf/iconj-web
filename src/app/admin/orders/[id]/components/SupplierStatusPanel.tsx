@@ -37,7 +37,7 @@ export function SupplierStatusPanel({ order }: { order: any }) {
       <CardContent className="pt-6 space-y-6">
         
         <div className="flex flex-col gap-4">
-          <div className="flex items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${status === "ORDER_RECEIVED" || !order.logistics_status ? "bg-indigo-100 text-indigo-600" : "bg-slate-100 text-slate-400"}`}>
               <RefreshCcw className="w-5 h-5" />
             </div>
@@ -52,7 +52,7 @@ export function SupplierStatusPanel({ order }: { order: any }) {
             )}
           </div>
 
-          <div className="flex items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${status === "SENT_TO_SUPPLIER" ? "bg-blue-100 text-blue-600" : "bg-slate-100 text-slate-400"}`}>
               <Send className="w-5 h-5" />
             </div>
@@ -67,7 +67,7 @@ export function SupplierStatusPanel({ order }: { order: any }) {
             )}
           </div>
 
-          <div className="flex items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${status === "SUPPLIER_CONFIRMED" || status === "IN_FULFILLMENT" ? "bg-amber-100 text-amber-600" : "bg-slate-100 text-slate-400"}`}>
               <CheckCircle className="w-5 h-5" />
             </div>
@@ -82,7 +82,7 @@ export function SupplierStatusPanel({ order }: { order: any }) {
             )}
           </div>
 
-          <div className="flex items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg bg-white shadow-sm">
             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${status === "READY_FOR_SHIPPING" || status === "SHIPPED" ? "bg-emerald-100 text-emerald-600" : "bg-slate-100 text-slate-400"}`}>
               <Truck className="w-5 h-5" />
             </div>

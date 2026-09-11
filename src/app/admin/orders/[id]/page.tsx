@@ -94,7 +94,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
             <CardContent className="pt-6">
               <div className="space-y-6">
                 {items?.map((item: any) => (
-                  <div key={item.id} className="flex gap-4 items-center">
+                  <div key={item.id} className="flex flex-col sm:flex-row gap-4 sm:items-center">
                     <div className="w-16 h-16 bg-slate-100 rounded overflow-hidden">
                       {item.product?.images?.[0] ? (
                         <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
@@ -150,7 +150,7 @@ export default async function AdminOrderDetailsPage({ params }: { params: Promis
                         </p>
                       )}
                     </div>
-                      <div className="text-right flex flex-col items-end gap-2">
+                      <div className="text-left sm:text-right flex flex-col items-start sm:items-end gap-2">
                         <div className="font-bold text-slate-900">₦{(item.unit_price * item.quantity).toLocaleString()}</div>
                         <div className="text-sm text-slate-500">Qty: {item.quantity} x ₦{item.unit_price.toLocaleString()}</div>
                         <CopyToSupplierButton item={item} address={address} />

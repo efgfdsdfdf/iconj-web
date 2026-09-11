@@ -216,7 +216,7 @@ export default function AdminQuotationDetailPage({ params }: { params: Promise<{
       </Alert>
 
       <Tabs defaultValue="workflow" className="w-full">
-        <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent mb-6">
+        <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent mb-6 overflow-x-auto flex-nowrap">
           <TabsTrigger value="workflow" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-6 py-3">Workflow & Pricing</TabsTrigger>
           <TabsTrigger value="details" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-6 py-3">Customer Details</TabsTrigger>
           <TabsTrigger value="exceptions" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none px-6 py-3">Exceptions {exceptions.filter(e => e.status !== 'RESOLVED' && e.status !== 'DISMISSED').length > 0 && <span className="ml-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]">{exceptions.filter(e => e.status !== 'RESOLVED' && e.status !== 'DISMISSED').length}</span>}</TabsTrigger>

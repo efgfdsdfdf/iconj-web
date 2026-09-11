@@ -78,7 +78,7 @@ export default function RatesPage() {
 
   return (
     <div className="p-6 max-w-6xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Shipping Rates</h1>
           <p className="text-slate-500">Manage DDP rates from suppliers</p>
@@ -140,7 +140,7 @@ export default function RatesPage() {
       <Card>
         <CardHeader><CardTitle>Active Rates</CardTitle></CardHeader>
         <CardContent>
-          <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto"><table className="w-full text-sm text-left min-w-[600px]">
             <thead className="bg-slate-50 text-slate-600">
               <tr>
                 <th className="px-4 py-2 font-medium">Weight Range</th>
@@ -166,7 +166,7 @@ export default function RatesPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </CardContent>
       </Card>
 
@@ -174,7 +174,7 @@ export default function RatesPage() {
         <Card>
           <CardHeader><CardTitle className="text-slate-500">Rate History</CardTitle></CardHeader>
           <CardContent>
-            <table className="w-full text-sm text-left text-slate-500">
+            <div className="overflow-x-auto"><table className="w-full text-sm text-left text-slate-500 min-w-[600px]">
               <thead className="bg-slate-50">
                 <tr>
                   <th className="px-4 py-2 font-medium">Weight Range</th>
@@ -195,7 +195,7 @@ export default function RatesPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           </CardContent>
         </Card>
       )}

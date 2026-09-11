@@ -256,7 +256,7 @@ export default async function AdminSellersPage({ searchParams }: { searchParams:
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-8 border-b border-slate-200 pb-0">
+      <div className="flex gap-2 mb-8 border-b border-slate-200 pb-0 overflow-x-auto shrink-0">
         {tabs.map(tab => (
           <Link
             key={tab.key}

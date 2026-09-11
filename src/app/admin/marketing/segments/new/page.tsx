@@ -45,7 +45,7 @@ export default function NewSegmentPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div><Label>Name</Label><Input required value={form.name} onChange={e=>setForm({...form, name: e.target.value})} /></div>
         <div><Label>Description</Label><Textarea value={form.description} onChange={e=>setForm({...form, description: e.target.value})} /></div>
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
           <div><Label>Field</Label><select className="w-full border p-2 rounded" value={form.field} onChange={e=>setForm({...form, field: e.target.value})}><option value="total_spent">Total Spent</option><option value="order_count">Order Count</option></select></div>
           <div><Label>Operator</Label><select className="w-full border p-2 rounded" value={form.operator} onChange={e=>setForm({...form, operator: e.target.value})}><option value=">">Greater Than</option><option value="<">Less Than</option></select></div>
           <div><Label>Value</Label><Input required type="number" value={form.value} onChange={e=>setForm({...form, value: e.target.value})} /></div>

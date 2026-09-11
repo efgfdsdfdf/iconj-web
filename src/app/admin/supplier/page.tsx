@@ -64,7 +64,7 @@ export default async function AdminSupplierListPage() {
 
   return (
     <main className="flex-1 p-4 md:p-8 bg-slate-50 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Supplier Management</h1>
           <p className="text-sm text-slate-500">Manage multiple suppliers, ledgers, and payments.</p>

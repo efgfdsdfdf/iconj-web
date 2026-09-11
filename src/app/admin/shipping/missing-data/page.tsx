@@ -26,14 +26,14 @@ export default function MissingDataPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h1 className="text-2xl font-bold text-slate-900">Products Missing Shipping Data</h1>
         <Link href="/admin/shipping/bulk-update">
           <Button>Bulk Update</Button>
         </Link>
       </div>
 
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {Object.entries(data.summary).map(([status, count]) => (
           <Card key={status}>
             <CardHeader className="py-3"><CardTitle className="text-sm text-slate-500">{status}</CardTitle></CardHeader>

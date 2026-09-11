@@ -122,7 +122,7 @@ export default async function SupplierLedgerPage({ params }: { params: Promise<{
             {pendingOrders && pendingOrders.length > 0 ? (
               <div className="space-y-4">
                 {pendingOrders.map((o: any) => (
-                  <div key={o.id} className="flex justify-between items-center p-4 bg-white rounded-lg border shadow-sm">
+                  <div key={o.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 p-4 bg-white rounded-lg border shadow-sm">
                     <div>
                       <Link href={`/admin/orders/${o.id}`} className="text-sm font-bold text-blue-600 hover:underline block">
                         Order #{o.id.split("-")[0].toUpperCase()}
@@ -131,7 +131,7 @@ export default async function SupplierLedgerPage({ params }: { params: Promise<{
                         Placed on {new Date(o.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                       <div className="text-right font-bold text-slate-900 text-lg">
                         {supplier.currency} {Number(o.supplier_cost).toLocaleString()}
                       </div>

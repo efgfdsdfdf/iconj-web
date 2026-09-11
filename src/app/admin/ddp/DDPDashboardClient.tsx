@@ -224,13 +224,13 @@ export function DDPDashboardClient({
             <div className="mt-8 p-4 border rounded-xl bg-slate-50">
               <h3 className="font-bold text-slate-800 mb-2">Record Actual DDP (Logistics Tool)</h3>
               <p className="text-sm text-slate-500 mb-4">When a supplier provides the final shipping invoice for an order, record it here.</p>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <select className="border rounded p-2 text-sm bg-white" id="actual-order-id">
                   <option value="">Select Order...</option>
                   {recentOrders.map((o: any) => <option key={o.id} value={o.id}>{o.paystack_reference || o.id.substring(0,8)}</option>)}
                 </select>
-                <Input id="actual-shipping" type="number" placeholder="Actual Shipping (₦)" className="max-w-[150px]" />
-                <Input id="actual-tax" type="number" placeholder="Actual Tax (₦)" className="max-w-[150px]" />
+                <Input id="actual-shipping" type="number" placeholder="Actual Shipping (₦)" className="w-full sm:max-w-[150px]" />
+                <Input id="actual-tax" type="number" placeholder="Actual Tax (₦)" className="w-full sm:max-w-[150px]" />
                 <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={async () => {
                   const oid = (document.getElementById('actual-order-id') as HTMLSelectElement).value;
                   const aship = (document.getElementById('actual-shipping') as HTMLInputElement).value;
@@ -253,7 +253,7 @@ export function DDPDashboardClient({
              <CardDescription>Internal tracking of funds deposited with the supplier.</CardDescription>
           </CardHeader>
           <CardContent>
-             <div className="flex items-center justify-between bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-6">
+             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-6">
                 <div>
                   <p className="text-indigo-800 font-medium">Current Available Balance</p>
                   <p className="text-3xl font-extrabold text-indigo-900">₦{Number(depositBalance).toLocaleString()}</p>
@@ -266,7 +266,7 @@ export function DDPDashboardClient({
                 }}><Plus className="w-4 h-4 mr-2" /> Add Deposit</Button>
              </div>
 
-             <table className="w-full text-sm text-left border rounded">
+             <div className="overflow-x-auto"><table className="w-full text-sm text-left border rounded min-w-[600px]">
                 <thead className="bg-slate-50 text-slate-600 font-medium">
                   <tr>
                     <th className="p-3">Date</th>

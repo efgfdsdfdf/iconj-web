@@ -131,7 +131,7 @@ export function LogisticsSettingsClient({ initialForwarders }: { initialForwarde
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <h2 className="text-xl font-semibold">Configured Forwarders</h2>
         <Button onClick={handleAddNew} className="bg-blue-600 hover:bg-blue-700">
           <Plus className="w-4 h-4 mr-2" /> Add Forwarder

@@ -32,7 +32,7 @@ export function AdminProductListClient({ products, search }: { products: any[], 
   return (
     <>
       {selectedIds.length > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900 text-white px-4 sm:px-6 py-3 rounded-full shadow-2xl flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-[90vw] sm:w-auto">
           <span className="font-medium">{selectedIds.length} products selected</span>
           <div className="h-5 w-px bg-slate-700" />
           <Button 

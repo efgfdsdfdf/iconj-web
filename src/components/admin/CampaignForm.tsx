@@ -92,7 +92,7 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-sm border border-slate-200 max-w-4xl space-y-6">
       
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Campaign Title (Internal)</label>
           <input 
@@ -146,7 +146,7 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
         <p className="text-xs text-slate-500 mt-1">Note: This will be wrapped in the standard ICONJ email template (header/footer).</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
           <select 

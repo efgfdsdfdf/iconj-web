@@ -190,7 +190,7 @@ export default function ImportAlibabaPage() {
 
   return (
     <main className="flex-1 p-4 md:p-8 min-h-[calc(100vh-130px)]">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
         <div className="flex items-center gap-4">
           <Button variant="outline" size="icon" onClick={() => setParsedData(null)}><ArrowLeft className="w-4 h-4" /></Button>
           <div><h1 className="text-2xl font-bold text-slate-900">Review Imported Product</h1><p className="text-sm text-slate-500">Edit details before saving to your catalog.</p></div>

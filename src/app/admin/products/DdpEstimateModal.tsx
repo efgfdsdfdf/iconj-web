@@ -388,7 +388,7 @@ export function DdpEstimateModal({ isOpen, onClose, selectedProductIds }: DdpEst
           )}
         </div>
 
-        <DialogFooter className="flex items-center sm:justify-between border-t pt-4">
+        <DialogFooter className="flex flex-col sm:flex-row items-stretch sm:justify-between gap-4 border-t pt-4">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

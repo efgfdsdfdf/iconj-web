@@ -321,14 +321,14 @@ export default function AddProductPage() {
               
               {pricingTiers.length > 0 ? (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-12 gap-4 text-xs font-bold text-slate-500 uppercase tracking-wider px-2">
+                  <div className="hidden sm:grid grid-cols-12 gap-4 text-xs font-bold text-slate-500 uppercase tracking-wider px-2">
                     <div className="col-span-3">Min Qty</div>
                     <div className="col-span-3">Max Qty (Leave empty for +)</div>
                     <div className="col-span-4">Unit Price (₦)</div>
                     <div className="col-span-2"></div>
                   </div>
                   {pricingTiers.map((tier, index) => (
-                    <div key={index} className="grid grid-cols-12 gap-4 items-start bg-slate-50 p-2 rounded-md">
+                    <div key={index} className="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start bg-slate-50 p-2 rounded-md">
                       <div className="col-span-3">
                         <Input type="number" min="1" value={tier.minQty} onChange={(e) => {
                           const newTiers = [...pricingTiers];
@@ -598,7 +598,7 @@ export default function AddProductPage() {
               </div>
               
               {imagePreviews.length > 0 && (
-                <div className="grid grid-cols-4 sm:grid-cols-5 gap-4 mt-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 mt-6">
                   {imagePreviews.map((src, i) => (
                     <div key={i} className="relative aspect-square rounded-md overflow-hidden border group">
                       {src.match(/\.(mp4|webm|ogg|mov)(\?.*)?$/i) ? (

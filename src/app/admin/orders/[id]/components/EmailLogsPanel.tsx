@@ -82,7 +82,7 @@ export function EmailLogsPanel({ orderId }: { orderId: string }) {
       ) : (
         <div className="space-y-3">
           {emails.map((email: any) => (
-            <div key={email.id} className="flex items-center justify-between border rounded-lg p-3">
+            <div key={email.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border rounded-lg p-3">
               <div className="flex items-center gap-3">
                 {getStatusIcon(email.status)}
                 <div>
