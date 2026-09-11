@@ -215,7 +215,7 @@ function genQuotationReceivedCustomer(q: any): string {
       We will contact you by email once your quotation is ready.</p>
     </div>
     <p style="color:#64748b;margin:0 0 16px;">If you have any questions, please <a href="${siteUrl}/contact" style="color:${BRAND.accent};">contact us</a>.</p>
-    ${q.user_id ? btnHtml(`${siteUrl}/account/quotations/${q.id}`, 'Track Your Request') : ''}
+    ${q.user_id ? btnHtml(`${siteUrl}/account/quotations/${q.id}?token=${q.access_token || ''}`, 'Track Your Request') : ''}
   `);
 }
 
@@ -282,7 +282,7 @@ function genQuoteSentCustomer(q: any): string {
     <p style="margin:0 0 8px;font-size:13px;color:#64748b;">Please note: ICONJ does not provide installation services. Products are delivered to your specified address.</p>
     <p style="margin:0 0 24px;font-size:13px;color:#64748b;">Please ensure your measurements are accurate before accepting.</p>
     <div style="text-align:center;margin:32px 0;">
-      ${btnHtml(`${siteUrl}/account/quotations/${q.id}`, 'Accept Quotation →')}
+      ${btnHtml(`${siteUrl}/account/quotations/${q.id}?token=${q.access_token || ''}`, 'Accept Quotation →')}
     </div>
     <p style="margin:0;color:#64748b;font-size:13px;">By accepting, you confirm the specifications are correct. You will then be directed to complete payment securely through Paystack.</p>
   `);
@@ -299,7 +299,7 @@ function genQuoteReminder(q: any, isExpiringSoon: boolean): string {
     ${total ? `<div style="text-align:center;margin:24px 0;"><p style="margin:0;font-size:28px;font-weight:700;color:#15803d;">${total}</p></div>` : ''}
     ${validUntil ? `<p style="text-align:center;color:#dc2626;font-weight:600;margin:0 0 24px;">Expires: ${validUntil}</p>` : ''}
     <div style="text-align:center;margin:32px 0;">
-      ${btnHtml(`${siteUrl}/account/quotations/${q.id}`, 'View Your Quotation →')}
+      ${btnHtml(`${siteUrl}/account/quotations/${q.id}?token=${q.access_token || ''}`, 'View Your Quotation →')}
     </div>
     <p style="color:#64748b;font-size:13px;margin:0;">If you have any questions, please <a href="${siteUrl}/contact" style="color:${BRAND.accent};">contact us</a>.</p>
   `);
@@ -315,7 +315,7 @@ function genQuoteAcceptedCustomer(q: any): string {
     </div>
     <p style="color:#64748b;margin:0 0 24px;">Your specifications have been recorded and will be confirmed once payment is received.</p>
     <div style="text-align:center;margin:32px 0;">
-      ${btnHtml(`${siteUrl}/account/quotations/${q.id}`, 'Proceed to Payment →', '#16a34a')}
+      ${btnHtml(`${siteUrl}/account/quotations/${q.id}?token=${q.access_token || ''}`, 'Proceed to Payment →', '#16a34a')}
     </div>
     <p style="color:#64748b;font-size:13px;">Payment is processed securely through Paystack.</p>
   `);

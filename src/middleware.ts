@@ -9,7 +9,7 @@ export function middleware(request: NextRequest) {
 
   const isProtectedPath = 
     request.nextUrl.pathname.startsWith("/checkout") || 
-    request.nextUrl.pathname.startsWith("/account") || 
+    (request.nextUrl.pathname.startsWith("/account") && !request.nextUrl.pathname.startsWith("/account/quotations")) || 
     request.nextUrl.pathname.startsWith("/admin");
 
   if (isProtectedPath && !hasAuthToken) {
