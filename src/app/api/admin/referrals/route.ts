@@ -9,12 +9,20 @@ const supabaseAdmin = createClient(
 export async function POST(request: Request) {
   try {
     const { name, email, referral_code, commission_type, commission_value } = await request.json();
-    if (!name || !referral_code || !commission_value) {
+    if (!referral_code || !commission_value) {
       return NextResponse.json({ error: 'Required fields missing' }, { status: 400 });
     }
+
+    let user_id = null;
+    if (email) {
+      const { data: profile } = await supabaseAdmin.from('profiles').select('id').eq('email', email.trim()).single();
+      if (profile) user_id = profile.id;
+    }
+
     const { data, error } = await supabaseAdmin.from('referral_partners').insert([{
-      name, email, referral_code, commission_type, commission_value: Number(commission_value), status: 'active',
+      user_id, referral_code, commission_type, commission_value: Number(commission_value), is_active: true, partner_type: 'affiliate'
     }]).select().single();
+
     if (error) throw error;
     return NextResponse.json({ success: true, partner: data });
   } catch (err: any) {

@@ -30,3 +30,17 @@ export async function deleteCampaign(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath('/admin/marketing');
 }
+
+export async function updateCoupon(id: string, data: any) {
+  const supabase = getAdminSupabase();
+  const { error } = await supabase.from('coupons').update(data).eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/marketing/coupons');
+}
+
+export async function updateLandingPage(id: string, data: any) {
+  const supabase = getAdminSupabase();
+  const { error } = await supabase.from('landing_pages').update(data).eq('id', id);
+  if (error) throw new Error(error.message);
+  revalidatePath('/admin/marketing/landing-pages');
+}

@@ -63,9 +63,11 @@ export default async function LandingPagesAdmin() {
                     <ExternalLink className="w-4 h-4 mr-2" /> View
                   </Button>
                 </Link>
-                <Button variant="ghost" size="sm" className="px-3 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
-                  Edit
-                </Button>
+                <Link href={`/admin/marketing/landing-pages/edit/${page.id}`}>
+                  <Button variant="ghost" size="sm" className="px-3 text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50">
+                    Edit
+                  </Button>
+                </Link>
                 <Button variant="ghost" size="sm" className="px-3 text-slate-400 hover:text-slate-600" title="Analytics coming soon">
                   <Activity className="w-4 h-4" />
                 </Button>

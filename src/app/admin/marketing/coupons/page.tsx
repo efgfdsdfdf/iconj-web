@@ -63,7 +63,9 @@ export default async function CouponsPage() {
               </div>
               <div className="flex items-center justify-between mt-4 pt-4 border-t">
                 <span className="text-xs text-slate-500 font-medium">Used: {coupon.times_used} {coupon.usage_limit ? `/ ${coupon.usage_limit}` : 'times'}</span>
-                <Button variant="ghost" size="sm" className="h-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50">Edit</Button>
+                <Link href={`/admin/marketing/coupons/edit/${coupon.id}`}>
+                  <Button variant="ghost" size="sm" className="h-8 text-orange-600 hover:text-orange-700 hover:bg-orange-50">Edit</Button>
+                </Link>
               </div>
             </CardContent>
           </Card>
