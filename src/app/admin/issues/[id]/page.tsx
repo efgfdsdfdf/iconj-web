@@ -30,7 +30,7 @@ export default async function AdminIssueDetails({ params }: { params: Promise<{ 
         </Link>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900 flex flex-wrap items-center gap-2">
               Issue Report
               <Badge variant="outline" className={
                 issue.status === "Submitted" ? "bg-blue-50 text-blue-700 border-blue-200" :

@@ -288,7 +288,7 @@ export default function AdminQuotationDetailPage({ params }: { params: Promise<{
                     </Alert>
                   )}
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Supplier Total Cost (₦)</Label>
                       <Input type="number" value={supplierTotal} onChange={e => setSupplierTotal(e.target.value)} placeholder="0" />

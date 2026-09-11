@@ -266,7 +266,7 @@ export function DDPDashboardClient({
                 }}><Plus className="w-4 h-4 mr-2" /> Add Deposit</Button>
              </div>
 
-             <div className="overflow-x-auto"><table className="w-full text-sm text-left border rounded min-w-[600px]">
+             <div className="overflow-x-auto"><table className="w-full text-sm text-left border rounded min-w-[800px]">
                 <thead className="bg-slate-50 text-slate-600 font-medium">
                   <tr>
                     <th className="p-3">Date</th>

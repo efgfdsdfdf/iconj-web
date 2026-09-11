@@ -101,7 +101,7 @@ export default async function SupplierLedgerPage({ params }: { params: Promise<{
         </Link>
         <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-slate-900 flex flex-wrap items-center gap-2">
               <Truck className="w-6 h-6 text-slate-400" />
               {supplier.name} Orders
               <DeleteSupplierButton supplierId={supplier.id} supplierName={supplier.name} />

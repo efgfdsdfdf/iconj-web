@@ -28,7 +28,7 @@ export default async function AdminShippingDashboard() {
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+        <h1 className="text-2xl font-bold text-slate-900 flex flex-wrap items-center gap-2">
           <Package className="w-6 h-6" /> Shipping Automation Dashboard
         </h1>
       </div>
