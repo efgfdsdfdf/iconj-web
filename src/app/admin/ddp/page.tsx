@@ -10,11 +10,11 @@ export default async function DDPManagementPage() {
   // 1. Fetch all products with their current DDP estimates
   const { data: products } = await supabase
     .from('products')
-    .select(
+    .select(`
       id, name, sku, alibaba_url, base_supplier_cost,
       ddp_safety_buffer,
       ddp_estimates (*)
-    );
+    `);
 
   // We filter in JS to avoid complex Supabase syntax for "not in"
   const activeProducts = products || [];
