@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { items, email, name, userId, sessionId, coupon_id, discount_amount } = body;
 
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const referralCode = cookieStore.get('iconj_ref')?.value;
 
     if (!items || items.length === 0) {
