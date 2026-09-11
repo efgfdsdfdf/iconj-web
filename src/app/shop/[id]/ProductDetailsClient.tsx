@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useCartStore } from "@/store/cartStore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Star, Truck, Check, Minus, Plus, Ruler } from "lucide-react";
+import { Star, Truck, Check, Minus, Plus, Ruler, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
