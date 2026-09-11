@@ -149,7 +149,7 @@ export async function POST(request: Request) {
         user_id: userId || null,
         order_id: orderData.id,
         discount_applied: couponDiscount
-      }]).catch(() => {});
+      }]);
     }
 
     // Process Referral Partner
@@ -172,7 +172,7 @@ export async function POST(request: Request) {
           referred_user_id: userId || null,
           status: 'PENDING',
           commission_earned: commissionAmount
-        }]).catch((err) => console.error("Referral Tracking Error:", err));
+        }]);
       }
     }
 
@@ -330,3 +330,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message || "Checkout failed" }, { status: 500 });
   }
 }
+
