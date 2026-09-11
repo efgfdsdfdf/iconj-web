@@ -13,7 +13,12 @@ export default function Error({
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="text-center p-8 max-w-md">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Something went wrong</h1>
-        <p className="text-slate-500 mb-6">We&apos;re sorry, this page encountered an error. Please try again.</p>
+        <p className="text-slate-500 mb-2">We&apos;re sorry, this page encountered an error. Please try again.</p>
+        <div className="bg-red-50 text-red-800 text-xs p-4 rounded text-left mb-6 overflow-auto max-h-48 border border-red-200">
+          <p className="font-bold">Error Details (for debugging):</p>
+          <p className="mt-1">{error?.message || "Unknown error"}</p>
+          {error?.digest && <p className="mt-1 text-red-600">Digest: {error.digest}</p>}
+        </div>
         <div className="flex gap-3 justify-center">
           <button
             onClick={() => reset()}
