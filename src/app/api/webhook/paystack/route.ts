@@ -175,6 +175,36 @@ export async function POST(req: Request) {
         if (paidOrder.user_id) {
           await incrementProfileStats(paidOrder.user_id, Number(paidOrder.total_amount));
         }
+
+        // Fulfill Referral Partner Commission
+        const { data: refTrack } = await supabaseAdmin
+          .from('referral_tracking')
+          .select('id, partner_id, commission_earned')
+          .eq('order_id', orderId)
+          .eq('status', 'PENDING')
+          .single();
+
+        if (refTrack) {
+          await supabaseAdmin.from('referral_tracking')
+            .update({ status: 'PAID', paid_at: new Date().toISOString() })
+            .eq('id', refTrack.id);
+
+          // Get current totals and increment
+          const { data: partner } = await supabaseAdmin
+            .from('referral_partners')
+            .select('total_referrals, total_earned')
+            .eq('id', refTrack.partner_id)
+            .single();
+
+          if (partner) {
+            await supabaseAdmin.from('referral_partners')
+              .update({
+                total_referrals: (partner.total_referrals || 0) + 1,
+                total_earned: Number(partner.total_earned || 0) + Number(refTrack.commission_earned)
+              })
+              .eq('id', refTrack.partner_id);
+          }
+        }
       }
 
       await supabaseAdmin.from("seller_orders").update({

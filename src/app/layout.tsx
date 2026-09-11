@@ -6,12 +6,13 @@ import { ConditionalLayout } from "@/components/layout/ConditionalLayout";
 import { Toaster } from "react-hot-toast";
 
 import { Footer } from "@/components/layout/Footer";
+import { ReferralTracker } from "@/components/layout/ReferralTracker";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "ICONJ - Customizable Blinds, Curtains & Window Accessories",
-  description: "Shop customizable window d�cor online. Custom blinds, tailored curtains, and window accessories in Nigeria, ordered your way.",
+  description: "Shop customizable window dcor online. Custom blinds, tailored curtains, and window accessories in Nigeria, ordered your way.",
   appleWebApp: {
     capable: true,
     title: "ICONJ",
@@ -47,6 +48,7 @@ export default async function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen flex flex-col overflow-x-hidden w-full`}>
         <Suspense fallback={null}>
+          <ReferralTracker />
           <AnalyticsProvider>
             <SplashScreen />
             <PwaInstallBanner />

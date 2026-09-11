@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createClient } from "@supabase/supabase-js";
 import { calculateDDPShippingForCart, snapshotShippingForOrder } from "@/lib/shipping";
 import { freezeOrderAttribution, incrementProfileStats } from "@/lib/analytics";
@@ -7,6 +8,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const { items, email, name, userId, sessionId, coupon_id, discount_amount } = body;
+
+    const cookieStore = cookies();
+    const referralCode = cookieStore.get('iconj_ref')?.value;
 
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
@@ -123,6 +127,30 @@ export async function POST(request: Request) {
         order_id: orderData.id,
         discount_applied: couponDiscount
       }]).catch(() => {});
+    }
+
+    // Process Referral Partner
+    if (referralCode) {
+      const { data: partner } = await supabaseAdmin
+        .from('referral_partners')
+        .select('id, commission_type, commission_value')
+        .eq('referral_code', referralCode)
+        .eq('is_active', true)
+        .single();
+        
+      if (partner) {
+        const commissionAmount = partner.commission_type === 'percentage' 
+          ? totalAmount * (Number(partner.commission_value) / 100) 
+          : Number(partner.commission_value);
+          
+        await supabaseAdmin.from('referral_tracking').insert([{
+          partner_id: partner.id,
+          order_id: orderData.id,
+          referred_user_id: userId || null,
+          status: 'PENDING',
+          commission_earned: commissionAmount
+        }]).catch((err) => console.error("Referral Tracking Error:", err));
+      }
     }
 
     const splitSubaccounts: any[] = [];
