@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Copy, Download, Check } from "lucide-react";
 import { getProductsForDdpEstimate } from "./actions";
 import { jsPDF } from "jspdf";
-import "jspdf-autotable";
+import autoTable from "jspdf-autotable";
 
 interface DdpEstimateModalProps {
   isOpen: boolean;
@@ -30,7 +30,7 @@ export function DdpEstimateModal({ isOpen, onClose, selectedProductIds }: DdpEst
   }, [isOpen, selectedProductIds]);
 
   const generateText = () => {
-    let text = `ICONJ — NIGERIA DDP ESTIMATE REQUEST\n\n`;
+    let text = `ICONJ - NIGERIA DDP ESTIMATE REQUEST\n\n`;
     text += `Hello, please provide an estimated DDP cost to Nigeria for the products below.\n\n`;
     text += `The estimates are for our standard-size product listings.\n`;
     text += `Please calculate based on the actual product/package dimensions, weight, quantity and the most appropriate/lowest-cost courier available.\n`;
@@ -72,133 +72,138 @@ export function DdpEstimateModal({ isOpen, onClose, selectedProductIds }: DdpEst
   };
 
   const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    
-    // Header
-    doc.setFontSize(16);
-    doc.setFont("helvetica", "bold");
-    doc.text("ICONJ — NIGERIA DDP ESTIMATE REQUEST", 14, 20);
-    
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "normal");
-    doc.text("Standard Product DDP Cost Estimation", 14, 28);
-    
-    doc.setFontSize(10);
-    doc.setTextColor(100);
-    doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 36);
-    doc.text(`Products Included: ${data.length}`, 14, 42);
-    
-    doc.setFontSize(9);
-    doc.setTextColor(80);
-    const introText = "The requested amounts are estimates for pricing purposes. Final DDP costs will be based on actual shipment costs/invoices.";
-    doc.text(introText, 14, 50, { maxWidth: 180 });
-    
-    let yPos = 65;
-    
-    data.forEach((p, index) => {
-      // Check if we need a new page
-      if (yPos > 240) {
+    try {
+      const doc = new jsPDF();
+      
+      // Header
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("ICONJ - NIGERIA DDP ESTIMATE REQUEST", 14, 20);
+      
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.text("Standard Product DDP Cost Estimation", 14, 28);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, 14, 36);
+      doc.text(`Products Included: ${data.length}`, 14, 42);
+      
+      doc.setFontSize(9);
+      doc.setTextColor(80);
+      const introText = "The requested amounts are estimates for pricing purposes. Final DDP costs will be based on actual shipment costs/invoices.";
+      doc.text(introText, 14, 50, { maxWidth: 180 });
+      
+      let yPos = 65;
+      
+      data.forEach((p, index) => {
+        // Check if we need a new page
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(0);
+        doc.text(`PRODUCT ${index + 1}`, 14, yPos);
+        yPos += 8;
+        
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        
+        const printLine = (label: string, value: string, isLink: boolean = false) => {
+          if (yPos > 275) {
+            doc.addPage();
+            yPos = 20;
+          }
+          doc.setFont("helvetica", "bold");
+          doc.text(label, 14, yPos);
+          
+          doc.setFont("helvetica", "normal");
+          const safeVal = value ? String(value) : "Not provided";
+          const lines = doc.splitTextToSize(safeVal, 120);
+          
+          if (isLink && safeVal !== "Not provided" && safeVal !== "MISSING") {
+            doc.setTextColor(0, 0, 255);
+            doc.textWithLink(lines, 65, yPos, { url: safeVal });
+            doc.setTextColor(0);
+          } else {
+            doc.text(lines, 65, yPos);
+          }
+          
+          yPos += (lines.length * 5) + 3;
+        };
+        
+        printLine("Product Name:", p.name);
+        printLine("Product ID/SKU:", `${p.id} / ${p.sku}`);
+        printLine("ICONJ Product URL:", p.iconjUrl, true);
+        printLine("Alibaba Supplier URL:", p.alibabaUrl, true);
+        printLine("Standard Size:", p.standardSize);
+        printLine("Requested Quantity:", p.quantity);
+        printLine("Product Weight:", p.productWeight);
+        printLine("Package Dimensions:", p.packageDimensions);
+        printLine("Package Weight:", p.packageWeight);
+        printLine("Variant Info:", p.variantInfo);
+        
+        yPos += 5; // Spacing between products
+        doc.setDrawColor(200);
+        doc.line(14, yPos, 196, yPos);
+        yPos += 10;
+      });
+      
+      if (yPos > 200) {
         doc.addPage();
         yPos = 20;
       }
       
+      // Supplier Response Table
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
-      doc.setTextColor(0);
-      doc.text(`PRODUCT ${index + 1}`, 14, yPos);
-      yPos += 8;
+      doc.text("SUPPLIER RESPONSE TABLE", 14, yPos);
+      yPos += 5;
+      
+      const tableData = data.map((p, i) => [
+        `Prod ${i + 1}`, 
+        p.standardSize !== "Not provided" ? p.standardSize.substring(0, 15) : "-", 
+        "1", 
+        "", 
+        "", 
+        ""
+      ]);
+      
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Product', 'Std Size', 'Qty', 'Est. DDP Cost', 'Courier', 'Supplier Notes']],
+        body: tableData,
+        theme: 'grid',
+        headStyles: { fillColor: [59, 130, 246] },
+        styles: { fontSize: 8 }
+      });
+      
+      // @ts-ignore
+      yPos = (doc as any).lastAutoTable.finalY + 15;
+      
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
       
       doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.text("DDP Estimate Request Note:", 14, yPos);
+      yPos += 6;
       doc.setFont("helvetica", "normal");
+      doc.setFontSize(9);
+      doc.setTextColor(80);
+      const disclaimer = "The requested DDP amounts are estimates for ICONJ's standard product pricing. The supplier has advised that the final DDP cost may vary depending on actual package dimensions, weight, courier selection, shipping conditions, taxes and other applicable costs. Final actual shipping and tax costs will be supported by the relevant invoices provided by the supplier/logistics provider.";
+      doc.text(disclaimer, 14, yPos, { maxWidth: 180 });
       
-      const printLine = (label: string, value: string, isLink: boolean = false) => {
-        if (yPos > 275) {
-          doc.addPage();
-          yPos = 20;
-        }
-        doc.setFont("helvetica", "bold");
-        doc.text(label, 14, yPos);
-        
-        doc.setFont("helvetica", "normal");
-        const lines = doc.splitTextToSize(value, 120);
-        
-        if (isLink && value !== "Not provided" && value !== "MISSING") {
-          doc.setTextColor(0, 0, 255);
-          doc.textWithLink(lines, 65, yPos, { url: value });
-          doc.setTextColor(0);
-        } else {
-          doc.text(lines, 65, yPos);
-        }
-        
-        yPos += (lines.length * 5) + 3;
-      };
-      
-      printLine("Product Name:", p.name);
-      printLine("Product ID/SKU:", `${p.id} / ${p.sku}`);
-      printLine("ICONJ Product URL:", p.iconjUrl, true);
-      printLine("Alibaba Supplier URL:", p.alibabaUrl, true);
-      printLine("Standard Size:", p.standardSize);
-      printLine("Requested Quantity:", p.quantity);
-      printLine("Product Weight:", p.productWeight);
-      printLine("Package Dimensions:", p.packageDimensions);
-      printLine("Package Weight:", p.packageWeight);
-      printLine("Variant Info:", p.variantInfo);
-      
-      yPos += 5; // Spacing between products
-      doc.setDrawColor(200);
-      doc.line(14, yPos, 196, yPos);
-      yPos += 10;
-    });
-    
-    if (yPos > 200) {
-      doc.addPage();
-      yPos = 20;
+      doc.save("ICONJ_DDP_Estimate_Request.pdf");
+    } catch (err) {
+      console.error("Failed to generate PDF: ", err);
+      alert("Failed to generate PDF document. Please try copying the text instead.");
     }
-    
-    // Supplier Response Table
-    doc.setFontSize(12);
-    doc.setFont("helvetica", "bold");
-    doc.text("SUPPLIER RESPONSE TABLE", 14, yPos);
-    yPos += 5;
-    
-    const tableData = data.map((p, i) => [
-      `Prod ${i + 1}`, 
-      p.standardSize !== "Not provided" ? p.standardSize.substring(0, 15) : "-", 
-      "1", 
-      "", 
-      "", 
-      ""
-    ]);
-    
-    // @ts-ignore - jspdf-autotable extends jsPDF but ts doesn't always know
-    doc.autoTable({
-      startY: yPos,
-      head: [['Product', 'Std Size', 'Qty', 'Est. DDP Cost', 'Courier', 'Supplier Notes']],
-      body: tableData,
-      theme: 'grid',
-      headStyles: { fillColor: [59, 130, 246] },
-      styles: { fontSize: 8 }
-    });
-    
-    // @ts-ignore
-    yPos = doc.lastAutoTable.finalY + 15;
-    
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
-    }
-    
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.text("DDP Estimate Request Note:", 14, yPos);
-    yPos += 6;
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(80);
-    const disclaimer = "The requested DDP amounts are estimates for ICONJ's standard product pricing. The supplier has advised that the final DDP cost may vary depending on actual package dimensions, weight, courier selection, shipping conditions, taxes and other applicable costs. Final actual shipping and tax costs will be supported by the relevant invoices provided by the supplier/logistics provider.";
-    doc.text(disclaimer, 14, yPos, { maxWidth: 180 });
-    
-    doc.save("ICONJ_DDP_Estimate_Request.pdf");
   };
 
   return (
