@@ -69,7 +69,7 @@ export function DDPDashboardClient({
         <Card className="bg-amber-50 border-amber-200"><CardContent className="p-4"><p className="text-sm font-medium text-amber-800">Awaiting Estimates</p><p className="text-2xl font-bold text-amber-900">{awaitingEstimates.length}</p></CardContent></Card>
         <Card className="bg-emerald-50 border-emerald-200"><CardContent className="p-4"><p className="text-sm font-medium text-emerald-800">Active Estimates</p><p className="text-2xl font-bold text-emerald-900">{activeEstimates.length}</p></CardContent></Card>
         <Card className="bg-red-50 border-red-200"><CardContent className="p-4"><p className="text-sm font-medium text-red-800">Variances to Review</p><p className="text-2xl font-bold text-red-900">{varianceCount}</p></CardContent></Card>
-        <Card className="bg-indigo-50 border-indigo-200"><CardContent className="p-4"><p className="text-sm font-medium text-indigo-800">Supplier Deposit</p><p className="text-2xl font-bold text-indigo-900">₦{Number(depositBalance).toLocaleString()}</p></CardContent></Card>
+        <Card className="bg-indigo-50 border-indigo-200"><CardContent className="p-4"><p className="text-sm font-medium text-indigo-800">Supplier Deposit</p><p className="text-2xl font-bold text-indigo-900">?{Number(depositBalance).toLocaleString()}</p></CardContent></Card>
       </div>
 
       <div className="flex space-x-2 border-b overflow-x-auto pb-2">
@@ -94,7 +94,7 @@ export function DDPDashboardClient({
                     <th className="p-3">Product</th>
                     <th className="p-3 w-32">Std Size</th>
                     <th className="p-3 w-20">Qty</th>
-                    <th className="p-3 w-40">Est. DDP (₦)</th>
+                    <th className="p-3 w-40">Est. DDP (?)</th>
                     <th className="p-3 w-32">Courier</th>
                     <th className="p-3">Notes</th>
                   </tr>
@@ -156,18 +156,18 @@ export function DDPDashboardClient({
                   )}
                   
                   <div className="bg-slate-50 p-3 rounded border space-y-1">
-                    <div className="flex justify-between text-slate-600"><span>Product Cost:</span> <span>₦{productCost.toLocaleString()}</span></div>
-                    <div className="flex justify-between text-slate-600"><span>Est. DDP:</span> <span>₦{est.estimated_ddp.toLocaleString()}</span></div>
-                    <div className="flex justify-between text-slate-600"><span>Safety Buffer:</span> <span>₦{safetyBuffer.toLocaleString()}</span></div>
+                    <div className="flex justify-between text-slate-600"><span>Product Cost:</span> <span>?{productCost.toLocaleString()}</span></div>
+                    <div className="flex justify-between text-slate-600"><span>Est. DDP:</span> <span>?{est.estimated_ddp.toLocaleString()}</span></div>
+                    <div className="flex justify-between text-slate-600"><span>Safety Buffer:</span> <span>?{safetyBuffer.toLocaleString()}</span></div>
                     <div className="border-t pt-1 mt-1 flex justify-between font-bold text-slate-800">
-                      <span>Total Internal Cost:</span> <span>₦{totalCost.toLocaleString()}</span>
+                      <span>Total Internal Cost:</span> <span>?{totalCost.toLocaleString()}</span>
                     </div>
                   </div>
 
                   <div className="bg-emerald-50 p-3 rounded border border-emerald-100">
                     <div className="flex justify-between text-emerald-800 font-bold">
                       <span>Recommended Price (30% Margin):</span>
-                      <span>₦{recommendedPrice.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+                      <span>?{recommendedPrice.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
                     </div>
                   </div>
 
@@ -204,12 +204,12 @@ export function DDPDashboardClient({
                   {actuals.map((a: any) => (
                     <tr key={a.id} className="hover:bg-slate-50">
                       <td className="p-3 font-medium text-indigo-600">{a.orders?.paystack_reference || a.order_id.substring(0,8)}</td>
-                      <td className="p-3">₦{a.actual_shipping.toLocaleString()}</td>
-                      <td className="p-3">₦{a.actual_tax.toLocaleString()}</td>
-                      <td className="p-3 font-bold text-slate-900">₦{a.total_actual_ddp.toLocaleString()}</td>
+                      <td className="p-3">?{a.actual_shipping.toLocaleString()}</td>
+                      <td className="p-3">?{a.actual_tax.toLocaleString()}</td>
+                      <td className="p-3 font-bold text-slate-900">?{a.total_actual_ddp.toLocaleString()}</td>
                       <td className="p-3">
                         <span className={`px-2 py-1 rounded text-xs font-bold ${a.variance > 0 ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}`}>
-                          {a.variance > 0 ? '+' : ''}₦{a.variance.toLocaleString()}
+                          {a.variance > 0 ? '+' : ''}?{a.variance.toLocaleString()}
                         </span>
                         {a.variance > 5000 && <AlertTriangle className="w-4 h-4 text-red-500 inline ml-2" title="Admin Review Required" />}
                       </td>
@@ -229,8 +229,8 @@ export function DDPDashboardClient({
                   <option value="">Select Order...</option>
                   {recentOrders.map((o: any) => <option key={o.id} value={o.id}>{o.paystack_reference || o.id.substring(0,8)}</option>)}
                 </select>
-                <Input id="actual-shipping" type="number" placeholder="Actual Shipping (₦)" className="w-full sm:max-w-[150px]" />
-                <Input id="actual-tax" type="number" placeholder="Actual Tax (₦)" className="w-full sm:max-w-[150px]" />
+                <Input id="actual-shipping" type="number" placeholder="Actual Shipping (?)" className="w-full sm:max-w-[150px]" />
+                <Input id="actual-tax" type="number" placeholder="Actual Tax (?)" className="w-full sm:max-w-[150px]" />
                 <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={async () => {
                   const oid = (document.getElementById('actual-order-id') as HTMLSelectElement).value;
                   const aship = (document.getElementById('actual-shipping') as HTMLInputElement).value;
@@ -256,10 +256,10 @@ export function DDPDashboardClient({
              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-indigo-50 p-4 rounded-xl border border-indigo-100 mb-6">
                 <div>
                   <p className="text-indigo-800 font-medium">Current Available Balance</p>
-                  <p className="text-3xl font-extrabold text-indigo-900">₦{Number(depositBalance).toLocaleString()}</p>
+                  <p className="text-3xl font-extrabold text-indigo-900">?{Number(depositBalance).toLocaleString()}</p>
                 </div>
                 <Button className="bg-indigo-600 hover:bg-indigo-700" onClick={async () => {
-                   const amt = prompt('Amount (₦):');
+                   const amt = prompt('Amount (?):');
                    if (!amt) return;
                    await fetch('/api/admin/ddp/deposits', { method: 'POST', body: JSON.stringify({ transaction_type: 'CREDIT', amount: amt }) });
                    window.location.reload();
@@ -282,18 +282,19 @@ export function DDPDashboardClient({
                       <td className="p-3">{new Date(d.created_at).toLocaleDateString()}</td>
                       <td className="p-3 font-medium text-slate-700">{d.transaction_type}</td>
                       <td className={`p-3 font-bold ${d.transaction_type === 'DEBIT' ? 'text-red-600' : 'text-emerald-600'}`}>
-                        {d.transaction_type === 'DEBIT' ? '-' : '+'}₦{d.amount.toLocaleString()}
+                        {d.transaction_type === 'DEBIT' ? '-' : '+'}?{d.amount.toLocaleString()}
                       </td>
-                      <td className="p-3 text-slate-900 font-medium">₦{d.balance_after.toLocaleString()}</td>
+                      <td className="p-3 text-slate-900 font-medium">?{d.balance_after.toLocaleString()}</td>
                       <td className="p-3 text-slate-500">{d.reference} {d.notes}</td>
                     </tr>
                   ))}
                   {deposits.length === 0 && <tr><td colSpan={5} className="p-8 text-center text-slate-500">No deposit history.</td></tr>}
                 </tbody>
-             </table>
+             </table></div>
           </CardContent>
         </Card>
       )}
     </div>
   );
 }
+
