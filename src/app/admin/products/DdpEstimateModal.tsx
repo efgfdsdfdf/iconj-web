@@ -126,7 +126,8 @@ export function DdpEstimateModal({ isOpen, onClose, selectedProductIds }: DdpEst
           
           if (isLink && safeVal !== "Not provided" && safeVal !== "MISSING") {
             doc.setTextColor(0, 0, 255);
-            doc.textWithLink(lines, 65, yPos, { url: safeVal });
+            doc.text(lines, 65, yPos);
+            doc.link(65, yPos - 4, 120, lines.length * 5, { url: safeVal });
             doc.setTextColor(0);
           } else {
             doc.text(lines, 65, yPos);
