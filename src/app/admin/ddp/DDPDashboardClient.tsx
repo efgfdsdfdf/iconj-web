@@ -79,7 +79,7 @@ export function DDPDashboardClient({
 
       <div className="flex space-x-2 border-b overflow-x-auto pb-2">
         {['AWAITING', 'ACTIVE', 'ACTUALS', 'DEPOSITS'].map(tab => (
-          <button key={tab} onClick={() => setActiveTab(tab)} className={\px-4 py-2 font-medium text-sm whitespace-nowrap \\}>
+          <button key={tab} onClick={() => setActiveTab(tab)} className={`px-4 py-2 font-medium text-sm whitespace-nowrap ${activeTab === tab ? 'border-b-2 border-slate-900 text-slate-900' : 'text-slate-500 hover:text-slate-700'}`}>
             {tab === 'AWAITING' ? 'Bulk Entry (Awaiting)' : tab === 'ACTIVE' ? 'Pricing Recommendations' : tab === 'ACTUALS' ? 'Actual Costs & Variances' : 'Supplier Deposit'}
           </button>
         ))}
@@ -213,7 +213,7 @@ export function DDPDashboardClient({
                       <td className="p-3">?{a.actual_tax.toLocaleString()}</td>
                       <td className="p-3 font-bold text-slate-900">?{a.total_actual_ddp.toLocaleString()}</td>
                       <td className="p-3">
-                        <span className={\px-2 py-1 rounded text-xs font-bold \\}>
+                        <span className={`px-2 py-1 rounded text-xs font-bold ${a.variance > 0 ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'}`}>
                           {a.variance > 0 ? '+' : ''}?{a.variance.toLocaleString()}
                         </span>
                         {a.variance > 5000 && <AlertTriangle className="w-4 h-4 text-red-500 inline ml-2" title="Admin Review Required" />}
@@ -287,7 +287,7 @@ export function DDPDashboardClient({
                     <tr key={d.id} className="hover:bg-slate-50">
                       <td className="p-3">{new Date(d.created_at).toLocaleDateString()}</td>
                       <td className="p-3 font-medium text-slate-700">{d.transaction_type}</td>
-                      <td className={\p-3 font-bold \\}>
+                      <td className={`p-3 font-bold ${d.transaction_type === 'DEBIT' ? 'text-red-600' : 'text-emerald-600'}`}>
                         {d.transaction_type === 'DEBIT' ? '-' : '+'}?{d.amount.toLocaleString()}
                       </td>
                       <td className="p-3 text-slate-900 font-medium">?{d.balance_after.toLocaleString()}</td>
