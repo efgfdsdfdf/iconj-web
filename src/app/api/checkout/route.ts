@@ -143,7 +143,7 @@ export async function POST(request: Request) {
 
     // Record coupon usage (increment times_used + log usage)
     if (coupon_id && couponDiscount > 0) {
-      await supabaseAdmin.rpc('increment_coupon_usage', { c_id: coupon_id }).catch(() => {});
+      await supabaseAdmin.rpc('increment_coupon_usage', { c_id: coupon_id });
       await supabaseAdmin.from('coupon_usages').insert([{
         coupon_id,
         user_id: userId || null,
