@@ -86,34 +86,45 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
     
   const recommended = recommendedRaw ? recommendedRaw.sort(() => 0.5 - Math.random()).slice(0, 8) : [];
 
+  // EARLY EXIT: If the product doesn't exist or query failed, show error page immediately
+  if (error || !productRaw) {
+    console.error("Product fetch error:", error);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <div className="text-center p-8">
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">Product Not Found</h1>
+          <p className="text-slate-500 mb-6">This product may have been removed or doesn&apos;t exist.</p>
+          <Link href="/shop" className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-blue-700">Return to Shop</Link>
+        </div>
+      </div>
+    );
+  }
 
   let product = productRaw;
-  if (product) {
-    // SECURITY: Sanitize sensitive supplier and cost data before passing to client components
-    delete product.base_supplier_cost;
-    delete product.supplier_id;
-    if (product.variants) {
-      delete product.variants.supplier_product_url;
-      delete product.variants.supplier_sku;
-    }
-    // Format wholesale pricing for the client component
-    if (product.wholesale_pricing && product.wholesale_pricing.length > 0) {
-      product.pricing_tiers = product.wholesale_pricing.map((tier: any) => ({
-        minQty: tier.min_quantity,
-        maxQty: tier.max_quantity,
-        price: Number(tier.price_per_unit)
-      }));
-    }
-    
-    // Determine stock status based on inventory table if it exists
-    if (product.inventory && product.inventory.length > 0) {
-      const totalInventory = product.inventory.reduce((sum: number, item: any) => sum + (item.available_quantity || 0), 0);
-      product.stock_status = totalInventory > 0 ? "In Stock" : "Out of Stock";
-    }
+  // SECURITY: Sanitize sensitive supplier and cost data before passing to client components
+  delete product.base_supplier_cost;
+  delete product.supplier_id;
+  if (product.variants) {
+    delete product.variants.supplier_product_url;
+    delete product.variants.supplier_sku;
+  }
+  // Format wholesale pricing for the client component
+  if (product.wholesale_pricing && product.wholesale_pricing.length > 0) {
+    product.pricing_tiers = product.wholesale_pricing.map((tier: any) => ({
+      minQty: tier.min_quantity,
+      maxQty: tier.max_quantity,
+      price: Number(tier.price_per_unit)
+    }));
+  }
+  
+  // Determine stock status based on inventory table if it exists
+  if (product.inventory && product.inventory.length > 0) {
+    const totalInventory = product.inventory.reduce((sum: number, item: any) => sum + (item.available_quantity || 0), 0);
+    product.stock_status = totalInventory > 0 ? "In Stock" : "Out of Stock";
   }
   
   // Protect non-approved products from public viewing
-  if (product && !isAdmin) {
+  if (!isAdmin) {
     if (product.approval_status !== 'approved' || !product.is_active) {
       return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50">
@@ -125,18 +136,6 @@ export default async function ProductPage({ params }: { params: Promise<{ id: st
         </div>
       );
     }
-  }
-
-  if (error || !product) {
-    console.error("Product fetch error:", error);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-slate-900 mb-4">Product Not Found</h1>
-          <Link href="/shop" className="text-blue-600 hover:underline">Return to Shop</Link>
-        </div>
-      </div>
-    );
   }
 
   // Fallback image handling
