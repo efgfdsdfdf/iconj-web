@@ -23,3 +23,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
+
+export async function GET() {
+  try {
+    const { data, error } = await supabaseAdmin.from('customer_segments').select('*').order('created_at', { ascending: false });
+    if (error) throw error;
+    return NextResponse.json({ segments: data });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
+}

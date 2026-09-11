@@ -265,6 +265,18 @@ export async function GET(request: Request) {
             profileQuery = profileQuery.gte('total_spent', 500000); // 500k NGN threshold for VIP
           } else if (camp.target_audience === 'NO_PURCHASE') {
             profileQuery = profileQuery.or('total_spent.eq.0,total_spent.is.null');
+          } else if (camp.target_audience !== 'ALL') {
+            // Custom Segment
+            const { data: segment } = await supabaseAdmin.from('customer_segments').select('filter_rules').eq('id', camp.target_audience).single();
+            if (segment && segment.filter_rules && Array.isArray(segment.filter_rules)) {
+              segment.filter_rules.forEach((rule: any) => {
+                if (rule.operator === '>') profileQuery = profileQuery.gt(rule.field, rule.value);
+                else if (rule.operator === '<') profileQuery = profileQuery.lt(rule.field, rule.value);
+                else if (rule.operator === '>=') profileQuery = profileQuery.gte(rule.field, rule.value);
+                else if (rule.operator === '<=') profileQuery = profileQuery.lte(rule.field, rule.value);
+                else if (rule.operator === '=') profileQuery = profileQuery.eq(rule.field, rule.value);
+              });
+            }
           }
 
           const { data: targets } = await profileQuery;

@@ -31,7 +31,17 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
     scheduled_for: getLocalDatetime(campaign?.scheduled_for),
   });
 
-  useEffect(() => setMounted(true), []);
+  const [segments, setSegments] = useState<any[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+    fetch('/api/admin/segments')
+      .then(res => res.json())
+      .then(data => {
+        if (data.segments) setSegments(data.segments);
+      })
+      .catch(console.error);
+  }, []);
 
   if (!mounted) {
     return <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200 h-96 flex items-center justify-center text-slate-500">Loading editor...</div>;
@@ -105,6 +115,9 @@ export function CampaignForm({ campaign = {} as any }: { campaign?: any }) {
             <option value="ALL">All Customers</option>
             <option value="VIP">VIPs only (High Spend)</option>
             <option value="NO_PURCHASE">Users with no purchases</option>
+            {segments.map(seg => (
+              <option key={seg.id} value={seg.id}>{seg.name} (Custom Segment)</option>
+            ))}
           </select>
         </div>
       </div>
